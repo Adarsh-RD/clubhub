@@ -2110,18 +2110,20 @@ app.post('/announcements', upload.single('image'), async (req, res) => {
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
     // Insert announcement
-    const [result] = await pool.execute(
+    // Insert announcement (Postgres syntax)
+    const { rows: result } = await pool.query(
       `INSERT INTO announcements 
        (club_id, title, content, image_url, registration_enabled, registration_deadline, max_registrations, created_by) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+       RETURNING id`,
       [user.club_id, title, content, imageUrl, regEnabled, regDeadline, maxReg, email]
     );
 
-    const announcementId = result.insertId;
+    const announcementId = result[0].id;
 
     // Verify it was saved correctly
-    const [verify] = await pool.execute(
-      'SELECT id, registration_enabled, registration_deadline, max_registrations FROM announcements WHERE id = ?',
+    const { rows: verify } = await pool.query(
+      'SELECT id, registration_enabled, registration_deadline, max_registrations FROM announcements WHERE id = $1',
       [announcementId]
     );
 
