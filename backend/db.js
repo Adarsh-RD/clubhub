@@ -1,73 +1,22 @@
 // backend/db.js
 const { Pool } = require('pg');
-const dns = require('dns');
 
-// =========================================================
-// ROBUST DATABASE CONNECTION (IPv4 FORCE)
-// =========================================================
-
-// Config for the pool
-const dbConfig = {
+// Simple configuration - no DNS hacks needed when using Session Mode pooler
+const pool = new Pool({
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT || 5432,
   user: process.env.DB_USER || "postgres",
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME || "postgres",
-  port: process.env.DB_PORT || 5432,
-  ssl: { rejectUnauthorized: false }, // Required for Supabase
+  ssl: { rejectUnauthorized: false },
   max: 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 10000,
-};
+});
 
-let actualPool = null;
-
-async function getLazyPool() {
-  if (actualPool) return actualPool;
-
-  let host = process.env.DB_HOST;
-  console.log('🔌 Check: Connecting to DB Host:', host);
-
-  // Attempt to resolve to IPv4 to bypass Render IPv6 issues
-  if (host && !host.match(/^(\d{1,3}\.){3}\d{1,3}$/)) { // If not already an IP
-    try {
-      console.log('🔍 DNS: Resolving IPv4 for', host);
-      const addresses = await dns.promises.resolve4(host);
-      if (addresses && addresses[0]) {
-        console.log(`✅ DNS: Resolved to ${addresses[0]}`);
-        host = addresses[0];
-      }
-    } catch (err) {
-      console.warn('⚠️ DNS: IPv4 Resolution failed, using hostname:', err.message);
-    }
-  }
-
-  // Create the real pool with the resolved IP
-  actualPool = new Pool({
-    ...dbConfig,
-    host: host, // Use resolved IP or original hostname
-    connectionString: `postgres://${dbConfig.user}:${dbConfig.password}@${host}:${dbConfig.port}/${dbConfig.database}?sslmode=no-verify`
-  });
-
-  // Error handler for the pool
-  actualPool.on('error', (err, client) => {
-    console.error('❌ Unexpected error on idle client', err);
-    // Don't exit, just log. Render might restart if critical.
-  });
-
-  return actualPool;
-}
-
-// STUB POOL - Mimics pg.Pool interface but initializes lazily
-// This allows exporting 'pool' immediately while doing async work behind the scenes
-const pool = {
-  query: async (text, params) => {
-    const p = await getLazyPool();
-    return p.query(text, params);
-  },
-  connect: async () => {
-    const p = await getLazyPool();
-    return p.connect();
-  },
-};
+pool.on('error', (err) => {
+  console.error('❌ Unexpected pool error:', err);
+});
 
 /* =========================
    USER FUNCTIONS
@@ -216,7 +165,6 @@ const getAllAnnouncements = async (limit = 50, offset = 0) => {
   return rows;
 };
 
-// Added missing function from previous implementation to prevent crashes
 const getAnnouncementsByClub = async (clubId, limit = 50) => {
   const { rows } = await pool.query(
     `SELECT 
