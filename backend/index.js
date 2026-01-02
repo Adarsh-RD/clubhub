@@ -1738,9 +1738,10 @@ app.post('/announcements/:announcementId/register', authMiddleware, async (req, 
     }
 
     // Check if announcement exists and has registration enabled
-    const [announcements] = await pool.execute(
+    // Check if announcement exists and has registration enabled
+    const { rows: announcements } = await pool.query(
       `SELECT id, title, registration_enabled, registration_deadline, max_registrations 
-       FROM announcements WHERE id = ?`,
+       FROM announcements WHERE id = $1`,
       [announcementId]
     );
 
@@ -1764,53 +1765,61 @@ app.post('/announcements/:announcementId/register', authMiddleware, async (req, 
 
     // Check if max registrations reached
     if (announcement.max_registrations) {
-      const [countResult] = await pool.execute(
-        'SELECT COUNT(*) as count FROM event_registrations WHERE announcement_id = ? AND status = "registered"',
-        [announcementId]
+      if (announcement.max_registrations) {
+        const { rows: countResult } = await pool.query(
+          'SELECT COUNT(*) as count FROM event_registrations WHERE announcement_id = $1 AND status = \'registered\'',
+          [announcementId]
+        );
+
+        if (countResult[0].count >= announcement.max_registrations) {
+          return res.status(400).json({ ok: false, error: 'Event is full. Maximum registrations reached.' });
+        }
+      }
+
+      // Check if already registered
+      // Check if already registered
+      const { rows: existing } = await pool.query(
+        'SELECT id, status FROM event_registrations WHERE announcement_id = $1 AND user_id = $2',
+        [announcementId, user.id]
       );
 
-      if (countResult[0].count >= announcement.max_registrations) {
-        return res.status(400).json({ ok: false, error: 'Event is full. Maximum registrations reached.' });
-      }
-    }
-
-    // Check if already registered
-    const [existing] = await pool.execute(
-      'SELECT id, status FROM event_registrations WHERE announcement_id = ? AND user_id = ?',
-      [announcementId, user.id]
-    );
-
-    if (existing.length > 0) {
-      if (existing[0].status === 'registered') {
-        return res.status(400).json({ ok: false, error: 'Already registered for this event' });
-      } else {
-        // Re-register if previously cancelled
-        await pool.execute(
-          'UPDATE event_registrations SET status = "registered", registered_at = NOW() WHERE id = ?',
-          [existing[0].id]
-        );
+      if (existing.length > 0) {
+        if (existing[0].status === 'registered') {
+          return res.status(400).json({ ok: false, error: 'Already registered for this event' });
+        } else {
+          // Re-register if previously cancelled
+        } else {
+          // Re-register if previously cancelled
+          await pool.query(
+            'UPDATE event_registrations SET status = \'registered\', registered_at = NOW() WHERE id = $1',
+            [existing[0].id]
+          );
+        }
       }
     } else {
       // Create new registration
-      await pool.execute(
+    } else {
+      // Create new registration
+      await pool.query(
         `INSERT INTO event_registrations 
          (announcement_id, user_id, user_email, user_name, roll_number, branch) 
-         VALUES (?, ?, ?, ?, ?, ?)`,
+         VALUES ($1, $2, $3, $4, $5, $6)`,
         [announcementId, user.id, user.email, user.name, user.roll_number, user.branch]
       );
     }
+  }
 
     console.log(`✓ ${userEmail} registered for event ${announcementId}`);
 
-    res.json({
-      ok: true,
-      message: 'Successfully registered for event!',
-      registered: true
-    });
-  } catch (err) {
-    console.error('Error registering for event:', err);
-    res.status(500).json({ ok: false, error: 'Failed to register' });
-  }
+  res.json({
+    ok: true,
+    message: 'Successfully registered for event!',
+    registered: true
+  });
+} catch (err) {
+  console.error('Error registering for event:', err);
+  res.status(500).json({ ok: false, error: 'Failed to register' });
+}
 });
 
 // Cancel registration
@@ -1825,12 +1834,13 @@ app.post('/announcements/:announcementId/unregister', authMiddleware, async (req
     }
 
     // Update registration status to cancelled
-    const [result] = await pool.execute(
-      'UPDATE event_registrations SET status = "cancelled" WHERE announcement_id = ? AND user_id = ? AND status = "registered"',
+    // Update registration status to cancelled
+    const { rowCount } = await pool.query(
+      'UPDATE event_registrations SET status = \'cancelled\' WHERE announcement_id = $1 AND user_id = $2 AND status = \'registered\'',
       [announcementId, user.id]
     );
 
-    if (result.affectedRows === 0) {
+    if (rowCount === 0) {
       return res.status(404).json({ ok: false, error: 'Registration not found' });
     }
 
