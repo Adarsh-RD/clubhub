@@ -937,7 +937,7 @@
         if (data.ok && data.announcements) {
           const userEmail = localStorage.getItem('user_email');
           const myEvents = data.announcements.filter(a =>
-            a.registration_enabled === 1 && a.created_by === userEmail
+            (a.registration_enabled === 1 || a.registration_enabled === true) && a.created_by === userEmail
           );
 
           const eventsList = document.getElementById('eventsList');
