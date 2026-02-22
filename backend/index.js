@@ -83,64 +83,52 @@ const smtpSecure = (String(process.env.EMAIL_SECURE || '').toLowerCase() === 'tr
 let transporter;
 
 const initializeEmail = async () => {
-  try {
-    console.log('📧 Initializing SMTP connection to:', process.env.EMAIL_HOST);
-
-    transporter = nodemailer.createTransport({
-      host: process.env.EMAIL_HOST, // Use standard hostname
-      port: smtpPort,
-      secure: smtpSecure,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-      tls: {
-        rejectUnauthorized: false
-      }
-    });
-
-    await transporter.verify();
-    console.log('✅ SMTP transporter verified connection to ' + process.env.EMAIL_HOST + ' on port ' + smtpPort);
-  } catch (err) {
-    console.warn('❌ SMTP Init Failed:', err.message);
-
-    // Auto-fallback to port 2525 if port 587 times out or fails (Common for Render outbound blocks)
-    if (smtpPort === 587) {
-      console.log('🔄 Retrying SMTP connection on fallback port 2525...');
-      try {
-        transporter = nodemailer.createTransport({
-          host: process.env.EMAIL_HOST,
-          port: 2525,
-          secure: false,
-          auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS,
-          },
-          tls: {
-            rejectUnauthorized: false
-          }
-        });
-        await transporter.verify();
-        console.log('✅ SMTP transporter verified connection on fallback port 2525');
-      } catch (fallbackErr) {
-        console.warn('❌ SMTP Fallback Init Failed:', fallbackErr.message);
-      }
-    }
-  }
+  console.log('📧 Brevo API Transport selected (bypassing Render SMTP blocks).');
 };
 
 // Initialize immediately
 initializeEmail();
 
-// Wrapper function to send mail safely
+// Wrapper function to send mail safely using Brevo HTTP API
 const sendEmailWrapper = async (mailOptions) => {
-  if (!transporter) {
-    await initializeEmail();
+  const apiKey = process.env.EMAIL_PASS;
+
+  if (!apiKey) {
+    throw new Error('Missing EMAIL_PASS (Brevo API Key) in environment variables');
   }
-  if (!transporter) {
-    throw new Error('Email transporter not initialized');
+
+  const payload = {
+    sender: {
+      name: "Club Hub",
+      email: mailOptions.from || process.env.EMAIL_USER
+    },
+    to: [
+      { email: mailOptions.to }
+    ],
+    subject: mailOptions.subject,
+  };
+
+  if (mailOptions.html) { payload.htmlContent = mailOptions.html; }
+  if (mailOptions.text) { payload.textContent = mailOptions.text; }
+
+  const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+      'api-key': apiKey
+    },
+    body: JSON.stringify(payload)
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error(`Brevo API Error (${response.status}):`, errorText);
+    throw new Error(`Brevo HTTP API failed: ${response.status}`);
   }
-  return transporter.sendMail(mailOptions);
+
+  const data = await response.json();
+  return { accepted: [mailOptions.to], rejected: [], messageId: data.messageId };
 };
 
 // ==================== OTP CODE STORAGE ====================
