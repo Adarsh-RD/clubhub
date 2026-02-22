@@ -939,8 +939,9 @@ async function sendAdminRequestEmail(userEmail, userName, clubId) {
     );
 
     // Create approve and reject links
-    const approveUrl = `http://localhost:4000/admin/approve-via-email?token=${requestToken}`;
-    const rejectUrl = `http://localhost:4000/admin/reject-via-email?token=${requestToken}`;
+    const backendUrl = process.env.BACKEND_URL || 'https://clubhub-5eh7.onrender.com';
+    const approveUrl = `${backendUrl}/admin/approve-via-email?token=${requestToken}`;
+    const rejectUrl = `${backendUrl}/admin/reject-via-email?token=${requestToken}`;
 
     const mailOptions = {
       from: process.env.FROM_EMAIL || process.env.EMAIL_USER,
@@ -1125,7 +1126,7 @@ async function sendAdminRequestEmail(userEmail, userName, clubId) {
                 <p style="margin: 5px 0; color: #6B7280; font-size: 14px;">
                   Or view all requests in:
                 </p>
-                <a href="http://localhost:3000/admin-dashboard.html">Admin Dashboard →</a>
+                <a href="${process.env.FRONTEND_ORIGIN || 'https://club-hub-vert.vercel.app'}/admin-dashboard.html">Admin Dashboard →</a>
               </div>
               
               <p style="color: #6B7280; font-size: 14px; margin-top: 20px;">
@@ -1281,7 +1282,7 @@ app.get('/admin/approve-via-email', async (req, res) => {
             <p><span class="label">Access:</span> <span class="value">Can create announcements</span></p>
           </div>
           <p>The user has been notified and can now access admin features.</p>
-          <a href="http://localhost:3000/admin-dashboard.html" class="button">View Dashboard</a>
+          <a href="${process.env.FRONTEND_ORIGIN || 'https://club-hub-vert.vercel.app'}/admin-dashboard.html" class="button">View Dashboard</a>
         </div>
       </body>
       </html>

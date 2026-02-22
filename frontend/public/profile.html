@@ -895,16 +895,16 @@
         loadMyRegistrations();
       } else if (p.role === "club_admin") {
         const clubName = p.club_name ? ` · ${p.club_name}` : "";
-        roleDisplay.textContent = p.admin_requested === 1
+        roleDisplay.textContent = (p.admin_requested === 1 || p.admin_requested === true)
           ? `🎯 Club Admin${clubName} (Pending)`
           : `🎯 Club Admin${clubName}`;
         roleDisplay.style.display = "inline-block";
-        roleDisplay.classList.toggle('pending', p.admin_requested === 1);
+        roleDisplay.classList.toggle('pending', (p.admin_requested === 1 || p.admin_requested === true));
 
         // Load club admin events
         document.getElementById('eventsSection').style.display = 'block';
         loadMyEvents();
-      } else if (p.admin_requested === 1 && !p.role) {
+      } else if ((p.admin_requested === 1 || p.admin_requested === true) && !p.role) {
         const clubName = p.club_name ? ` · ${p.club_name}` : "";
         roleDisplay.textContent = `🎯 Club Admin${clubName} (Pending)`;
         roleDisplay.style.display = "inline-block";
@@ -914,7 +914,7 @@
       }
 
       // Handle form state
-      if (p.role || p.admin_requested === 1) {
+      if (p.role || (p.admin_requested === 1 || p.admin_requested === true)) {
         document.getElementById('roleSelect').style.display = "none";
         document.getElementById('clubSelect').style.display = "none";
         setReadOnly(true);
