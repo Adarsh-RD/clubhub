@@ -58,13 +58,15 @@ const upload = multer({
   storage: storage,
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
   fileFilter: (req, file, cb) => {
-    const allowedTypes = /jpeg|jpg|png|gif|webp/;
-    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+    const allowedTypes = /jpeg|jpg|png|gif|webp|heic|heif/i;
+    const extname = allowedTypes.test(path.extname(file.originalname));
     const mimetype = allowedTypes.test(file.mimetype);
-    if (mimetype && extname) {
+    // Relaxed check: Some browsers send empty mimetypes for certain images
+    // If either the extension OR the mimetype asserts it's an image, let it upload
+    if (mimetype || extname) {
       return cb(null, true);
     }
-    cb(new Error('Only image files allowed!'));
+    cb(new Error('Only image files allowed! Received: ' + file.mimetype + ' | ' + file.originalname));
   }
 });
 
@@ -2228,7 +2230,7 @@ app.get('/my-registrations', authMiddleware, async (req, res) => {
     }
 
     // Get all active registrations with event details
-    const [registrations] = await pool.execute(`
+    const { rows: registrations } = await pool.query(`
       SELECT 
         er.id,
         er.announcement_id,
@@ -2242,7 +2244,7 @@ app.get('/my-registrations', authMiddleware, async (req, res) => {
       FROM event_registrations er
       JOIN announcements a ON er.announcement_id = a.id
       JOIN clubs c ON a.club_id = c.id
-      WHERE er.user_id = ? AND er.status = 'registered'
+      WHERE er.user_id = $1 AND (er.status = 'registered' OR er.status = 'waitlisted')
       ORDER BY er.registered_at DESC
     `, [user.id]);
 
