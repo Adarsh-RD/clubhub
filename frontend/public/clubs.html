@@ -93,6 +93,7 @@
             letter-spacing: -0.02em;
             background: linear-gradient(to right, #ffffff, #a0aec0);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
@@ -588,11 +589,11 @@
                 if (res.ok && data.ok) {
                     if (isSubscribed) {
                         button.classList.remove('subscribed');
-                        button.innerHTML = '<span>🔔</span> Subscribe';
+                        button.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg> Subscribe';
                         showNotification(`Unsubscribed from ${clubName}`, 'info');
                     } else {
                         button.classList.add('subscribed');
-                        button.innerHTML = '<span>✓</span> Subscribed';
+                        button.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Subscribed';
                         showNotification(`Subscribed to ${clubName}! You'll get email notifications.`, 'success');
                     }
                     updateSubscriberCount(clubId);
@@ -677,7 +678,7 @@
                                     class="subscribe-btn ${isSubscribed ? 'subscribed' : ''}"
                                     onclick="toggleSubscription(${club.id}, '${club.club_name.replace(/'/g, "\\'")}', this)"
                                 >
-                                    ${isSubscribed ? '<span>✓</span> Subscribed' : '<span>🔔</span> Subscribe'}
+                                    ${isSubscribed ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Subscribed' : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg> Subscribe'}
                                 </button>
                             </div>
                         `;
@@ -690,7 +691,7 @@
                 } else {
                     container.innerHTML = `
                         <div class="empty-state">
-                            <div class="empty-icon">📭</div>
+                            <div class="empty-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg></div>
                             <h2 class="empty-title">No clubs found</h2>
                             <p class="empty-text">Clubs will appear here once they're added</p>
                         </div>
@@ -700,7 +701,7 @@
                 console.error('Error loading clubs:', err);
                 container.innerHTML = `
                     <div class="empty-state">
-                        <div class="empty-icon">⚠️</div>
+                        <div class="empty-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg></div>
                         <h2 class="empty-title">Failed to load clubs</h2>
                         <p class="empty-text">Please try again later</p>
                     </div>

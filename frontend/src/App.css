@@ -87,13 +87,15 @@ body {
 /* ==================== HEADER ==================== */
 
 .app-header {
-  background: var(--white);
-  border-bottom: 1px solid var(--gray-200);
+  background: rgba(20, 20, 28, 0.6);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   padding: 1rem 2rem;
   position: sticky;
   top: 0;
   z-index: 100;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
 }
 
 .header-content {
@@ -116,9 +118,10 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--white);
+  background: rgba(255, 255, 255, 0.05);
   border-radius: var(--radius-md);
   overflow: hidden;
+  padding: 4px;
 }
 
 .header-logo img {
@@ -135,14 +138,14 @@ body {
 .header-title {
   font-size: 1.5rem;
   font-weight: 800;
-  color: var(--gray-900);
+  color: var(--white);
   line-height: 1.2;
   letter-spacing: -0.02em;
 }
 
 .header-subtitle {
   font-size: 0.75rem;
-  color: var(--gray-500);
+  color: var(--gray-400);
   font-weight: 500;
 }
 

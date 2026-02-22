@@ -94,6 +94,7 @@
       letter-spacing: -0.02em;
       background: linear-gradient(to right, #ffffff, #a0aec0);
       -webkit-background-clip: text;
+      background-clip: text;
       -webkit-text-fill-color: transparent;
     }
 
@@ -533,6 +534,7 @@
       color: #FFFFFF;
       background: linear-gradient(135deg, #FFF, #94A3B8);
       -webkit-background-clip: text;
+      background-clip: text;
       -webkit-text-fill-color: transparent;
     }
 
@@ -848,11 +850,11 @@
           <div class="radio-group">
             <div class="radio-option">
               <input type="radio" name="role" value="student" id="roleStudent" onchange="toggleClubSelect()">
-              <label for="roleStudent">👨‍🎓 Student</label>
+              <label for="roleStudent">Student</label>
             </div>
             <div class="radio-option">
               <input type="radio" name="role" value="club_admin" id="roleAdmin" onchange="toggleClubSelect()">
-              <label for="roleAdmin">🎯 Club Admin</label>
+              <label for="roleAdmin">Club Admin</label>
             </div>
           </div>
         </div>
@@ -885,7 +887,12 @@
     <div id="eventsSection" class="events-section" style="display: none;">
       <div class="section-header">
         <h2 class="section-title">
-          <span>📊</span>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 20V10"></path>
+            <path d="M18 20V4"></path>
+            <path d="M6 20v-4"></path>
+          </svg>
           Event Management
         </h2>
       </div>
@@ -896,7 +903,14 @@
     <div id="myRegistrationsSection" class="events-section" style="display: none;">
       <div class="section-header">
         <h2 class="section-title">
-          <span>📝</span>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+          </svg>
           My Event Registrations
         </h2>
       </div>
@@ -1014,7 +1028,7 @@
       // Display role badge
       const roleDisplay = document.getElementById('roleDisplay');
       if (p.role === "student") {
-        roleDisplay.textContent = "👨‍🎓 Student";
+        roleDisplay.textContent = "Student";
         roleDisplay.style.display = "inline-block";
         roleDisplay.classList.remove('pending');
 
@@ -1024,8 +1038,8 @@
       } else if (p.role === "club_admin") {
         const clubName = p.club_name ? ` · ${p.club_name}` : "";
         roleDisplay.textContent = (p.admin_requested === 1 || p.admin_requested === true)
-          ? `🎯 Club Admin${clubName} (Pending)`
-          : `🎯 Club Admin${clubName}`;
+          ? `Club Admin${clubName} (Pending)`
+          : `Club Admin${clubName}`;
         roleDisplay.style.display = "inline-block";
         roleDisplay.classList.toggle('pending', (p.admin_requested === 1 || p.admin_requested === true));
 
@@ -1034,7 +1048,7 @@
         loadMyEvents();
       } else if ((p.admin_requested === 1 || p.admin_requested === true) && !p.role) {
         const clubName = p.club_name ? ` · ${p.club_name}` : "";
-        roleDisplay.textContent = `🎯 Club Admin${clubName} (Pending)`;
+        roleDisplay.textContent = `Club Admin${clubName} (Pending)`;
         roleDisplay.style.display = "inline-block";
         roleDisplay.classList.add('pending');
       } else {
@@ -1073,7 +1087,7 @@
           if (myEvents.length === 0) {
             eventsList.innerHTML = `
               <div class="empty-state">
-                <div class="empty-icon">📅</div>
+                <div class="empty-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></div>
                 <p><strong>No events with registration yet</strong></p>
                 <p>Create an announcement with "Enable Student Registration" to see it here</p>
               </div>
@@ -1101,7 +1115,7 @@
           <div class="event-header">
             <h3 class="event-title">${event.title}</h3>
             <div class="event-date">
-              <span>📅</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
               ${new Date(event.created_at).toLocaleDateString()}
             </div>
           </div>
@@ -1129,12 +1143,12 @@
 
           <div class="event-actions">
             <button class="btn-view-reg" onclick="toggleRegistrations(${event.id})">
-              <span>👥</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
               <span id="btn-text-${event.id}">View Registrations</span>
             </button>
             ${infoData.current_count > 0 ? `
               <button class="btn-export" onclick="exportRegistrations(${event.id})">
-                📥 Export CSV
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Export CSV
               </button>
             ` : ''}
           </div>
@@ -1242,7 +1256,7 @@
           if (data.registrations.length === 0) {
             list.innerHTML = `
               <div class="empty-state">
-                <div class="empty-icon">📝</div>
+                <div class="empty-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg></div>
                 <p><strong>No event registrations yet</strong></p>
                 <p>Browse announcements and register for events you're interested in</p>
               </div>
@@ -1255,8 +1269,14 @@
               <div class="registration-info">
                 <h3>${reg.title}</h3>
                 <div class="registration-meta">
-                  <span>🎯 ${reg.club_name}</span>
-                  <span>📅 Registered: ${new Date(reg.registered_at).toLocaleDateString()}</span>
+                  <span style="display: flex; align-items: center; gap: 0.25rem;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+                    ${reg.club_name}
+                  </span>
+                  <span style="display: flex; align-items: center; gap: 0.25rem;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                    Registered: ${new Date(reg.registered_at).toLocaleDateString()}
+                  </span>
                 </div>
               </div>
               <button class="btn-cancel-reg" onclick="cancelRegistration(${reg.announcement_id}, '${reg.title.replace(/'/g, "\\'")}')">
@@ -1282,14 +1302,14 @@
         const data = await res.json();
 
         if (res.ok && data.ok) {
-          alert('✓ Registration cancelled successfully');
+          alert('Registration cancelled successfully');
           loadMyRegistrations();
         } else {
-          alert('✗ Failed to cancel: ' + (data.error || 'Unknown error'));
+          alert('Failed to cancel: ' + (data.error || 'Unknown error'));
         }
       } catch (err) {
         console.error('Error cancelling registration:', err);
-        alert('✗ Failed to cancel registration');
+        alert('Failed to cancel registration');
       }
     }
 
@@ -1327,10 +1347,10 @@
       });
 
       if (res.ok) {
-        alert("✓ Profile saved!");
+        alert("Profile saved successfully");
         await loadProfile();
       } else {
-        alert("✗ Failed to save");
+        alert("Failed to save profile");
       }
     };
 
