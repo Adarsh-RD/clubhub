@@ -210,6 +210,41 @@ const limiter = rateLimit({
 
 // ==================== AUTH ROUTES ====================
 
+app.get('/test-email-ports', async (req, res) => {
+  const nodemailer = require('nodemailer');
+  const portsToTest = [587, 2525, 465];
+  const results = [];
+
+  for (const port of portsToTest) {
+    const isSecure = port === 465;
+    const testTransporter = nodemailer.createTransport({
+      host: process.env.EMAIL_HOST,
+      port: port,
+      secure: isSecure,
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+      tls: { rejectUnauthorized: false }
+    });
+
+    try {
+      await testTransporter.verify();
+      results.push({ port, status: 'Success', secure: isSecure });
+      console.log(`Port ${port} success`);
+    } catch (err) {
+      results.push({ port, status: 'Failed', error: err.message, secure: isSecure });
+      console.log(`Port ${port} failed: ${err.message}`);
+    }
+  }
+
+  res.json({
+    message: "SMTP Port Test Results from Render",
+    host: process.env.EMAIL_HOST,
+    results
+  });
+});
+
 app.post('/auth/send-code', limiter, async (req, res) => {
   const { email } = req.body || {};
   if (!email || typeof email !== 'string') {
