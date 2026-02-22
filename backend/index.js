@@ -1881,7 +1881,7 @@ app.post('/announcements/:announcementId/unregister', authMiddleware, async (req
     // Update registration status to cancelled
     // Update registration status to cancelled
     const { rowCount } = await pool.query(
-      'UPDATE event_registrations SET status = \'cancelled\' WHERE announcement_id = $1 AND user_id = $2 AND status = \'registered\'',
+      'UPDATE event_registrations SET status = \'cancelled\' WHERE announcement_id = $1 AND user_id = $2 AND (status = \'registered\' OR status = \'waitlisted\')',
       [announcementId, user.id]
     );
 
