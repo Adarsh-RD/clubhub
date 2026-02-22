@@ -1566,7 +1566,7 @@ app.get('/my-subscriptions', authMiddleware, async (req, res) => {
         cs.subscribed_at
       FROM club_subscriptions cs
       JOIN clubs c ON cs.club_id = c.id
-      WHERE cs.user_id = $1 AND (cs.is_active = true OR cs.is_active = 1)
+      WHERE cs.user_id = $1 AND cs.is_active = true
       ORDER BY cs.subscribed_at DESC
     `, [user.id]);
 
@@ -1583,7 +1583,7 @@ app.get('/clubs/:clubId/subscriber-count', async (req, res) => {
     const clubId = parseInt(req.params.clubId);
 
     const { rows: result } = await pool.query(
-      'SELECT COUNT(*) as count FROM club_subscriptions WHERE club_id = $1 AND (is_active = true OR is_active = 1)',
+      'SELECT COUNT(*) as count FROM club_subscriptions WHERE club_id = $1 AND is_active = true',
       [clubId]
     );
 
@@ -1608,7 +1608,7 @@ async function notifySubscribers(clubId, announcementTitle, announcementContent,
       SELECT u.email, u.name
       FROM club_subscriptions cs
       JOIN users u ON cs.user_id = u.id
-      WHERE cs.club_id = $1 AND (cs.is_active = true OR cs.is_active = 1) AND u.email IS NOT NULL
+      WHERE cs.club_id = $1 AND cs.is_active = true AND u.email IS NOT NULL
     `, [clubId]);
 
     if (subscribers.length === 0) {
