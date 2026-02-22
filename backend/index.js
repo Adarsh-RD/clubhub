@@ -97,10 +97,17 @@ const sendEmailWrapper = async (mailOptions) => {
     throw new Error('Missing EMAIL_PASS (Brevo API Key) in environment variables');
   }
 
+  // Extract pure email if formatted as "Name <email@domain.com>"
+  let senderEmail = mailOptions.from || process.env.EMAIL_USER;
+  const emailMatch = senderEmail.match(/<([^>]+)>/);
+  if (emailMatch) {
+    senderEmail = emailMatch[1];
+  }
+
   const payload = {
     sender: {
       name: "Club Hub",
-      email: mailOptions.from || process.env.EMAIL_USER
+      email: senderEmail.trim()
     },
     to: [
       { email: mailOptions.to }
