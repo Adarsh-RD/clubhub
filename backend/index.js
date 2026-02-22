@@ -896,13 +896,13 @@ app.post('/admin/reject-request', authMiddleware, isCoordinator, async (req, res
       return res.status(400).json({ ok: false, error: 'Email required' });
     }
 
-    await pool.execute(`
+    await pool.query(`
       UPDATE users 
-      SET admin_requested = 0,
+      SET admin_requested = false,
           club_id = NULL,
           requested_at = NULL,
           updated_at = NOW()
-      WHERE email = ?
+      WHERE email = $1
     `, [email.toLowerCase()]);
 
     console.log(`✗ Rejected request: ${email}`);
@@ -922,7 +922,7 @@ async function sendAdminRequestEmail(userEmail, userName, clubId) {
   try {
     let clubName = 'Unknown Club';
     if (clubId) {
-      const [clubs] = await pool.execute('SELECT club_name FROM clubs WHERE id = ?', [clubId]);
+      const { rows: clubs } = await pool.query('SELECT club_name FROM clubs WHERE id = $1', [clubId]);
       if (clubs.length > 0) clubName = clubs[0].club_name;
     }
 
@@ -1143,7 +1143,7 @@ async function sendAdminRequestEmail(userEmail, userName, clubId) {
       `
     };
 
-    await transporter.sendMail(mailOptions);
+    await sendEmailWrapper(mailOptions);
     console.log(`✓ Admin notification email sent to bigbossssz550@gmail.com`);
   } catch (err) {
     console.error('Failed to send admin notification email:', err);
@@ -1213,8 +1213,8 @@ app.get('/admin/approve-via-email', async (req, res) => {
     const { email, club_id } = decoded;
 
     // Check if request still exists
-    const [requests] = await pool.execute(
-      'SELECT * FROM users WHERE email = ? AND admin_requested = 1 AND role IS NULL',
+    const { rows: requests } = await pool.query(
+      'SELECT * FROM users WHERE email = $1 AND admin_requested = true AND role IS NULL',
       [email.toLowerCase()]
     );
 
@@ -1242,12 +1242,12 @@ app.get('/admin/approve-via-email', async (req, res) => {
     }
 
     // Approve the request
-    await pool.execute(`
+    await pool.query(`
       UPDATE users 
       SET role = 'club_admin', 
-          admin_requested = 0,
+          admin_requested = false,
           updated_at = NOW()
-      WHERE email = ?
+      WHERE email = $1
     `, [email.toLowerCase()]);
 
     console.log(`✓ Approved club admin via email: ${email}`);
@@ -1348,8 +1348,8 @@ app.get('/admin/reject-via-email', async (req, res) => {
     const { email } = decoded;
 
     // Check if request exists
-    const [requests] = await pool.execute(
-      'SELECT * FROM users WHERE email = ? AND admin_requested = 1 AND role IS NULL',
+    const { rows: requests } = await pool.query(
+      'SELECT * FROM users WHERE email = $1 AND admin_requested = true AND role IS NULL',
       [email.toLowerCase()]
     );
 
@@ -1376,13 +1376,13 @@ app.get('/admin/reject-via-email', async (req, res) => {
     }
 
     // Reject the request
-    await pool.execute(`
+    await pool.query(`
       UPDATE users 
-      SET admin_requested = 0,
+      SET admin_requested = false,
           club_id = NULL,
           requested_at = NULL,
           updated_at = NOW()
-      WHERE email = ?
+      WHERE email = $1
     `, [email.toLowerCase()]);
 
     console.log(`✗ Rejected club admin via email: ${email}`);
