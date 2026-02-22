@@ -84,15 +84,10 @@ let transporter;
 
 const initializeEmail = async () => {
   try {
-    const dns = require('dns').promises;
-    console.log('📧 Resolving SMTP Host:', process.env.EMAIL_HOST);
-
-    // Explicitly resolve to IPv4
-    const { address } = await dns.lookup(process.env.EMAIL_HOST, { family: 4 });
-    console.log(`✅ Resolved ${process.env.EMAIL_HOST} to IPv4: ${address}`);
+    console.log('📧 Initializing SMTP connection to:', process.env.EMAIL_HOST);
 
     transporter = nodemailer.createTransport({
-      host: address, // Use the IP directly
+      host: process.env.EMAIL_HOST, // Use standard hostname
       port: smtpPort,
       secure: smtpSecure,
       auth: {
@@ -101,14 +96,36 @@ const initializeEmail = async () => {
       },
       tls: {
         rejectUnauthorized: false
-      },
-      servername: process.env.EMAIL_HOST, // verifying certificate needs this when using IP
+      }
     });
 
     await transporter.verify();
-    console.log('✅ SMTP transporter verified connection to ' + address);
+    console.log('✅ SMTP transporter verified connection to ' + process.env.EMAIL_HOST + ' on port ' + smtpPort);
   } catch (err) {
     console.warn('❌ SMTP Init Failed:', err.message);
+
+    // Auto-fallback to port 2525 if port 587 times out or fails (Common for Render outbound blocks)
+    if (smtpPort === 587) {
+      console.log('🔄 Retrying SMTP connection on fallback port 2525...');
+      try {
+        transporter = nodemailer.createTransport({
+          host: process.env.EMAIL_HOST,
+          port: 2525,
+          secure: false,
+          auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS,
+          },
+          tls: {
+            rejectUnauthorized: false
+          }
+        });
+        await transporter.verify();
+        console.log('✅ SMTP transporter verified connection on fallback port 2525');
+      } catch (fallbackErr) {
+        console.warn('❌ SMTP Fallback Init Failed:', fallbackErr.message);
+      }
+    }
   }
 };
 
