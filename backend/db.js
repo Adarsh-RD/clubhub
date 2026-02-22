@@ -1,11 +1,5 @@
 // backend/db.js
 const { Pool } = require('pg');
-const dns = require('dns');
-
-// Force IPv4 globally to avoid Render's IPv6 timeout issues
-if (dns.setDefaultResultOrder) {
-  dns.setDefaultResultOrder('ipv4first');
-}
 
 // Connection pool with stability settings
 const pool = new Pool({
