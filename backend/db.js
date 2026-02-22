@@ -9,7 +9,10 @@ const pool = new Pool({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME || "postgres",
   ssl: { rejectUnauthorized: false },
-  max: 10 // Let the Supabase pooler handle connections
+  max: 10, // Let the Supabase pooler handle connections
+  connectionTimeoutMillis: 10000,
+  idleTimeoutMillis: 10000,
+  keepAlive: true
 });
 
 pool.on('error', (err) => {
