@@ -205,6 +205,17 @@ const limiter = rateLimit({
   legacyHeaders: false,
 });
 
+// TEMPORARY DB MIGRATE ROUTE: Render will hit this to alter the enum
+app.get('/fix-db', async (req, res) => {
+  try {
+    await pool.query("ALTER TYPE registration_status ADD VALUE 'waitlisted'");
+    res.send('Fixed DB enum');
+  } catch (e) {
+    if (e.message.includes('already exists')) res.send('Enum already fixed');
+    else res.status(500).send(e.message);
+  }
+});
+
 // ==================== AUTH ROUTES ====================
 
 app.get('/test-email-ports', async (req, res) => {
