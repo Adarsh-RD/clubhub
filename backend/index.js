@@ -230,7 +230,7 @@ app.post('/auth/send-code', limiter, async (req, res) => {
   };
 
   try {
-    const info = await transporter.sendMail(mailOptions);
+    const info = await sendEmailWrapper(mailOptions);
     console.log('Email sent:', { accepted: info.accepted, rejected: info.rejected });
     return res.json({ ok: true, message: 'Code sent' });
   } catch (err) {
