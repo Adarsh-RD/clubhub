@@ -10,8 +10,6 @@ const pool = new Pool({
   database: process.env.DB_NAME || "postgres",
   ssl: { rejectUnauthorized: false },
   max: 10, // Let the Supabase pooler handle connections
-  connectionTimeoutMillis: 10000,
-  idleTimeoutMillis: 10000,
   keepAlive: true
 });
 
