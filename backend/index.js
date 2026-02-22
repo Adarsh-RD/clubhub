@@ -1445,21 +1445,21 @@ app.post('/clubs/:clubId/subscribe', authMiddleware, async (req, res) => {
     }
 
     // Check if already subscribed
-    const [existing] = await pool.execute(
-      'SELECT id, is_active FROM club_subscriptions WHERE user_id = ? AND club_id = ?',
+    const { rows: existing } = await pool.query(
+      'SELECT id, is_active FROM club_subscriptions WHERE user_id = $1 AND club_id = $2',
       [user.id, clubId]
     );
 
     if (existing.length > 0) {
       // Reactivate if was unsubscribed
-      await pool.execute(
-        'UPDATE club_subscriptions SET is_active = 1, subscribed_at = NOW() WHERE user_id = ? AND club_id = ?',
+      await pool.query(
+        'UPDATE club_subscriptions SET is_active = true, subscribed_at = NOW() WHERE user_id = $1 AND club_id = $2',
         [user.id, clubId]
       );
     } else {
       // Create new subscription
-      await pool.execute(
-        'INSERT INTO club_subscriptions (user_id, club_id) VALUES (?, ?)',
+      await pool.query(
+        'INSERT INTO club_subscriptions (user_id, club_id) VALUES ($1, $2)',
         [user.id, clubId]
       );
     }
@@ -1488,9 +1488,9 @@ app.post('/clubs/:clubId/unsubscribe', authMiddleware, async (req, res) => {
       return res.status(404).json({ ok: false, error: 'User not found' });
     }
 
-    // Soft delete - set is_active to 0
-    await pool.execute(
-      'UPDATE club_subscriptions SET is_active = 0 WHERE user_id = ? AND club_id = ?',
+    // Soft delete - set is_active to false
+    await pool.query(
+      'UPDATE club_subscriptions SET is_active = false WHERE user_id = $1 AND club_id = $2',
       [user.id, clubId]
     );
 
@@ -1518,14 +1518,14 @@ app.get('/clubs/:clubId/subscription-status', authMiddleware, async (req, res) =
       return res.json({ ok: true, subscribed: false });
     }
 
-    const [subscription] = await pool.execute(
-      'SELECT is_active FROM club_subscriptions WHERE user_id = ? AND club_id = ?',
+    const { rows: subscription } = await pool.query(
+      'SELECT is_active FROM club_subscriptions WHERE user_id = $1 AND club_id = $2',
       [user.id, clubId]
     );
 
     res.json({
       ok: true,
-      subscribed: subscription.length > 0 && subscription[0].is_active === 1
+      subscribed: subscription.length > 0 && (subscription[0].is_active === 1 || subscription[0].is_active === true)
     });
   } catch (err) {
     console.error('Error checking subscription:', err);
@@ -1543,7 +1543,7 @@ app.get('/my-subscriptions', authMiddleware, async (req, res) => {
       return res.json({ ok: true, subscriptions: [] });
     }
 
-    const [subscriptions] = await pool.execute(`
+    const { rows: subscriptions } = await pool.query(`
       SELECT 
         c.id,
         c.club_name,
@@ -1553,7 +1553,7 @@ app.get('/my-subscriptions', authMiddleware, async (req, res) => {
         cs.subscribed_at
       FROM club_subscriptions cs
       JOIN clubs c ON cs.club_id = c.id
-      WHERE cs.user_id = ? AND cs.is_active = 1
+      WHERE cs.user_id = $1 AND (cs.is_active = true OR cs.is_active = 1)
       ORDER BY cs.subscribed_at DESC
     `, [user.id]);
 
@@ -1569,8 +1569,8 @@ app.get('/clubs/:clubId/subscriber-count', async (req, res) => {
   try {
     const clubId = parseInt(req.params.clubId);
 
-    const [result] = await pool.execute(
-      'SELECT COUNT(*) as count FROM club_subscriptions WHERE club_id = ? AND is_active = 1',
+    const { rows: result } = await pool.query(
+      'SELECT COUNT(*) as count FROM club_subscriptions WHERE club_id = $1 AND (is_active = true OR is_active = 1)',
       [clubId]
     );
 
@@ -1591,11 +1591,11 @@ async function notifySubscribers(clubId, announcementTitle, announcementContent,
     if (!club) return;
 
     // Get all active subscribers with their emails
-    const [subscribers] = await pool.execute(`
+    const { rows: subscribers } = await pool.query(`
       SELECT u.email, u.name
       FROM club_subscriptions cs
       JOIN users u ON cs.user_id = u.id
-      WHERE cs.club_id = ? AND cs.is_active = 1 AND u.email IS NOT NULL
+      WHERE cs.club_id = $1 AND (cs.is_active = true OR cs.is_active = 1) AND u.email IS NOT NULL
     `, [clubId]);
 
     if (subscribers.length === 0) {
