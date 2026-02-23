@@ -1127,7 +1127,7 @@ body {
 .section-title {
   font-size: 1.75rem;
   font-weight: 800;
-  color: var(--gray-900);
+  color: #E2E8F0;
   margin-bottom: 1.5rem;
   display: flex;
   align-items: center;
