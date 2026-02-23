@@ -1114,7 +1114,8 @@ body {
   backdrop-filter: blur(4px);
 }
 
-.status-message.error {
+.status-message.error,
+.status-message.loading {
   background: rgba(225, 29, 72, 0.1);
   color: #E11D48;
   border: 1px solid rgba(225, 29, 72, 0.3);
