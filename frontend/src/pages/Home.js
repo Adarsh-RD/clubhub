@@ -182,38 +182,22 @@ export default function Home() {
               <button
                 className="btn btn-primary btn-sm"
                 onClick={() => window.location.href = '/admin-dashboard.html'}
-                style={{ background: '#10B981' }}
+                style={{ background: '#10B981', padding: '0.5rem' }}
+                title="Admin Dashboard"
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                   <path d="M12 4.5V19.5M19.5 12H4.5" stroke="currentColor" strokeWidth="2" />
                   <circle cx="12" cy="12" r="2" fill="currentColor" />
                 </svg>
-                Admin Dashboard
               </button>
             )}
-            <button className="btn btn-secondary btn-sm" onClick={() => window.location.href = '/clubs.html'}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                <rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="2" />
-                <rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="2" />
-                <rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="2" />
-                <rect x="14" y="14" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="2" />
+
+            <button className="btn btn-ghost btn-sm" onClick={logout} title="Sign Out">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
               </svg>
-              All Clubs
-            </button>
-
-            <div className="user-menu" onClick={() => window.location.href = '/profile.html'}>
-              <div className="user-avatar">
-                {profile?.profile_picture ? (
-                  <img src={profile.profile_picture} alt={firstName} />
-                ) : (
-                  firstName.charAt(0).toUpperCase()
-                )}
-              </div>
-              <span className="user-name">{firstName}</span>
-            </div>
-
-            <button className="btn btn-ghost btn-sm" onClick={logout}>
-              Sign out
             </button>
           </div>
         </div>
@@ -259,18 +243,47 @@ export default function Home() {
         </section>
       </main>
 
-      {/* Floating Create Button - Only for Club Admins */}
-      {isClubAdmin && (
-        <button
-          className="fab"
-          onClick={() => setShowCreateModal(true)}
-          title="Create Announcement"
-        >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path d="M12 5V19M5 12H19" stroke="white" strokeWidth="3" strokeLinecap="round" />
+      {/* Modern Bottom Dock Navigation */}
+      <nav className="bottom-dock">
+        <button className="dock-item active" onClick={() => window.location.href = '/'}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
           </svg>
+          <span className="dock-label">Home</span>
         </button>
-      )}
+
+        <button className="dock-item" onClick={() => window.location.href = '/clubs.html'}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <span className="dock-label">Explore</span>
+        </button>
+
+        {isClubAdmin && (
+          <button
+            className="dock-fab"
+            onClick={() => setShowCreateModal(true)}
+            title="Create Announcement"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round">
+              <path d="M12 5V19M5 12H19" />
+            </svg>
+          </button>
+        )}
+
+        <button className="dock-item" onClick={() => window.location.href = '/profile.html'}>
+          <div className="dock-avatar">
+            {profile?.profile_picture ? (
+              <img src={profile.profile_picture} alt={firstName} />
+            ) : (
+              firstName.charAt(0).toUpperCase()
+            )}
+          </div>
+          <span className="dock-label">Profile</span>
+        </button>
+      </nav>
 
       {/* Create Announcement Modal */}
       {showCreateModal && (
