@@ -51,26 +51,32 @@ function AuthCard({
       </div>
 
       {view === "choose" && (
-        <>
+        <div className="hero-entrance">
           <p className="auth-description">
-            Your central hub for club announcements, events, and campus activities.
-            Connect with clubs and stay updated.
+            Your vibe check passed. Discover, connect, and pull up to events
+            across KLE Tech.
           </p>
+          <div className="live-counter">
+            <span className="live-dot"></span>
+            420+ students pulling up right now 🔥
+          </div>
           <div className="auth-buttons">
-            <button className="btn btn-primary btn-large" onClick={() => setView("login")}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                <path d="M15 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H15M10 17L15 12L10 7M15 12H3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <button className="btn btn-primary btn-large btn-glow-cyan" onClick={() => setView("login")}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                <polyline points="10 17 15 12 10 7"></polyline>
+                <line x1="15" y1="12" x2="3" y2="12"></line>
               </svg>
-              Log in
+              Sign In
             </button>
-            <button className="btn btn-secondary btn-large" onClick={() => setView("signup-email")}>
-              Sign up
+            <button className="btn btn-secondary btn-large btn-glass" onClick={() => setView("signup-email")}>
+              Sign Up
             </button>
           </div>
           <p className="auth-footer-text">
-            By signing up, you agree to follow KLE Tech campus guidelines and club policies.
+            Join the movement. By signing up, you agree to our community guidelines.
           </p>
-        </>
+        </div>
       )}
 
       {view === "login" && (

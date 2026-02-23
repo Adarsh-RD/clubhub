@@ -19,11 +19,11 @@
             font-family: 'Inter', -apple-system, sans-serif;
             margin: 0;
             color: #E2E8F0;
-            background-color: #0A0A0F;
+            background-color: #050505;
             background-image:
-                radial-gradient(at 0% 0%, rgba(196, 30, 58, 0.15) 0px, transparent 50%),
-                radial-gradient(at 100% 0%, rgba(242, 183, 5, 0.1) 0px, transparent 50%),
-                radial-gradient(at 40% 100%, rgba(16, 185, 129, 0.05) 0px, transparent 50%);
+                radial-gradient(at 0% 0%, rgba(255, 0, 127, 0.25) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(0, 255, 255, 0.15) 0px, transparent 50%),
+                radial-gradient(at 40% 100%, rgba(138, 43, 226, 0.15) 0px, transparent 50%);
             background-attachment: fixed;
             min-height: 100vh;
         }
@@ -39,13 +39,14 @@
 
         .app-header {
             background: rgba(10, 10, 15, 0.7);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             padding: 1rem 2rem;
             position: sticky;
             top: 0;
             z-index: 100;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
         }
 
         .header-content {
@@ -87,14 +88,15 @@
 
         .header-title {
             font-size: 1.5rem;
-            font-weight: 800;
+            font-weight: 900;
             color: #FFFFFF;
             line-height: 1.2;
-            letter-spacing: -0.02em;
-            background: linear-gradient(to right, #ffffff, #a0aec0);
+            letter-spacing: -0.03em;
+            background: linear-gradient(to right, #ffffff, #00FFFF);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
         }
 
         .header-subtitle {
@@ -133,13 +135,17 @@
         }
 
         .page-title {
-            font-size: 3rem;
+            font-size: 3.5rem;
             font-weight: 900;
             color: #FFFFFF;
             margin-bottom: 0.75rem;
             text-align: center;
             letter-spacing: -0.03em;
-            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            background: linear-gradient(135deg, #FFF 0%, #FF007F 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 10px 30px rgba(255, 0, 127, 0.3);
         }
 
         .page-subtitle {
@@ -157,12 +163,12 @@
         }
 
         .club-card {
-            background: rgba(20, 20, 28, 0.6);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            background: rgba(20, 20, 30, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 1.25rem;
-            padding: 2rem;
+            border-radius: 1.5rem;
+            padding: 2.5rem;
             box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             position: relative;
@@ -177,8 +183,8 @@
             top: 0;
             left: 0;
             right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, #FFD700 0%, #FF2A54 100%);
+            height: 4px;
+            background: linear-gradient(90deg, #00FFFF 0%, #FF007F 100%);
             transform: scaleX(0);
             transform-origin: left;
             transition: transform 0.4s ease;
@@ -189,25 +195,25 @@
         }
 
         .club-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 20px 40px -10px rgba(196, 30, 58, 0.15), 0 0 20px rgba(255, 255, 255, 0.02) inset;
-            border-color: rgba(255, 255, 255, 0.15);
-            background: rgba(30, 30, 42, 0.7);
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(255, 0, 127, 0.2), 0 0 30px rgba(0, 255, 255, 0.1) inset;
+            border-color: rgba(255, 255, 255, 0.2);
+            background: rgba(30, 30, 42, 0.8);
         }
 
         .club-icon {
-            width: 72px;
-            height: 72px;
-            border-radius: 1.25rem;
-            background: linear-gradient(135deg, #FF2A54 0%, #C41E3A 100%);
+            width: 80px;
+            height: 80px;
+            border-radius: 1.5rem;
+            background: linear-gradient(135deg, #FF007F 0%, #8A2BE2 100%);
             display: flex;
             align-items: center;
             justify-content: center;
             color: #FFFFFF;
-            font-size: 32px;
+            font-size: 36px;
             font-weight: 800;
             margin-bottom: 1.5rem;
-            box-shadow: 0 8px 20px rgba(196, 30, 58, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 20px rgba(255, 0, 127, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.3);
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
             transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             position: relative;
@@ -215,9 +221,9 @@
 
         /* Alternate gradient for odd cards */
         .club-card:nth-child(even) .club-icon {
-            background: linear-gradient(135deg, #FFD700 0%, #F2B705 100%);
-            box-shadow: 0 8px 20px rgba(242, 183, 5, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.4);
-            color: #1A1A1A;
+            background: linear-gradient(135deg, #BFFF00 0%, #00FFFF 100%);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.4);
+            color: #050505;
             text-shadow: none;
         }
 
@@ -281,21 +287,23 @@
         }
 
         .subscribe-btn {
-            padding: 0.625rem 1.25rem;
-            background: linear-gradient(135deg, #FF2A54 0%, #C41E3A 100%);
-            color: white;
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, #00FFFF 0%, #0099FF 100%);
+            color: #050505;
             border: none;
-            border-radius: 0.75rem;
-            font-weight: 600;
-            font-size: 0.875rem;
+            border-radius: 1rem;
+            font-weight: 800;
+            font-size: 0.9375rem;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            box-shadow: 0 4px 12px rgba(196, 30, 58, 0.2);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
             position: relative;
             overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
         .subscribe-btn::after {
@@ -314,23 +322,25 @@
         }
 
         .subscribe-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(196, 30, 58, 0.4);
+            transform: translateY(-4px) scale(1.05);
+            box-shadow: 0 10px 30px rgba(0, 255, 255, 0.6);
         }
 
         .subscribe-btn:disabled {
-            opacity: 0.6;
+            opacity: 0.5;
             cursor: not-allowed;
             transform: none !important;
+            box-shadow: none !important;
         }
 
         .subscribe-btn.subscribed {
-            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+            background: linear-gradient(135deg, #BFFF00 0%, #32CD32 100%);
+            color: #050505;
+            box-shadow: 0 0 20px rgba(191, 255, 0, 0.4);
         }
 
         .subscribe-btn.subscribed:hover {
-            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+            box-shadow: 0 10px 30px rgba(191, 255, 0, 0.6);
         }
 
         .loading-container {
@@ -343,12 +353,14 @@
         }
 
         .spinner {
-            width: 56px;
-            height: 56px;
+            width: 64px;
+            height: 64px;
             border: 4px solid rgba(255, 255, 255, 0.1);
-            border-top-color: #FF2A54;
+            border-top-color: #00FFFF;
+            border-right-color: #FF007F;
             border-radius: 50%;
-            animation: spin 1s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+            animation: spin 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+            filter: drop-shadow(0 0 15px rgba(0, 255, 255, 0.5));
         }
 
         @keyframes spin {
@@ -373,11 +385,13 @@
 
             0%,
             100% {
+                transform: scale(1);
                 opacity: 1;
             }
 
             50% {
-                opacity: 0.5;
+                transform: scale(1.05);
+                opacity: 0.7;
             }
         }
 
@@ -403,11 +417,11 @@
 
             0%,
             100% {
-                transform: translateY(0);
+                transform: translateY(0) rotate(0deg);
             }
 
             50% {
-                transform: translateY(-10px);
+                transform: translateY(-15px) rotate(5deg);
             }
         }
 
@@ -589,12 +603,12 @@
                 if (res.ok && data.ok) {
                     if (isSubscribed) {
                         button.classList.remove('subscribed');
-                        button.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg> Subscribe';
-                        showNotification(`Unsubscribed from ${clubName}`, 'info');
+                        button.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg> Going';
+                        showNotification(`You bailed on ${clubName} ✌️`, 'info');
                     } else {
                         button.classList.add('subscribed');
-                        button.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Subscribed';
-                        showNotification(`Subscribed to ${clubName}! You'll get email notifications.`, 'success');
+                        button.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Locked In';
+                        showNotification(`Locked in for ${clubName}! 🔥`, 'success');
                     }
                     updateSubscriberCount(clubId);
                 } else {
@@ -672,13 +686,13 @@
                             
                             <div class="club-footer">
                                 <div class="subscriber-info">
-                                    <span class="subscriber-count">${subscriberCount} subscriber${subscriberCount !== 1 ? 's' : ''}</span>
+                                    <span class="subscriber-count">🔥 ${subscriberCount} pullin' up</span>
                                 </div>
                                 <button 
                                     class="subscribe-btn ${isSubscribed ? 'subscribed' : ''}"
                                     onclick="toggleSubscription(${club.id}, '${club.club_name.replace(/'/g, "\\'")}', this)"
                                 >
-                                    ${isSubscribed ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Subscribed' : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg> Subscribe'}
+                                    ${isSubscribed ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Locked In' : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg> Going'}
                                 </button>
                             </div>
                         `;
@@ -691,9 +705,9 @@
                 } else {
                     container.innerHTML = `
                         <div class="empty-state">
-                            <div class="empty-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg></div>
-                            <h2 class="empty-title">No clubs found</h2>
-                            <p class="empty-text">Clubs will appear here once they're added</p>
+                            <div class="empty-icon"><svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#FF007F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg></div>
+                            <h2 class="empty-title">It's dead in here 💀</h2>
+                            <p class="empty-text">No clubs dropping events right now. Check back later.</p>
                         </div>
                     `;
                 }
@@ -701,9 +715,9 @@
                 console.error('Error loading clubs:', err);
                 container.innerHTML = `
                     <div class="empty-state">
-                        <div class="empty-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg></div>
-                        <h2 class="empty-title">Failed to load clubs</h2>
-                        <p class="empty-text">Please try again later</p>
+                        <div class="empty-icon"><svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#00FFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg></div>
+                        <h2 class="empty-title">Oops, we fumbled 📉</h2>
+                        <p class="empty-text">Couldn't load the clubs. Refresh and try again.</p>
                     </div>
                 `;
             }
