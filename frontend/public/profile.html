@@ -89,15 +89,10 @@
 
     .header-title {
       font-size: 1.5rem;
-      font-weight: 900;
+      font-weight: 800;
       color: #FFFFFF;
       line-height: 1.2;
-      letter-spacing: -0.03em;
-      background: linear-gradient(to right, #ffffff, #00FFFF);
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-      text-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+      letter-spacing: -0.02em;
     }
 
     .header-subtitle {
@@ -192,23 +187,23 @@
       border-radius: 50%;
       object-fit: cover;
       border: 4px solid transparent;
-      background: linear-gradient(#050505, #050505) padding-box, linear-gradient(135deg, #00FFFF, #FF007F) border-box;
-      box-shadow: 0 8px 30px rgba(0, 255, 255, 0.3);
+      background: linear-gradient(#0A0A0B, #0A0A0B) padding-box, linear-gradient(135deg, #E11D48, #F59E0B) border-box;
+      box-shadow: 0 8px 30px rgba(225, 29, 72, 0.3);
     }
 
     .profile-photo-placeholder {
       width: 150px;
       height: 150px;
       border-radius: 50%;
-      background: linear-gradient(135deg, #00FFFF, #FF007F);
+      background: linear-gradient(135deg, #E11D48, #F59E0B);
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 60px;
-      color: #050505;
+      color: #FFFFFF;
       font-weight: 800;
-      box-shadow: 0 8px 30px rgba(0, 255, 255, 0.4);
-      border: 4px solid #050505;
+      box-shadow: 0 8px 30px rgba(225, 29, 72, 0.4);
+      border: 4px solid #0A0A0B;
     }
 
     .upload-btn-overlay {
@@ -217,20 +212,20 @@
       right: 5px;
       width: 45px;
       height: 45px;
-      background: linear-gradient(135deg, #8A2BE2 0%, #FF007F 100%);
+      background: linear-gradient(135deg, #E11D48 0%, #BE123C 100%);
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      box-shadow: 0 4px 12px rgba(255, 0, 127, 0.5);
-      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      border: 4px solid #050505;
+      box-shadow: 0 4px 12px rgba(225, 29, 72, 0.5);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      border: 4px solid #0A0A0B;
     }
 
     .upload-btn-overlay:hover {
-      transform: scale(1.15) rotate(90deg);
-      box-shadow: 0 6px 16px rgba(196, 30, 58, 0.7);
+      transform: scale(1.1);
+      box-shadow: 0 6px 16px rgba(225, 29, 72, 0.7);
     }
 
     #photoInput {
@@ -247,13 +242,13 @@
     .role-badge {
       display: inline-block;
       padding: 0.75rem 2rem;
-      background: linear-gradient(135deg, #FF007F 0%, #8A2BE2 100%);
+      background: linear-gradient(135deg, #E11D48 0%, #BE123C 100%);
       color: white;
       border-radius: 2rem;
-      font-weight: 800;
+      font-weight: 700;
       font-size: 0.9375rem;
       margin-bottom: 2.5rem;
-      box-shadow: 0 8px 20px rgba(255, 0, 127, 0.4);
+      box-shadow: 0 4px 14px rgba(225, 29, 72, 0.4);
       letter-spacing: 0.05em;
       text-transform: uppercase;
     }
@@ -299,9 +294,9 @@
     input:focus,
     select:focus {
       outline: none;
-      border-color: #00FFFF;
+      border-color: #E11D48;
       background: rgba(20, 20, 30, 0.9);
-      box-shadow: 0 0 0 3px rgba(0, 255, 255, 0.2), inset 0 2px 4px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.2), inset 0 2px 4px rgba(0, 0, 0, 0.2);
     }
 
     input::placeholder {
@@ -350,7 +345,7 @@
       width: auto;
       margin: 0;
       cursor: pointer;
-      accent-color: #00FFFF;
+      accent-color: #E11D48;
       transform: scale(1.2);
     }
 
@@ -388,9 +383,9 @@
     }
 
     .btn-primary {
-      background: linear-gradient(135deg, #FF007F 0%, #8A2BE2 100%);
+      background: linear-gradient(135deg, #E11D48 0%, #BE123C 100%);
       color: white;
-      box-shadow: 0 4px 12px rgba(255, 0, 127, 0.3);
+      box-shadow: 0 4px 14px rgba(225, 29, 72, 0.3);
     }
 
     .btn-primary::after {
@@ -454,8 +449,8 @@
       bottom: -2px;
       left: 0;
       width: 100px;
-      height: 4px;
-      background: linear-gradient(90deg, #00FFFF, #FF007F);
+      height: 3px;
+      background: linear-gradient(90deg, #E11D48, #F59E0B);
     }
 
     .section-title {
@@ -533,13 +528,12 @@
 
     .stat-value {
       font-size: 1.75rem;
-      font-weight: 900;
+      font-weight: 800;
       color: #FFFFFF;
-      background: linear-gradient(135deg, #FFF, #00FFFF);
+      background: linear-gradient(135deg, #FFF, #F59E0B);
       -webkit-background-clip: text;
       background-clip: text;
       -webkit-text-fill-color: transparent;
-      text-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
     }
 
     .event-actions {
@@ -551,7 +545,7 @@
     .btn-view-reg {
       flex: 1;
       padding: 0.75rem 1.5rem;
-      background: linear-gradient(135deg, #FF007F 0%, #8A2BE2 100%);
+      background: linear-gradient(135deg, #E11D48 0%, #BE123C 100%);
       color: white;
       border: none;
       border-radius: 0.75rem;
@@ -563,19 +557,19 @@
       align-items: center;
       justify-content: center;
       gap: 0.5rem;
-      box-shadow: 0 4px 12px rgba(255, 0, 127, 0.2);
+      box-shadow: 0 4px 14px rgba(225, 29, 72, 0.3);
     }
 
     .btn-view-reg:hover {
       transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(255, 0, 127, 0.4);
+      box-shadow: 0 6px 20px rgba(225, 29, 72, 0.4);
     }
 
     .btn-export {
       padding: 0.75rem 1.5rem;
-      background: rgba(0, 255, 255, 0.1);
-      color: #00FFFF;
-      border: 1px solid rgba(0, 255, 255, 0.4);
+      background: rgba(255, 255, 255, 0.05);
+      color: #E2E8F0;
+      border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 0.75rem;
       font-weight: 700;
       font-size: 0.9375rem;
@@ -585,10 +579,9 @@
     }
 
     .btn-export:hover {
-      background: rgba(0, 255, 255, 0.2);
-      border-color: rgba(0, 255, 255, 0.8);
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0, 255, 255, 0.3);
     }
 
     .registrations-container {
@@ -644,9 +637,9 @@
     }
 
     .status-registered {
-      background: rgba(0, 255, 255, 0.15);
-      color: #00FFFF;
-      border: 1px solid rgba(0, 255, 255, 0.3);
+      background: rgba(16, 185, 129, 0.15);
+      color: #10B981;
+      border: 1px solid rgba(16, 185, 129, 0.3);
     }
 
     .status-waitlisted {
@@ -669,21 +662,21 @@
     }
 
     .registration-card {
-      background: rgba(0, 255, 255, 0.05);
-      border: 1px solid rgba(0, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 1rem;
       padding: 1.75rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .registration-card:hover {
-      background: rgba(0, 255, 255, 0.08);
-      border-color: rgba(0, 255, 255, 0.4);
-      transform: translateY(-4px) scale(1.02);
-      box-shadow: 0 10px 30px rgba(0, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     }
 
     .registration-info h3 {
@@ -703,23 +696,22 @@
 
     .btn-cancel-reg {
       padding: 0.75rem 1.5rem;
-      background: rgba(255, 0, 127, 0.1);
-      color: #FF007F;
-      border: 1px solid rgba(255, 0, 127, 0.3);
+      background: rgba(225, 29, 72, 0.1);
+      color: #E11D48;
+      border: 1px solid rgba(225, 29, 72, 0.3);
       border-radius: 0.75rem;
-      font-weight: 800;
+      font-weight: 700;
       font-size: 0.9375rem;
       cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      transition: all 0.3s ease;
       backdrop-filter: blur(4px);
     }
 
     .btn-cancel-reg:hover {
-      background: rgba(255, 0, 127, 0.2);
-      border-color: rgba(255, 0, 127, 0.6);
-      color: #FFF;
-      transform: scale(1.05);
-      box-shadow: 0 4px 15px rgba(255, 0, 127, 0.4);
+      background: rgba(225, 29, 72, 0.2);
+      border-color: rgba(225, 29, 72, 0.6);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 14px rgba(225, 29, 72, 0.4);
     }
 
     .empty-state {
@@ -1095,7 +1087,7 @@
           if (myEvents.length === 0) {
             eventsList.innerHTML = `
               <div class="empty-state">
-                <div class="empty-icon"><svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#FF007F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></div>
+                <div class="empty-icon"><svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#E11D48" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></div>
                 <p><strong>It's crickets in here 🦗</strong></p>
                 <p>Drop an announcement with "Enable Student Registration" to make moves.</p>
               </div>
@@ -1264,7 +1256,7 @@
           if (data.registrations.length === 0) {
             list.innerHTML = `
               <div class="empty-state">
-                <div class="empty-icon"><svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#00FFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg></div>
+                <div class="empty-icon"><svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#E11D48" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg></div>
                 <p><strong>Bruh, you're not going to anything 😭</strong></p>
                 <p>Browse campus clubs and lock into some events!</p>
               </div>
