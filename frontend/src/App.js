@@ -259,7 +259,7 @@ function AuthCard({
       )}
 
       {msg && (
-        <div className={`status-message ${msg.includes('✗') ? 'error' : msg.includes('🔄') ? 'loading' : 'success'}`}>
+        <div className={`status-message ${msg.includes('✗') ? 'error' : msg.includes('✓') ? 'success' : 'loading'}`}>
           {msg}
         </div>
       )}
