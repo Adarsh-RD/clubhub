@@ -261,17 +261,30 @@ export default function Home() {
           <span className="dock-label">Explore</span>
         </button>
 
-        {isClubAdmin && (
-          <button
-            className="dock-fab"
-            onClick={() => setShowCreateModal(true)}
-            title="Create Announcement"
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round">
-              <path d="M12 5V19M5 12H19" />
-            </svg>
-          </button>
-        )}
+        <button
+          className="dock-fab"
+          onClick={() => {
+            if (isClubAdmin) setShowCreateModal(true);
+            else alert("Restricted: Only Club Admins can create announcements.");
+          }}
+          title={isClubAdmin ? "Create Announcement" : "Restricted: Club Admins Only"}
+          style={{ opacity: isClubAdmin ? 1 : 0.5, filter: isClubAdmin ? 'none' : 'grayscale(100%)' }}
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round">
+            <path d="M12 5V19M5 12H19" />
+          </svg>
+        </button>
+
+        <button className="dock-item" onClick={() => {
+          if (isClubAdmin) alert("You have no new notifications.");
+          else alert("Notifications are currently visible to Club Admins only.");
+        }}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+          </svg>
+          <span className="dock-label">Alerts</span>
+        </button>
 
         <button className="dock-item" onClick={() => window.location.href = '/profile.html'}>
           <div className="dock-avatar">
