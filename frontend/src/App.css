@@ -897,10 +897,6 @@ body {
   color: #FFFFFF;
   margin-bottom: 0.5rem;
   letter-spacing: -0.03em;
-  background: linear-gradient(to right, var(--white), var(--kle-cyan));
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
 }
 
 .auth-subtitle {
@@ -985,14 +981,25 @@ body {
 
 .input:focus {
   outline: none;
-  border-color: var(--kle-cyan);
+  border-color: var(--kle-red);
   background: rgba(20, 20, 30, 0.9);
-  box-shadow: 0 0 0 4px rgba(0, 255, 255, 0.15), inset 0 2px 4px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.2), inset 0 2px 4px rgba(0, 0, 0, 0.2);
   transform: translateY(-2px);
 }
 
 .input::placeholder {
   color: #64748B;
+}
+
+/* Fix for Chrome autocomplete white background */
+.input:-webkit-autofill,
+.input:-webkit-autofill:hover,
+.input:-webkit-autofill:focus,
+.input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px #0F0F14 inset !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+  transition: background-color 5000s ease-in-out 0s;
+  caret-color: #FFFFFF;
 }
 
 .auth-buttons {
@@ -1005,17 +1012,25 @@ body {
 .btn-large {
   padding: 1.125rem 1.5rem;
   font-size: 1.125rem;
-  background: linear-gradient(135deg, var(--kle-pink) 0%, var(--kle-purple) 100%);
+  background: linear-gradient(135deg, var(--kle-red) 0%, var(--kle-red-dark) 100%);
   color: white;
   border: none;
   border-radius: 1rem;
-  font-weight: 800;
+  font-weight: 700;
   cursor: pointer;
-  transition: var(--transition-bounce);
+  transition: var(--transition-smooth);
   position: relative;
   overflow: hidden;
-  box-shadow: var(--shadow-neon-pink);
+  box-shadow: var(--shadow-primary);
   letter-spacing: 0.02em;
+}
+
+.btn-large:disabled {
+  background: rgba(225, 29, 72, 0.3);
+  color: rgba(255, 255, 255, 0.5);
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .btn-large::after {
@@ -1029,17 +1044,17 @@ body {
   transition: left 0.5s ease;
 }
 
-.btn-large:hover::after {
+.btn-large:hover:not(:disabled)::after {
   left: 100%;
 }
 
 .btn-large:hover:not(:disabled) {
-  transform: translateY(-4px) scale(1.02);
-  box-shadow: 0 12px 30px rgba(255, 0, 127, 0.6);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(225, 29, 72, 0.4);
 }
 
 .btn-large:active:not(:disabled) {
-  transform: translateY(2px) scale(0.98);
+  transform: translateY(1px);
 }
 
 .link-button {
@@ -1058,7 +1073,7 @@ body {
 }
 
 .link-button strong {
-  color: #FF2A54;
+  color: var(--kle-red);
   font-weight: 700;
 }
 
@@ -1144,15 +1159,15 @@ body {
   right: 2.5rem;
   width: 64px;
   height: 64px;
-  background: linear-gradient(135deg, #FF2A54 0%, #C41E3A 100%);
+  background: linear-gradient(135deg, var(--kle-red) 0%, var(--kle-red-dark) 100%);
   border: none;
   border-radius: 50%;
-  box-shadow: 0 8px 30px rgba(196, 30, 58, 0.4);
+  box-shadow: 0 8px 30px rgba(225, 29, 72, 0.4);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   z-index: 99;
 }
 
@@ -1297,9 +1312,9 @@ body {
 .form-field input:focus,
 .form-field textarea:focus {
   outline: none;
-  border-color: #FF2A54;
+  border-color: var(--kle-red);
   background: rgba(20, 20, 28, 0.8);
-  box-shadow: 0 0 0 3px rgba(196, 30, 58, 0.2), inset 0 2px 4px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.2), inset 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .form-field textarea {
