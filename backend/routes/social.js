@@ -38,8 +38,8 @@ module.exports = function (pool) {
                 return res.status(400).json({ ok: false, error: 'No image data provided' });
             }
 
-            await pool.execute(
-                'UPDATE users SET profile_picture = ? WHERE email = ?',
+            await pool.query(
+                'UPDATE users SET profile_picture = $1 WHERE email = $2',
                 [profile_picture, userEmail]
             );
 
@@ -54,8 +54,8 @@ module.exports = function (pool) {
         try {
             const { userId } = req.params;
 
-            const [rows] = await pool.execute(
-                'SELECT profile_picture FROM users WHERE id = ?',
+            const { rows } = await pool.query(
+                'SELECT profile_picture FROM users WHERE id = $1',
                 [userId]
             );
 
@@ -80,8 +80,8 @@ module.exports = function (pool) {
             const userEmail = req.user.sub;
 
             // Get user ID from email
-            const [userRows] = await pool.execute(
-                'SELECT id FROM users WHERE email = ?',
+            const { rows: userRows } = await pool.query(
+                'SELECT id FROM users WHERE email = $1',
                 [userEmail]
             );
 
@@ -92,8 +92,8 @@ module.exports = function (pool) {
             const userId = userRows[0].id;
 
             // Check if announcement exists
-            const [annRows] = await pool.execute(
-                'SELECT id FROM announcements WHERE id = ?',
+            const { rows: annRows } = await pool.query(
+                'SELECT id FROM announcements WHERE id = $1',
                 [announcementId]
             );
 
@@ -102,44 +102,44 @@ module.exports = function (pool) {
             }
 
             // Check if already liked
-            const [existingLike] = await pool.execute(
-                'SELECT id FROM announcement_likes WHERE announcement_id = ? AND user_id = ?',
+            const { rows: existingLike } = await pool.query(
+                'SELECT id FROM announcement_likes WHERE announcement_id = $1 AND user_id = $2',
                 [announcementId, userId]
             );
 
             if (existingLike.length > 0) {
                 // Unlike
-                await pool.execute(
-                    'DELETE FROM announcement_likes WHERE announcement_id = ? AND user_id = ?',
+                await pool.query(
+                    'DELETE FROM announcement_likes WHERE announcement_id = $1 AND user_id = $2',
                     [announcementId, userId]
                 );
 
-                const [countRows] = await pool.execute(
-                    'SELECT COUNT(*) as count FROM announcement_likes WHERE announcement_id = ?',
+                const { rows: countRows } = await pool.query(
+                    'SELECT COUNT(*) as count FROM announcement_likes WHERE announcement_id = $1',
                     [announcementId]
                 );
 
                 return res.json({
                     ok: true,
                     liked: false,
-                    likeCount: countRows[0].count
+                    likeCount: parseInt(countRows[0].count)
                 });
             } else {
                 // Like
-                await pool.execute(
-                    'INSERT INTO announcement_likes (announcement_id, user_id) VALUES (?, ?)',
+                await pool.query(
+                    'INSERT INTO announcement_likes (announcement_id, user_id) VALUES ($1, $2)',
                     [announcementId, userId]
                 );
 
-                const [countRows] = await pool.execute(
-                    'SELECT COUNT(*) as count FROM announcement_likes WHERE announcement_id = ?',
+                const { rows: countRows } = await pool.query(
+                    'SELECT COUNT(*) as count FROM announcement_likes WHERE announcement_id = $1',
                     [announcementId]
                 );
 
                 return res.json({
                     ok: true,
                     liked: true,
-                    likeCount: countRows[0].count
+                    likeCount: parseInt(countRows[0].count)
                 });
             }
         } catch (error) {
@@ -154,8 +154,8 @@ module.exports = function (pool) {
             const userEmail = req.user.sub;
 
             // Get user ID
-            const [userRows] = await pool.execute(
-                'SELECT id FROM users WHERE email = ?',
+            const { rows: userRows } = await pool.query(
+                'SELECT id FROM users WHERE email = $1',
                 [userEmail]
             );
 
@@ -165,8 +165,8 @@ module.exports = function (pool) {
 
             const userId = userRows[0].id;
 
-            const [likeRows] = await pool.execute(
-                'SELECT id FROM announcement_likes WHERE announcement_id = ? AND user_id = ?',
+            const { rows: likeRows } = await pool.query(
+                'SELECT id FROM announcement_likes WHERE announcement_id = $1 AND user_id = $2',
                 [announcementId, userId]
             );
 
@@ -197,8 +197,8 @@ module.exports = function (pool) {
             }
 
             // Get user ID
-            const [userRows] = await pool.execute(
-                'SELECT id, name, email, profile_picture FROM users WHERE email = ?',
+            const { rows: userRows } = await pool.query(
+                'SELECT id, name, email, profile_picture FROM users WHERE email = $1',
                 [userEmail]
             );
 
@@ -209,8 +209,8 @@ module.exports = function (pool) {
             const user = userRows[0];
 
             // Check if announcement exists
-            const [annRows] = await pool.execute(
-                'SELECT id FROM announcements WHERE id = ?',
+            const { rows: annRows } = await pool.query(
+                'SELECT id FROM announcements WHERE id = $1',
                 [announcementId]
             );
 
@@ -219,14 +219,14 @@ module.exports = function (pool) {
             }
 
             // Insert comment
-            const [result] = await pool.execute(
-                'INSERT INTO announcement_comments (announcement_id, user_id, comment_text) VALUES (?, ?, ?)',
+            const { rows: result } = await pool.query(
+                'INSERT INTO announcement_comments (announcement_id, user_id, comment_text) VALUES ($1, $2, $3) RETURNING id',
                 [announcementId, user.id, comment_text.trim()]
             );
 
             // Return the created comment with user info
             const comment = {
-                id: result.insertId,
+                id: result[0].id,
                 announcement_id: announcementId,
                 user_id: user.id,
                 comment_text: comment_text.trim(),
@@ -250,7 +250,7 @@ module.exports = function (pool) {
         try {
             const announcementId = parseInt(req.params.id);
 
-            const [comments] = await pool.execute(
+            const { rows: comments } = await pool.query(
                 `SELECT 
           c.id,
           c.announcement_id,
@@ -262,7 +262,7 @@ module.exports = function (pool) {
           u.profile_picture
         FROM announcement_comments c 
         JOIN users u ON c.user_id = u.id 
-        WHERE c.announcement_id = ?
+        WHERE c.announcement_id = $1
         ORDER BY c.created_at DESC`,
                 [announcementId]
             );
@@ -284,8 +284,8 @@ module.exports = function (pool) {
             const userEmail = req.user.sub;
 
             // Get user ID
-            const [userRows] = await pool.execute(
-                'SELECT id FROM users WHERE email = ?',
+            const { rows: userRows } = await pool.query(
+                'SELECT id FROM users WHERE email = $1',
                 [userEmail]
             );
 
@@ -296,8 +296,8 @@ module.exports = function (pool) {
             const userId = userRows[0].id;
 
             // Check if comment exists and belongs to user
-            const [commentRows] = await pool.execute(
-                'SELECT id, user_id FROM announcement_comments WHERE id = ?',
+            const { rows: commentRows } = await pool.query(
+                'SELECT id, user_id FROM announcement_comments WHERE id = $1',
                 [commentId]
             );
 
@@ -309,8 +309,8 @@ module.exports = function (pool) {
                 return res.status(403).json({ ok: false, error: 'Not authorized to delete this comment' });
             }
 
-            await pool.execute(
-                'DELETE FROM announcement_comments WHERE id = ?',
+            await pool.query(
+                'DELETE FROM announcement_comments WHERE id = $1',
                 [commentId]
             );
 
@@ -325,7 +325,7 @@ module.exports = function (pool) {
 
     router.get('/announcements/enhanced', async (req, res) => {
         try {
-            const [announcements] = await pool.execute(`
+            const { rows: announcements } = await pool.query(`
         SELECT 
           a.id,
           a.club_id,
@@ -342,7 +342,7 @@ module.exports = function (pool) {
           (SELECT COUNT(*) FROM announcement_comments WHERE announcement_id = a.id) as comment_count
         FROM announcements a
         LEFT JOIN clubs c ON a.club_id = c.id
-        WHERE a.is_active = 1
+        WHERE a.is_active = true
         ORDER BY a.created_at DESC
       `);
 
