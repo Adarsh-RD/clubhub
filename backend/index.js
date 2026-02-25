@@ -25,7 +25,10 @@ const {
   getAnnouncementsByClub,
   createAnnouncement,
   deleteAnnouncement,
-  updateAnnouncement
+  updateAnnouncement,
+  toggleLike,
+  getComments,
+  addComment
 } = require("./db");
 
 const app = express();
