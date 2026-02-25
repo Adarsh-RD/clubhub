@@ -2432,6 +2432,19 @@ app.listen(PORT, async () => {
   try {
     await pool.query('ALTER TABLE announcements ALTER COLUMN image_url TYPE TEXT;');
 
+    // Check for stale schema
+    const checkLikeCols = await pool.query(`
+      SELECT column_name 
+      FROM information_schema.columns 
+      WHERE table_name = 'announcement_likes' AND column_name = 'user_email'
+    `);
+
+    // If the table exists but doesn't have user_email, it's an old incompatible version
+    if (checkLikeCols.rows.length === 0) {
+      await pool.query('DROP TABLE IF EXISTS announcement_likes CASCADE;');
+      await pool.query('DROP TABLE IF EXISTS announcement_comments CASCADE;');
+    }
+
     await pool.query(`
       CREATE TABLE IF NOT EXISTS announcement_likes (
           id SERIAL PRIMARY KEY,
