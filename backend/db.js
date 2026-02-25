@@ -27,9 +27,16 @@ const poolQuery = async (...args) => {
   try {
     return await pool.query(...args);
   } catch (err) {
-    if (err.code === 'ETIMEDOUT' || err.message?.includes('ETIMEDOUT')) {
-      console.warn('⚠️ DB ETIMEDOUT — retrying in 3s...');
-      await delay(3000);
+    const msg = err.message || '';
+    if (
+      err.code === 'ETIMEDOUT' ||
+      msg.includes('ETIMEDOUT') ||
+      msg.includes('Connection terminated') ||
+      msg.includes('timeout') ||
+      msg.includes('Unexpected EOF')
+    ) {
+      console.warn(`⚠️ DB Error (${msg}) — retrying in 1.5s...`);
+      await delay(1500);
       return await pool.query(...args); // one retry
     }
     throw err;
