@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import AnnouncementCard from '../components/AnnouncementCard';
-import { requestForToken, onMessageListener } from '../firebase';
+import { requestForToken, messaging } from '../firebase';
+import { onMessage } from 'firebase/messaging';
 
 const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:4000";
 
@@ -10,6 +11,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);
+  const [notifications, setNotifications] = useState([]);
   const token = localStorage.getItem('token');
 
   // ✅ CORRECT: Registration fields in state
@@ -78,10 +80,12 @@ export default function Home() {
         });
       }
 
-      onMessageListener().then(payload => {
-        console.log("Foreground push notification received:", payload);
-        // We could show a custom toast here if we wanted
-      }).catch(err => console.log('failed: ', err));
+      if (messaging) {
+        onMessage(messaging, (payload) => {
+          console.log("Foreground push notification received:", payload);
+          setNotifications(prev => [payload.notification, ...prev]);
+        });
+      }
 
     } catch (err) {
       console.error('Error loading data:', err);
@@ -303,13 +307,24 @@ export default function Home() {
         </button>
 
         <button className="dock-item" onClick={() => {
-          if (isClubAdmin) alert("You have no new notifications.");
-          else alert("Notifications are currently visible to Club Admins only.");
+          if (notifications.length > 0) {
+            const latest = notifications[0];
+            alert(`New Notification: ${latest.title}\n\n${latest.body}`);
+            // Clear notifications after viewing
+            setNotifications([]);
+          } else {
+            alert("You have no new notifications.");
+          }
         }}>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-          </svg>
+          <div style={{ position: 'relative' }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
+            {notifications.length > 0 && (
+              <span style={{ position: 'absolute', top: -2, right: -2, width: 8, height: 8, backgroundColor: '#E11D48', borderRadius: '50%' }}></span>
+            )}
+          </div>
           <span className="dock-label">Alerts</span>
         </button>
 
