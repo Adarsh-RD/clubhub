@@ -9,37 +9,43 @@ const pool = new Pool({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME || "postgres",
   ssl: { rejectUnauthorized: false },
-  max: 5,                             // keep pool small for free tier
-  idleTimeoutMillis: 30000,           // close idle connections after 30s
-  connectionTimeoutMillis: 10000,     // fail fast if DB is unreachable
+  max: 10,                            // allow a few more concurrent connections
+  idleTimeoutMillis: 10000,           // close idle connections quickly (10s)
+  connectionTimeoutMillis: 5000,      // fail fast (5s) to trigger immediate retry
   keepAlive: true,
-  keepAliveInitialDelayMillis: 10000,
 });
 
 pool.on('error', (err) => {
   console.error('❌ Unexpected pool error:', err.message);
 });
 
-// Retry wrapper: retries once on ETIMEDOUT to handle Supabase free-tier wake-up
+// Retry wrapper: handles Supabase connection drops robustly
 const delay = ms => new Promise(r => setTimeout(r, ms));
 
 const poolQuery = async (...args) => {
-  try {
-    return await pool.query(...args);
-  } catch (err) {
-    const msg = err.message || '';
-    if (
-      err.code === 'ETIMEDOUT' ||
-      msg.includes('ETIMEDOUT') ||
-      msg.includes('Connection terminated') ||
-      msg.includes('timeout') ||
-      msg.includes('Unexpected EOF')
-    ) {
-      console.warn(`⚠️ DB Error (${msg}) — retrying in 1.5s...`);
-      await delay(1500);
-      return await pool.query(...args); // one retry
+  let retries = 3;
+  while (retries > 0) {
+    try {
+      return await pool.query(...args);
+    } catch (err) {
+      const msg = err.message || '';
+      const isConnectionDrop =
+        err.code === 'ETIMEDOUT' ||
+        err.code === 'ECONNRESET' ||
+        msg.includes('ETIMEDOUT') ||
+        msg.includes('Connection terminated') ||
+        msg.includes('timeout') ||
+        msg.includes('socket') ||
+        msg.includes('Unexpected EOF');
+
+      if (isConnectionDrop && retries > 1) {
+        retries--;
+        console.warn(`⚠️ DB Connection Error (${msg}) — retrying (${retries} retries left)...`);
+        await delay(1000); // Wait 1 second before retrying so the pool can clear dead sockets
+        continue;
+      }
+      throw err;
     }
-    throw err;
   }
 };
 
