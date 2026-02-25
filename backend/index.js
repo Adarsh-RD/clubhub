@@ -441,7 +441,15 @@ app.post('/profile', async (req, res) => {
     if (!auth) return res.status(401).json({ error: 'missing token' });
 
     const token = auth.split(' ')[1];
-    const payload = jwt.verify(token, JWT_SECRET);
+    let payload;
+    try {
+      payload = jwt.verify(token, JWT_SECRET);
+    } catch (jwtErr) {
+      if (jwtErr.name === 'TokenExpiredError') {
+        return res.status(401).json({ error: 'Token expired. Please log in again.' });
+      }
+      return res.status(401).json({ error: 'Invalid token' });
+    }
     const email = payload.sub.toLowerCase();
 
     const { name, branch, roll_number, role, club_id } = req.body;
@@ -790,7 +798,15 @@ app.delete('/announcements/:id', async (req, res) => {
     if (!auth) return res.status(401).json({ error: 'missing token' });
 
     const token = auth.split(' ')[1];
-    const payload = jwt.verify(token, JWT_SECRET);
+    let payload;
+    try {
+      payload = jwt.verify(token, JWT_SECRET);
+    } catch (jwtErr) {
+      if (jwtErr.name === 'TokenExpiredError') {
+        return res.status(401).json({ error: 'Token expired' });
+      }
+      return res.status(401).json({ error: 'Invalid token' });
+    }
     const email = payload.sub.toLowerCase();
 
     const announcementId = parseInt(req.params.id);
@@ -813,7 +829,15 @@ app.put('/announcements/:id', async (req, res) => {
     if (!auth) return res.status(401).json({ error: 'missing token' });
 
     const token = auth.split(' ')[1];
-    const payload = jwt.verify(token, JWT_SECRET);
+    let payload;
+    try {
+      payload = jwt.verify(token, JWT_SECRET);
+    } catch (jwtErr) {
+      if (jwtErr.name === 'TokenExpiredError') {
+        return res.status(401).json({ error: 'Token expired' });
+      }
+      return res.status(401).json({ error: 'Invalid token' });
+    }
     const email = payload.sub.toLowerCase();
 
     const announcementId = parseInt(req.params.id);
@@ -2114,7 +2138,15 @@ app.post('/announcements', upload.single('image'), async (req, res) => {
     if (!auth) return res.status(401).json({ error: 'missing token' });
 
     const token = auth.split(' ')[1];
-    const payload = jwt.verify(token, JWT_SECRET);
+    let payload;
+    try {
+      payload = jwt.verify(token, JWT_SECRET);
+    } catch (jwtErr) {
+      if (jwtErr.name === 'TokenExpiredError') {
+        return res.status(401).json({ error: 'Token expired. Please log in again.' });
+      }
+      return res.status(401).json({ error: 'Invalid token' });
+    }
     const email = payload.sub.toLowerCase();
 
     // Log what we received
