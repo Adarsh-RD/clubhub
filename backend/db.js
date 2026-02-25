@@ -297,6 +297,29 @@ const addComment = async (announcementId, userEmail, content) => {
     [announcementId, userEmail, content]
   );
   return rows[0].id;
+  return rows[0].id;
+};
+
+/* =========================
+   PUSH NOTIFICATIONS (FCM)
+========================= */
+
+const saveFCMToken = async (email, token) => {
+  const res = await poolQuery(
+    `UPDATE users SET fcm_token = $1 WHERE email = $2`,
+    [token, email]
+  );
+  return res.rowCount > 0;
+};
+
+const getClubAdminFCMToken = async (clubId) => {
+  const { rows } = await poolQuery(
+    `SELECT u.fcm_token 
+     FROM users u
+     WHERE u.club_id = $1 AND u.role = 'club_admin' AND u.fcm_token IS NOT NULL`,
+    [clubId]
+  );
+  return rows.length > 0 ? rows[0].fcm_token : null;
 };
 
 module.exports = {
@@ -317,5 +340,7 @@ module.exports = {
   updateAnnouncement,
   toggleLike,
   getComments,
-  addComment
+  addComment,
+  saveFCMToken,
+  getClubAdminFCMToken
 };

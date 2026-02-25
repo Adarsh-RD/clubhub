@@ -28,8 +28,12 @@ const {
   updateAnnouncement,
   toggleLike,
   getComments,
-  addComment
+  addComment,
+  saveFCMToken,
+  getClubAdminFCMToken
 } = require("./db");
+
+const admin = require('./firebase-admin');
 
 const app = express();
 app.set('trust proxy', 1); // Trust first proxy (Render load balancer)
@@ -548,6 +552,27 @@ app.post('/profile/picture', async (req, res) => {
   } catch (err) {
     console.error('Error saving profile picture:', err);
     return res.status(500).json({ error: 'server error', detail: err.message });
+  }
+});
+
+// ==================== PUSH NOTIFICATIONS ====================
+
+app.post('/profile/fcm-token', authMiddleware, async (req, res) => {
+  try {
+    const { token } = req.body;
+    if (!token) {
+      return res.status(400).json({ ok: false, error: 'Token is required' });
+    }
+
+    const success = await saveFCMToken(req.userEmail, token);
+    if (success) {
+      return res.json({ ok: true, message: 'FCM token saved' });
+    } else {
+      return res.status(404).json({ ok: false, error: 'User not found' });
+    }
+  } catch (err) {
+    console.error('Error saving FCM token:', err);
+    res.status(500).json({ ok: false, error: 'Failed to save FCM token' });
   }
 });
 
@@ -1607,6 +1632,31 @@ app.post('/clubs/:clubId/subscribe', authMiddleware, async (req, res) => {
 
     console.log(`✓ ${userEmail} subscribed to club ${clubId}`);
 
+    // --- SEND PUSH NOTIFICATION TO ADMIN ---
+    try {
+      if (admin.apps.length > 0) { // If Firebase is configured
+        const adminFcmToken = await getClubAdminFCMToken(clubId);
+        if (adminFcmToken) {
+          await admin.messaging().send({
+            token: adminFcmToken,
+            notification: {
+              title: 'New Club Subscription 🎉',
+              body: `${user.name || userEmail} just subscribed to ${club.club_name}!`,
+            },
+            webpush: {
+              fcmOptions: {
+                link: '/admin-dashboard.html' // Clicking notification opens app here
+              }
+            }
+          });
+          console.log(`✓ Push notification sent to admin of club ${clubId}`);
+        }
+      }
+    } catch (pushErr) {
+      console.error('Error sending push notification:', pushErr);
+      // We don't want to crash the request if push fails
+    }
+
     res.json({
       ok: true,
       message: 'Successfully subscribed to club',
@@ -2434,6 +2484,7 @@ app.listen(PORT, async () => {
   // Ensure the image_url column is TEXT to support long base64 strings
   try {
     await pool.query('ALTER TABLE announcements ALTER COLUMN image_url TYPE TEXT;');
+    await pool.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS fcm_token TEXT;');
 
     // Check for stale schema
     const checkLikeCols = await pool.query(`

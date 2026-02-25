@@ -24,6 +24,7 @@ CREATE TABLE users (
     admin_requested BOOLEAN DEFAULT FALSE,
     requested_at TIMESTAMP WITH TIME ZONE,
     profile_picture TEXT,
+    fcm_token TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE
 );

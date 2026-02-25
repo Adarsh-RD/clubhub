@@ -1,6 +1,6 @@
-// frontend/src/pages/Home.js - CORRECTED VERSION
 import React, { useState, useEffect } from 'react';
 import AnnouncementCard from '../components/AnnouncementCard';
+import { requestForToken, onMessageListener } from '../firebase';
 
 const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:4000";
 
@@ -43,19 +43,46 @@ export default function Home() {
       }
 
       // Load announcements
-      const announcementsRes = await fetch(`${API_BASE}/announcements`);
+      let fetchedAnnouncements = [];
+      const announcementsRes = await fetch(`${API_BASE}/announcements`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       const announcementsData = await announcementsRes.json();
 
       if (announcementsData.ok && announcementsData.announcements) {
-        const anns = announcementsData.announcements.map(ann => ({
+        fetchedAnnouncements = announcementsData.announcements.map(ann => ({
           ...ann,
-          like_count: 0,
-          comment_count: 0
+          like_count: ann.like_count || 0,
+          comment_count: ann.comment_count || 0,
+          has_liked: ann.has_liked || false
         }));
-        setAnnouncements(anns);
+        setAnnouncements(fetchedAnnouncements);
       }
 
       setLoading(false);
+
+      // --- PUSH NOTIFICATIONS ---
+      // Request permission and get token
+      const vapidKey = "BKgJD4e72EG2Ij3CkznmOeJZ98BtOqo3OhtAXYwAKfP8mBhoGTCMFZD6pgdh53fF4hBrTuoUcAjMbxblYk24YOU";
+      const fcmToken = await requestForToken(vapidKey);
+
+      if (fcmToken) {
+        console.log("FCM Token retrieved, saving to backend...");
+        await fetch(`${API_BASE}/profile/fcm-token`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ token: fcmToken })
+        });
+      }
+
+      onMessageListener().then(payload => {
+        console.log("Foreground push notification received:", payload);
+        // We could show a custom toast here if we wanted
+      }).catch(err => console.log('failed: ', err));
+
     } catch (err) {
       console.error('Error loading data:', err);
       setLoading(false);
