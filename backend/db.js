@@ -25,9 +25,18 @@ const delay = ms => new Promise(r => setTimeout(r, ms));
 const poolQuery = async (...args) => {
   let retries = 3;
   while (retries > 0) {
+    let client;
     try {
-      return await pool.query(...args);
+      client = await pool.connect();
+      const result = await client.query(...args);
+      client.release();
+      return result;
     } catch (err) {
+      // If we got a client but the query failed, passing the error to release() 
+      // instructs the pg-pool to DESTROY the socket instead of reusing it.
+      if (client) {
+        client.release(err);
+      }
       const msg = err.message || '';
       const isConnectionDrop =
         err.code === 'ETIMEDOUT' ||
@@ -41,7 +50,7 @@ const poolQuery = async (...args) => {
       if (isConnectionDrop && retries > 1) {
         retries--;
         console.warn(`⚠️ DB Connection Error (${msg}) — retrying (${retries} retries left)...`);
-        await delay(1000); // Wait 1 second before retrying so the pool can clear dead sockets
+        await delay(1000); // Backoff before grabbing a new connection
         continue;
       }
       throw err;
