@@ -190,7 +190,11 @@ export default function AnnouncementCard({ announcement, currentUser }) {
 
             {announcement.image_url && (
                 <img
-                    src={`${API_BASE}${announcement.image_url}`}
+                    src={
+                        announcement.image_url.startsWith('http') || announcement.image_url.startsWith('data:')
+                            ? announcement.image_url
+                            : `${API_BASE}${announcement.image_url}`
+                    }
                     alt={announcement.title}
                     className="announcement-image"
                 />
