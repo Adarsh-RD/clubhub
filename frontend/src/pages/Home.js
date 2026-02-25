@@ -319,7 +319,7 @@ export default function Home() {
           <span className="dock-label">Alerts</span>
         </button>
 
-        <button className="dock-item" onClick={() => window.location.href = '/profile.html'}>
+        <button className="dock-item" onClick={() => window.location.href = '/profile.html?v=2'}>
           <div className="dock-avatar">
             {profile?.profile_picture ? (
               <img src={profile.profile_picture} alt={firstName} />
