@@ -2103,6 +2103,41 @@ app.post('/announcements/:announcementId/register', authMiddleware, async (req, 
 
     console.log(`✓ ${userEmail} registered for event ${announcementId}`);
 
+    // --- SEND NOTIFICATION TO ALL ADMINS ---
+    try {
+      const admins = await getClubAdmins(announcement.club_id);
+      for (const adminUser of admins) {
+        // 1. Save to DB
+        await addNotification(
+          adminUser.id,
+          'New Event Registration 🎟️',
+          `${user.name || userEmail.split('@')[0]} registered for "${announcement.title}"`,
+          'registration',
+          announcementId
+        );
+
+        // 2. Send push if token exists and Firebase is setup
+        if (admin.apps.length > 0 && adminUser.fcm_token) {
+          try {
+            await admin.messaging().send({
+              token: adminUser.fcm_token,
+              notification: {
+                title: 'New Event Registration 🎟️',
+                body: `${user.name || userEmail.split('@')[0]} registered for "${announcement.title}"`,
+              },
+              webpush: {
+                fcmOptions: { link: '/notifications.html' }
+              }
+            });
+          } catch (err) {
+            console.error(`Failed to push to ${adminUser.email}:`, err.message);
+          }
+        }
+      }
+    } catch (notifErr) {
+      console.error('Error handling notifications:', notifErr);
+    }
+
     res.json({
       ok: true,
       message: 'Successfully registered for event!',
