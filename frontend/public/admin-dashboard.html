@@ -336,8 +336,7 @@
                 <!-- Notification Bell -->
                 <button class="btn btn-icon"
                     style="background: none; border: none; cursor: pointer; color: #4B5563; position: relative;"
-                    title="Notifications"
-                    onclick="alert('Push notifications are configured. You will receive an alert for new subscribers.')">
+                    title="Click here to enable notifications" onclick="setupPushNotifications()">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round">
                         <path d="M18 8A6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
@@ -470,7 +469,6 @@
 
                 // Load admin count
                 loadAdminCount();
-                setupPushNotifications(); // Ask for push permission
             } catch (err) {
                 console.error('Error loading requests:', err);
                 document.getElementById('loadingState').innerHTML = '<p style="color:#EF4444;">Failed to load requests</p>';
