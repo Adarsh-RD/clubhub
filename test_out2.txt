@@ -1,0 +1,9 @@
+Error: Error: getaddrinfo ENOTFOUND db.mlphjzznhyxftjmnlthq.supabase.co
+    at x:\club-hub\backend\node_modules\pg-pool\index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async checkSchema (x:\club-hub\backend\check-schema.js:6:26) {
+  errno: -3008,
+  code: 'ENOTFOUND',
+  syscall: 'getaddrinfo',
+  hostname: 'db.mlphjzznhyxftjmnlthq.supabase.co'
+}

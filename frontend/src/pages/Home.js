@@ -306,16 +306,7 @@ export default function Home() {
           </svg>
         </button>
 
-        <button className="dock-item" onClick={() => {
-          if (notifications.length > 0) {
-            const latest = notifications[0];
-            alert(`New Notification: ${latest.title}\n\n${latest.body}`);
-            // Clear notifications after viewing
-            setNotifications([]);
-          } else {
-            alert("You have no new notifications.");
-          }
-        }}>
+        <button className="dock-item" onClick={() => window.location.href = '/notifications.html'}>
           <div style={{ position: 'relative' }}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>

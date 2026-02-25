@@ -1,0 +1,5 @@
+commit b221173f0ed71735682196fe04becc841c6de306
+Author: adarshdodamania-ship-it <adarshdodamania@gmail.com>
+Date:   Wed Feb 25 14:24:18 2026 +0530
+
+    fix(backend): optimal connection pool settings with resilient 5-retry loop

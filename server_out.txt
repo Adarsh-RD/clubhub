@@ -1,0 +1,5 @@
+Firebase Admin initialized successfully
+📧 Brevo API Transport selected (bypassing Render SMTP blocks).
+🚀 Server running on port 4000
+✅ DB Schema verified: tables and columns ready
+^C

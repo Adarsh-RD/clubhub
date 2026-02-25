@@ -5,8 +5,6 @@ importScripts(
 
 // We need to use compat version of firebase inside the service worker or v8 syntax
 firebase.initializeApp({
-    apiKey: "REPLACE_WITH_API_KEY", // Note: The actual credentials need to be interpolated or hardcoded since SW doesn't read process.env easily. For simplicity in CRA, we hardcode or use URL params. 
-    // Wait, wait... Actually, Firebase v9+ doesn't need all keys in SW, only appId, messagingSenderId, projectId, apiKey
     apiKey: new URL(location).searchParams.get("apiKey"),
     projectId: new URL(location).searchParams.get("projectId"),
     messagingSenderId: new URL(location).searchParams.get("messagingSenderId"),

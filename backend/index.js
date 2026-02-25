@@ -30,7 +30,11 @@ const {
   getComments,
   addComment,
   saveFCMToken,
-  getClubAdminFCMToken
+  getClubAdminFCMToken,
+  getClubAdmins,
+  addNotification,
+  getUserNotifications,
+  markNotificationsAsRead
 } = require("./db");
 
 const admin = require('./firebase-admin');
@@ -1632,29 +1636,40 @@ app.post('/clubs/:clubId/subscribe', authMiddleware, async (req, res) => {
 
     console.log(`✓ ${userEmail} subscribed to club ${clubId}`);
 
-    // --- SEND PUSH NOTIFICATION TO ADMIN ---
+    // --- SEND NOTIFICATION TO ALL ADMINS ---
     try {
-      if (admin.apps.length > 0) { // If Firebase is configured
-        const adminFcmToken = await getClubAdminFCMToken(clubId);
-        if (adminFcmToken) {
-          await admin.messaging().send({
-            token: adminFcmToken,
-            notification: {
-              title: 'New Club Subscription 🎉',
-              body: `${user.name || userEmail} just subscribed to ${club.club_name}!`,
-            },
-            webpush: {
-              fcmOptions: {
-                link: '/admin-dashboard.html' // Clicking notification opens app here
+      const admins = await getClubAdmins(clubId);
+      for (const adminUser of admins) {
+        // 1. Save to DB
+        await addNotification(
+          adminUser.id,
+          'New Club Subscription 🎉',
+          `${user.name || userEmail.split('@')[0]} just subscribed to ${club.club_name}!`,
+          'subscription',
+          clubId
+        );
+
+        // 2. Send push if token exists and Firebase is setup
+        if (admin.apps.length > 0 && adminUser.fcm_token) {
+          try {
+            await admin.messaging().send({
+              token: adminUser.fcm_token,
+              notification: {
+                title: 'New Club Subscription 🎉',
+                body: `${user.name || userEmail.split('@')[0]} just subscribed to ${club.club_name}!`,
+              },
+              webpush: {
+                fcmOptions: { link: '/notifications.html' }
               }
-            }
-          });
-          console.log(`✓ Push notification sent to admin of club ${clubId}`);
+            });
+            console.log(`✓ Push notification sent to admin ${adminUser.email}`);
+          } catch (err) {
+            console.error(`Failed to push to ${adminUser.email}:`, err.message);
+          }
         }
       }
-    } catch (pushErr) {
-      console.error('Error sending push notification:', pushErr);
-      // We don't want to crash the request if push fails
+    } catch (notifErr) {
+      console.error('Error handling notifications:', notifErr);
     }
 
     res.json({
@@ -1769,6 +1784,37 @@ app.get('/clubs/:clubId/subscriber-count', async (req, res) => {
   } catch (err) {
     console.error('Error getting subscriber count:', err);
     res.status(500).json({ ok: false, error: 'Failed to get count' });
+  }
+});
+
+// ==================== NOTIFICATIONS ROUTES ====================
+
+app.get('/notifications', authMiddleware, async (req, res) => {
+  try {
+    const user = await findUserByEmail(req.userEmail);
+    if (!user) return res.status(404).json({ ok: false, error: 'User not found' });
+
+    // Default limit 50
+    const limit = parseInt(req.query.limit) || 50;
+    const notifications = await getUserNotifications(user.id, limit);
+
+    res.json({ ok: true, notifications });
+  } catch (err) {
+    console.error('Error fetching notifications:', err);
+    res.status(500).json({ ok: false, error: 'Failed' });
+  }
+});
+
+app.post('/notifications/read', authMiddleware, async (req, res) => {
+  try {
+    const user = await findUserByEmail(req.userEmail);
+    if (!user) return res.status(404).json({ ok: false, error: 'User not found' });
+
+    await markNotificationsAsRead(user.id);
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('Error marking notifications read:', err);
+    res.status(500).json({ ok: false, error: 'Failed' });
   }
 });
 

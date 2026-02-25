@@ -344,6 +344,42 @@ const getClubAdminFCMToken = async (clubId) => {
   return rows.length > 0 ? rows[0].fcm_token : null;
 };
 
+/* =========================
+   NOTIFICATIONS
+========================= */
+
+const getClubAdmins = async (clubId) => {
+  const { rows } = await poolQuery(
+    `SELECT id, email, fcm_token FROM users WHERE club_id = $1 AND role = 'club_admin'`,
+    [clubId]
+  );
+  return rows;
+};
+
+const addNotification = async (userId, title, body, type = 'system', relatedId = null) => {
+  const { rows } = await poolQuery(
+    `INSERT INTO notifications (user_id, title, body, type, related_id)
+     VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+    [userId, title, body, type, relatedId]
+  );
+  return rows[0];
+};
+
+const getUserNotifications = async (userId, limit = 50) => {
+  const { rows } = await poolQuery(
+    `SELECT * FROM notifications WHERE user_id = $1 ORDER BY created_at DESC LIMIT $2`,
+    [userId, limit]
+  );
+  return rows;
+};
+
+const markNotificationsAsRead = async (userId) => {
+  await poolQuery(
+    `UPDATE notifications SET is_read = true WHERE user_id = $1 AND is_read = false`,
+    [userId]
+  );
+};
+
 module.exports = {
   pool,
   poolQuery,
@@ -364,5 +400,9 @@ module.exports = {
   getComments,
   addComment,
   saveFCMToken,
-  getClubAdminFCMToken
+  getClubAdminFCMToken,
+  getClubAdmins,
+  addNotification,
+  getUserNotifications,
+  markNotificationsAsRead
 };
