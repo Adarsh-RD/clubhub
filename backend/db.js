@@ -9,9 +9,9 @@ const pool = new Pool({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME || "postgres",
   ssl: { rejectUnauthorized: false },
-  max: 10,                            // allow a few more concurrent connections
-  idleTimeoutMillis: 10000,           // close idle connections quickly (10s)
-  connectionTimeoutMillis: 5000,      // fail fast (5s) to trigger immediate retry
+  max: 10,                            // connection limit 
+  idleTimeoutMillis: 15000,           // aggressively close after 15s to beat Supabase 30s timeout
+  connectionTimeoutMillis: 10000,     // allow 10s for new TLS handshakes on cold starts
   keepAlive: true,
 });
 
@@ -23,7 +23,8 @@ pool.on('error', (err) => {
 const delay = ms => new Promise(r => setTimeout(r, ms));
 
 const poolQuery = async (...args) => {
-  let retries = 3;
+  // If the pool has 10 connections and they all drop silently, we need at least 5-10 retries to cycle them out.
+  let retries = 5;
   while (retries > 0) {
     let client;
     try {
@@ -32,9 +33,8 @@ const poolQuery = async (...args) => {
       client.release();
       return result;
     } catch (err) {
-      // If we got a client but the query failed, passing the error to release() 
-      // instructs the pg-pool to DESTROY the socket instead of reusing it.
       if (client) {
+        // Destroy the broken socket from the pool explicitly
         client.release(err);
       }
       const msg = err.message || '';
@@ -49,8 +49,8 @@ const poolQuery = async (...args) => {
 
       if (isConnectionDrop && retries > 1) {
         retries--;
-        console.warn(`⚠️ DB Connection Error (${msg}) — retrying (${retries} retries left)...`);
-        await delay(1000); // Backoff before grabbing a new connection
+        console.warn(`⚠️ DB Connection Error (${msg}) — purging dead socket and retrying (${retries} left)...`);
+        await delay(500); // short delay to avoid tight loop
         continue;
       }
       throw err;
