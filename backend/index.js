@@ -2367,4 +2367,18 @@ app.use('/', socialRoutes(pool));
 
 // ==================== START SERVER ====================
 
-app.listen(PORT, () => console.log(`Auth server listening on http://localhost:${PORT}`));
+app.listen(PORT, async () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+
+  // Ensure the image_url column is TEXT to support long base64 strings
+  try {
+    await pool.query('ALTER TABLE announcements ALTER COLUMN image_url TYPE TEXT;');
+    console.log('✅ DB Schema verified: announcements.image_url is TEXT');
+  } catch (err) {
+    if (err.message.includes('does not exist')) {
+      console.warn('⚠️ Could not verify schema: table may not exist yet.');
+    } else {
+      console.warn('⚠️ Schema verification note:', err.message);
+    }
+  }
+});
