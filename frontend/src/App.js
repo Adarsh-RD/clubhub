@@ -268,7 +268,7 @@ function AuthCard({
 }
 
 export default function App() {
-  const [view, setView] = useState("choose");
+  const [view, setView] = useState(localStorage.getItem("token") ? "loading" : "choose");
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [password, setPassword] = useState("");
@@ -383,6 +383,17 @@ export default function App() {
 
   // Show auth screen if not logged in
   if (view !== "app") {
+    if (view === "loading") {
+      return (
+        <div className="page-wrapper">
+          <div className="loading-container">
+            <div className="spinner"></div>
+            <p className="loading-text">Verifying session...</p>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="auth-page">
         <div className="auth-container">
