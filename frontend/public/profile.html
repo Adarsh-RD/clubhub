@@ -883,6 +883,30 @@
       </div>
     </div>
 
+    <!-- Club Information Section (Club Admins) -->
+    <div id="clubDashboardSection" class="events-section" style="display: none;">
+      <div class="section-header">
+        <h2 class="section-title">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+          Club Information
+        </h2>
+      </div>
+      <div class="event-stats" style="margin-top: 0">
+        <div class="stat-box">
+          <span class="stat-label">Total Subscribers</span>
+          <span class="stat-value" id="clubSubscriberCount">-</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-label">Total Announcements</span>
+          <span class="stat-value" id="clubAnnouncementCount">-</span>
+        </div>
+      </div>
+    </div>
+
     <!-- Event Management Section (Club Admins) -->
     <div id="eventsSection" class="events-section" style="display: none;">
       <div class="section-header">
@@ -1044,7 +1068,9 @@
         roleDisplay.classList.toggle('pending', (p.admin_requested === 1 || p.admin_requested === true));
 
         // Load club admin events
+        document.getElementById('clubDashboardSection').style.display = 'block';
         document.getElementById('eventsSection').style.display = 'block';
+        loadClubStats(p.club_id);
         loadMyEvents();
       } else if ((p.admin_requested === 1 || p.admin_requested === true) && !p.role) {
         const clubName = p.club_name ? ` · ${p.club_name}` : "";
@@ -1067,6 +1093,26 @@
         setReadOnly(false);
         document.getElementById('saveBtn').style.display = "flex";
         document.getElementById('editBtn').style.display = "none";
+      }
+    }
+
+    // Load Club Dashboard Stats
+    async function loadClubStats(clubId) {
+      if (!clubId) return;
+      try {
+        const subRes = await fetch(`${API}/clubs/${clubId}/subscriber-count`);
+        const subData = await subRes.json();
+        if (subData.ok) {
+          document.getElementById('clubSubscriberCount').textContent = subData.count;
+        }
+
+        const annRes = await fetch(`${API}/clubs/${clubId}/announcements`);
+        const annData = await annRes.json();
+        if (annData.ok && annData.announcements) {
+          document.getElementById('clubAnnouncementCount').textContent = annData.announcements.length;
+        }
+      } catch (err) {
+        console.error('Error loading club stats:', err);
       }
     }
 
