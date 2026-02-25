@@ -74,7 +74,7 @@ app.use('/uploads', express.static(uploadsDir));
 
 // ==================== MIDDLEWARE ====================
 
-app.use(express.json({ limit: '50mb' }));
+app.use(express.json({ limit: '10mb' }));
 app.use(cors({ origin: process.env.FRONTEND_ORIGIN || '*' }));
 
 // ==================== EMAIL SETUP ====================
@@ -1618,13 +1618,21 @@ async function notifySubscribers(clubId, announcementTitle, announcementContent,
 
     console.log(`Sending announcement notification to ${subscribers.length} subscribers of ${club.club_name}`);
 
-    // Send email to each subscriber
-    const emailPromises = subscribers.map(subscriber => {
-      const mailOptions = {
-        from: process.env.FROM_EMAIL || process.env.EMAIL_USER,
-        to: subscriber.email,
-        subject: `🔔 New Announcement from ${club.club_name} - Club Hub`,
-        html: `
+    // Send email to subscribers in batches to avoid rate limits
+    const BATCH_SIZE = 10;
+    const DELAY_MS = 500;
+    const delay = ms => new Promise(res => setTimeout(res, ms));
+
+    for (let i = 0; i < subscribers.length; i += BATCH_SIZE) {
+      const batch = subscribers.slice(i, i + BATCH_SIZE);
+      console.log(`Processing email batch ${Math.floor(i / BATCH_SIZE) + 1} of ${Math.ceil(subscribers.length / BATCH_SIZE)}...`);
+
+      const emailPromises = batch.map(subscriber => {
+        const mailOptions = {
+          from: process.env.FROM_EMAIL || process.env.EMAIL_USER,
+          to: subscriber.email,
+          subject: `🔔 New Announcement from ${club.club_name} - Club Hub`,
+          html: `
           <!DOCTYPE html>
           <html>
           <head>
@@ -1756,16 +1764,22 @@ async function notifySubscribers(clubId, announcementTitle, announcementContent,
           </body>
           </html>
         `
-      };
+        };
 
-      // Use sendEmailWrapper for safe handling (auto-init if needed)
-      return sendEmailWrapper(mailOptions)
-        .then(() => console.log(`✓ Email sent to ${subscriber.email}`))
-        .catch(err => console.error(`✗ Failed to send to ${subscriber.email}:`, err.message));
-    });
+        // Use sendEmailWrapper for safe handling
+        return sendEmailWrapper(mailOptions)
+          .then(() => console.log(`✓ Email sent to ${subscriber.email}`))
+          .catch(err => console.error(`✗ Failed to send to ${subscriber.email}:`, err.message));
+      });
 
-    await Promise.all(emailPromises);
-    console.log(`✓ Notification emails sent to ${subscribers.length} subscribers`);
+      await Promise.all(emailPromises);
+
+      // Delay between batches
+      if (i + BATCH_SIZE < subscribers.length) {
+        await delay(DELAY_MS);
+      }
+    }
+    console.log(`✓ Notification emails sent to ${subscribers.length} subscribers in batches`);
   } catch (err) {
     console.error('Error notifying subscribers:', err);
     // Don't throw - announcement should still be created even if emails fail
