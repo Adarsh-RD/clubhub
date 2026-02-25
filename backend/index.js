@@ -2095,10 +2095,8 @@ app.post('/announcements/:announcementId/register', authMiddleware, async (req, 
       } else {
         // Create new registration
         await pool.query(
-          `INSERT INTO event_registrations 
-         (announcement_id, user_id, user_email, user_name, roll_number, branch) 
-         VALUES ($1, $2, $3, $4, $5, $6)`,
-          [announcementId, user.id, user.email, user.name, user.roll_number, user.branch]
+          `INSERT INTO event_registrations (announcement_id, user_id) VALUES ($1, $2)`,
+          [announcementId, user.id]
         );
       }
     }
@@ -2248,14 +2246,14 @@ app.get('/announcements/:announcementId/registrations', authMiddleware, async (r
     const { rows: registrations } = await pool.query(
       `SELECT 
         er.id,
-        er.user_name,
-        er.user_email,
-        er.roll_number,
-        er.branch,
+        u.name AS user_name,
+        u.email AS user_email,
+        u.roll_number,
+        u.branch,
         er.registered_at,
-        er.status,
-        er.notes
+        er.status
        FROM event_registrations er
+       JOIN users u ON er.user_id = u.id
        WHERE er.announcement_id = $1
        ORDER BY er.registered_at DESC`,
       [announcementId]
@@ -2295,15 +2293,16 @@ app.get('/announcements/:announcementId/registrations/export', authMiddleware, a
 
     const { rows: registrations } = await pool.query(
       `SELECT 
-        user_name,
-        user_email,
-        roll_number,
-        branch,
-        registered_at,
-        status
-       FROM event_registrations
-       WHERE announcement_id = $1
-       ORDER BY registered_at DESC`,
+        u.name AS user_name,
+        u.email AS user_email,
+        u.roll_number,
+        u.branch,
+        er.registered_at,
+        er.status
+       FROM event_registrations er
+       JOIN users u ON er.user_id = u.id
+       WHERE er.announcement_id = $1
+       ORDER BY er.registered_at DESC`,
       [announcementId]
     );
 
