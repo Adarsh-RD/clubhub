@@ -40,37 +40,21 @@ const CODE_TTL = (process.env.CODE_TTL_SECONDS ? parseInt(process.env.CODE_TTL_S
 const DEV_FALLBACK = String(process.env.DEV_FALLBACK || '').toLowerCase() === 'true';
 
 // ==================== FILE UPLOAD SETUP ====================
-
-const uploadsDir = path.join(__dirname, 'uploads');
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
-}
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, uploadsDir),
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, 'announcement-' + uniqueSuffix + path.extname(file.originalname));
-  }
-});
+// Using memoryStorage so images are stored as base64 in the DB (persistent across Render restarts)
 
 const upload = multer({
-  storage: storage,
+  storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
   fileFilter: (req, file, cb) => {
     const allowedTypes = /jpeg|jpg|png|gif|webp|heic|heif/i;
     const extname = allowedTypes.test(path.extname(file.originalname));
     const mimetype = allowedTypes.test(file.mimetype);
-    // Relaxed check: Some browsers send empty mimetypes for certain images
-    // If either the extension OR the mimetype asserts it's an image, let it upload
     if (mimetype || extname) {
       return cb(null, true);
     }
     cb(new Error('Only image files allowed! Received: ' + file.mimetype + ' | ' + file.originalname));
   }
 });
-
-app.use('/uploads', express.static(uploadsDir));
 
 // ==================== MIDDLEWARE ====================
 
@@ -501,6 +485,49 @@ app.post('/profile', async (req, res) => {
     });
   } catch (err) {
     console.error('Profile save error:', err);
+    return res.status(500).json({ error: 'server error', detail: err.message });
+  }
+});
+
+// ==================== PROFILE PICTURE ROUTE ====================
+
+app.post('/profile/picture', async (req, res) => {
+  try {
+    const auth = req.headers.authorization;
+    if (!auth) return res.status(401).json({ error: 'missing token' });
+
+    const token = auth.split(' ')[1];
+    let payload;
+    try {
+      payload = jwt.verify(token, JWT_SECRET);
+    } catch (jwtErr) {
+      if (jwtErr.name === 'TokenExpiredError') {
+        return res.status(401).json({ error: 'Token expired. Please log in again.' });
+      }
+      return res.status(401).json({ error: 'Invalid token' });
+    }
+    const email = payload.sub.toLowerCase();
+
+    const { profile_picture } = req.body;
+
+    if (!profile_picture || typeof profile_picture !== 'string') {
+      return res.status(400).json({ error: 'profile_picture (base64 data URL) required' });
+    }
+
+    // Validate it's a data URL
+    if (!profile_picture.startsWith('data:image/')) {
+      return res.status(400).json({ error: 'Invalid image format' });
+    }
+
+    await pool.query(
+      `UPDATE users SET profile_picture = $1, updated_at = NOW() WHERE email = $2`,
+      [profile_picture, email]
+    );
+
+    console.log(`✓ Profile picture updated for ${email}`);
+    return res.json({ ok: true, message: 'Profile picture updated successfully' });
+  } catch (err) {
+    console.error('Error saving profile picture:', err);
     return res.status(500).json({ error: 'server error', detail: err.message });
   }
 });
@@ -2174,7 +2201,13 @@ app.post('/announcements', upload.single('image'), async (req, res) => {
       return res.status(403).json({ error: 'only club admins can create announcements' });
     }
 
-    const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
+    // Convert uploaded image to base64 for persistent storage (Render disk is ephemeral)
+    let imageUrl = null;
+    if (req.file) {
+      const mimeType = req.file.mimetype || 'image/jpeg';
+      const base64 = req.file.buffer.toString('base64');
+      imageUrl = `data:${mimeType};base64,${base64}`;
+    }
 
     // ⭐⭐⭐ CRITICAL FIX: Parse registration_enabled correctly ⭐⭐⭐
     // FormData sends boolean as string 'true' or 'false'
