@@ -584,26 +584,20 @@ app.get('/announcements', async (req, res) => {
     const limit = parseInt(req.query.limit) || 50;
     const offset = parseInt(req.query.offset) || 0;
 
-    const { rows: announcements } = await pool.query(`
-      SELECT 
-        a.id,
-        a.club_id,
-        a.title,
-        a.content,
-        a.image_url,
-        a.registration_enabled,
-        a.registration_deadline,
-        a.max_registrations,
-        a.created_at,
-        a.created_by,
-        c.club_name,
-        c.club_code
-      FROM announcements a
-      LEFT JOIN clubs c ON a.club_id = c.id
-      ORDER BY a.created_at DESC
-      LIMIT $1 OFFSET $2
-    `, [limit, offset]);
+    // Optional Auth for has_liked
+    let userEmail = null;
+    const auth = req.headers.authorization;
+    if (auth) {
+      const token = auth.split(' ')[1];
+      try {
+        const payload = jwt.verify(token, JWT_SECRET);
+        userEmail = payload.sub.toLowerCase();
+      } catch (err) {
+        // Ignore invalid token for public fetch
+      }
+    }
 
+    const announcements = await getAllAnnouncements(limit, offset, userEmail);
     console.log(`✓ Fetched ${announcements.length} announcements with registration data`);
 
     return res.json({ ok: true, announcements });
@@ -616,11 +610,75 @@ app.get('/announcements', async (req, res) => {
 app.get('/announcements/club/:clubId', async (req, res) => {
   try {
     const clubId = parseInt(req.params.clubId);
-    const announcements = await getAnnouncementsByClub(clubId);
+
+    // Optional Auth for has_liked
+    let userEmail = null;
+    const auth = req.headers.authorization;
+    if (auth) {
+      const token = auth.split(' ')[1];
+      try {
+        const payload = jwt.verify(token, JWT_SECRET);
+        userEmail = payload.sub.toLowerCase();
+      } catch (err) {
+        // Ignore invalid token for public fetch
+      }
+    }
+
+    const announcements = await getAnnouncementsByClub(clubId, 50, userEmail);
     return res.json({ ok: true, announcements });
   } catch (err) {
     console.error('Error fetching club announcements:', err);
     return res.status(500).json({ error: 'server error' });
+  }
+});
+
+// ==================== LIKES & COMMENTS ====================
+
+app.post('/announcements/:id/like', authMiddleware, async (req, res) => {
+  try {
+    const announcementId = parseInt(req.params.id);
+    const userEmail = req.userEmail;
+
+    const hasLiked = await toggleLike(announcementId, userEmail);
+
+    res.json({ ok: true, has_liked: hasLiked });
+  } catch (err) {
+    console.error('Error toggling like:', err);
+    res.status(500).json({ ok: false, error: 'Failed to toggle like' });
+  }
+});
+
+app.get('/announcements/:id/comments', async (req, res) => {
+  try {
+    const announcementId = parseInt(req.params.id);
+    const comments = await getComments(announcementId);
+    res.json({ ok: true, comments });
+  } catch (err) {
+    console.error('Error fetching comments:', err);
+    res.status(500).json({ ok: false, error: 'Failed to fetch comments' });
+  }
+});
+
+app.post('/announcements/:id/comments', authMiddleware, async (req, res) => {
+  try {
+    const announcementId = parseInt(req.params.id);
+    const userEmail = req.userEmail;
+    const { content } = req.body;
+
+    if (!content || !content.trim()) {
+      return res.status(400).json({ ok: false, error: 'Comment content cannot be empty' });
+    }
+
+    const commentId = await addComment(announcementId, userEmail, content.trim());
+
+    res.json({
+      ok: true,
+      message: 'Comment added',
+      comment_id: commentId
+    });
+  } catch (err) {
+    console.error('Error adding comment:', err);
+    res.status(500).json({ ok: false, error: 'Failed to add comment' });
   }
 });
 
@@ -2373,7 +2431,28 @@ app.listen(PORT, async () => {
   // Ensure the image_url column is TEXT to support long base64 strings
   try {
     await pool.query('ALTER TABLE announcements ALTER COLUMN image_url TYPE TEXT;');
-    console.log('✅ DB Schema verified: announcements.image_url is TEXT');
+
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS announcement_likes (
+          id SERIAL PRIMARY KEY,
+          announcement_id INTEGER REFERENCES announcements(id) ON DELETE CASCADE,
+          user_email VARCHAR(255) REFERENCES users(email) ON DELETE CASCADE,
+          created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+          UNIQUE(announcement_id, user_email)
+      );
+    `);
+
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS announcement_comments (
+          id SERIAL PRIMARY KEY,
+          announcement_id INTEGER REFERENCES announcements(id) ON DELETE CASCADE,
+          user_email VARCHAR(255) REFERENCES users(email) ON DELETE CASCADE,
+          content TEXT NOT NULL,
+          created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    console.log('✅ DB Schema verified: tables and columns ready');
   } catch (err) {
     if (err.message.includes('does not exist')) {
       console.warn('⚠️ Could not verify schema: table may not exist yet.');

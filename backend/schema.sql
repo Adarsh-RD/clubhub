@@ -67,6 +67,24 @@ CREATE TABLE event_registrations (
     UNIQUE(announcement_id, user_id)
 );
 
+-- 6. Announcement Likes Table
+CREATE TABLE announcement_likes (
+    id SERIAL PRIMARY KEY,
+    announcement_id INTEGER REFERENCES announcements(id) ON DELETE CASCADE,
+    user_email VARCHAR(255) REFERENCES users(email) ON DELETE CASCADE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(announcement_id, user_email)
+);
+
+-- 7. Announcement Comments Table
+CREATE TABLE announcement_comments (
+    id SERIAL PRIMARY KEY,
+    announcement_id INTEGER REFERENCES announcements(id) ON DELETE CASCADE,
+    user_email VARCHAR(255) REFERENCES users(email) ON DELETE CASCADE,
+    content TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Initial Data: Insert a few sample clubs
 INSERT INTO clubs (club_name, club_code, description, category) VALUES 
 ('Coding Club', 'CODE', 'For programming enthusiasts', 'Technical'),

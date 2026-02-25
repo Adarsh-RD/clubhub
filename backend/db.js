@@ -166,41 +166,56 @@ const getClubMembers = async (clubId) => {
    ANNOUNCEMENTS
 ========================= */
 
-const getAllAnnouncements = async (limit = 50, offset = 0) => {
+const getAllAnnouncements = async (limit = 50, offset = 0, userEmail = null) => {
   const { rows } = await poolQuery(
     `SELECT 
       a.id, a.title, a.content, a.image_url, a.created_at,
+      a.registration_enabled, a.registration_deadline, a.max_registrations,
       a.club_id, c.club_name, c.club_code,
-      a.created_by, u.name AS author_name
+      a.created_by, u.name AS author_name,
+      COUNT(DISTINCT al.id) AS like_count,
+      COUNT(DISTINCT ac.id) AS comment_count,
+      EXISTS(SELECT 1 FROM announcement_likes WHERE announcement_id = a.id AND user_email = $3) AS has_liked
      FROM announcements a
      JOIN clubs c ON a.club_id = c.id
      LEFT JOIN users u ON a.created_by = u.email
+     LEFT JOIN announcement_likes al ON a.id = al.announcement_id
+     LEFT JOIN announcement_comments ac ON a.id = ac.announcement_id
      WHERE a.is_active=true
+     GROUP BY a.id, c.club_name, c.club_code, u.name
      ORDER BY a.created_at DESC
      LIMIT $1 OFFSET $2`,
-    [limit, offset]
+    [limit, offset, userEmail]
   );
   return rows;
 };
 
-const getAnnouncementsByClub = async (clubId, limit = 50) => {
+const getAnnouncementsByClub = async (clubId, limit = 50, userEmail = null) => {
   const { rows } = await poolQuery(
     `SELECT 
         a.id,
         a.title,
         a.content,
+        a.image_url,
         a.created_at,
+        a.registration_enabled, a.registration_deadline, a.max_registrations,
         a.club_id,
         c.club_name,
         a.created_by,
-        u.name as author_name
+        u.name as author_name,
+        COUNT(DISTINCT al.id) AS like_count,
+        COUNT(DISTINCT ac.id) AS comment_count,
+        EXISTS(SELECT 1 FROM announcement_likes WHERE announcement_id = a.id AND user_email = $3) AS has_liked
        FROM announcements a
        JOIN clubs c ON a.club_id = c.id
        LEFT JOIN users u ON a.created_by = u.email
+       LEFT JOIN announcement_likes al ON a.id = al.announcement_id
+       LEFT JOIN announcement_comments ac ON a.id = ac.announcement_id
        WHERE a.club_id = $1 AND a.is_active = true
+       GROUP BY a.id, c.club_name, u.name
        ORDER BY a.created_at DESC
        LIMIT $2`,
-    [clubId, limit]
+    [clubId, limit, userEmail]
   );
   return rows;
 };
@@ -233,6 +248,57 @@ const updateAnnouncement = async (announcementId, title, content, userEmail) => 
   return res.rowCount > 0;
 };
 
+/* =========================
+   LIKES & COMMENTS
+========================= */
+
+const toggleLike = async (announcementId, userEmail) => {
+  // Check if like exists
+  const { rows } = await poolQuery(
+    `SELECT id FROM announcement_likes WHERE announcement_id = $1 AND user_email = $2`,
+    [announcementId, userEmail]
+  );
+
+  if (rows.length > 0) {
+    // Exists, so unlike
+    await poolQuery(
+      `DELETE FROM announcement_likes WHERE announcement_id = $1 AND user_email = $2`,
+      [announcementId, userEmail]
+    );
+    return false; // has_liked = false
+  } else {
+    // Does not exist, so like
+    await poolQuery(
+      `INSERT INTO announcement_likes (announcement_id, user_email) VALUES ($1, $2)`,
+      [announcementId, userEmail]
+    );
+    return true; // has_liked = true
+  }
+};
+
+const getComments = async (announcementId) => {
+  const { rows } = await poolQuery(
+    `SELECT 
+        c.id, c.content, c.created_at,
+        u.name AS author_name, u.email AS author_email, u.profile_picture
+       FROM announcement_comments c
+       JOIN users u ON c.user_email = u.email
+       WHERE c.announcement_id = $1
+       ORDER BY c.created_at ASC`,
+    [announcementId]
+  );
+  return rows;
+};
+
+const addComment = async (announcementId, userEmail, content) => {
+  const { rows } = await poolQuery(
+    `INSERT INTO announcement_comments (announcement_id, user_email, content) 
+     VALUES ($1, $2, $3) RETURNING id`,
+    [announcementId, userEmail, content]
+  );
+  return rows[0].id;
+};
+
 module.exports = {
   pool,
   poolQuery,
@@ -248,5 +314,8 @@ module.exports = {
   getAnnouncementsByClub,
   createAnnouncement,
   deleteAnnouncement,
-  updateAnnouncement
+  updateAnnouncement,
+  toggleLike,
+  getComments,
+  addComment
 };
