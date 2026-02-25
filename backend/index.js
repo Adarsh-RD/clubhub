@@ -365,10 +365,18 @@ app.get('/me', async (req, res) => {
     return res.status(401).json({ error: 'invalid auth header' });
   }
 
+  let payload;
   try {
-    const payload = jwt.verify(parts[1], JWT_SECRET);
-    const user = await findUserByEmail(payload.sub);
+    payload = jwt.verify(parts[1], JWT_SECRET);
+  } catch (jwtErr) {
+    if (jwtErr.name === 'TokenExpiredError') {
+      return res.status(401).json({ error: 'Token expired. Please log in again.' });
+    }
+    return res.status(401).json({ error: 'invalid token' });
+  }
 
+  try {
+    const user = await findUserByEmail(payload.sub);
     if (!user) return res.status(404).json({ error: 'user not found' });
 
     return res.json({
@@ -383,8 +391,8 @@ app.get('/me', async (req, res) => {
       }
     });
   } catch (err) {
-    console.error(err);
-    return res.status(401).json({ error: 'invalid token' });
+    console.error('[/me] DB error:', err.message);
+    return res.status(503).json({ error: 'Service temporarily unavailable. Please try again.' });
   }
 });
 
@@ -393,9 +401,17 @@ app.get('/profile', async (req, res) => {
     const token = req.headers.authorization?.split(' ')[1];
     if (!token) return res.status(401).json({ error: 'missing token' });
 
-    const decoded = jwt.verify(token, JWT_SECRET);
-    const user = await findUserByEmail(decoded.sub);
+    let decoded;
+    try {
+      decoded = jwt.verify(token, JWT_SECRET);
+    } catch (jwtErr) {
+      if (jwtErr.name === 'TokenExpiredError') {
+        return res.status(401).json({ error: 'Token expired. Please log in again.' });
+      }
+      return res.status(401).json({ error: 'Invalid token' });
+    }
 
+    const user = await findUserByEmail(decoded.sub);
     if (!user) return res.status(404).json({ error: 'User not found' });
 
     res.json({

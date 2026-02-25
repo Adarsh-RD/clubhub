@@ -1,7 +1,7 @@
 // backend/db.js
 const { Pool } = require('pg');
 
-// Connection pool with stability settings
+// Connection pool tuned for Supabase free tier (wakes up after inactivity)
 const pool = new Pool({
   host: process.env.DB_HOST,
   port: process.env.DB_PORT || 5432,
@@ -9,20 +9,39 @@ const pool = new Pool({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME || "postgres",
   ssl: { rejectUnauthorized: false },
-  max: 10, // Let the Supabase pooler handle connections
-  keepAlive: true
+  max: 5,                             // keep pool small for free tier
+  idleTimeoutMillis: 30000,           // close idle connections after 30s
+  connectionTimeoutMillis: 10000,     // fail fast if DB is unreachable
+  keepAlive: true,
+  keepAliveInitialDelayMillis: 10000,
 });
 
 pool.on('error', (err) => {
-  console.error('❌ Unexpected pool error:', err);
+  console.error('❌ Unexpected pool error:', err.message);
 });
+
+// Retry wrapper: retries once on ETIMEDOUT to handle Supabase free-tier wake-up
+const delay = ms => new Promise(r => setTimeout(r, ms));
+
+const poolQuery = async (...args) => {
+  try {
+    return await pool.query(...args);
+  } catch (err) {
+    if (err.code === 'ETIMEDOUT' || err.message?.includes('ETIMEDOUT')) {
+      console.warn('⚠️ DB ETIMEDOUT — retrying in 3s...');
+      await delay(3000);
+      return await pool.query(...args); // one retry
+    }
+    throw err;
+  }
+};
 
 /* =========================
    USER FUNCTIONS
 ========================= */
 
 const findUserByEmail = async (email) => {
-  const { rows } = await pool.query(
+  const { rows } = await poolQuery(
     `SELECT 
       u.id,
       u.email,
@@ -47,7 +66,7 @@ const findUserByEmail = async (email) => {
 };
 
 const createUser = async (email, passwordHash, role = null) => {
-  const { rows } = await pool.query(
+  const { rows } = await poolQuery(
     `INSERT INTO users (email, password_hash, role, updated_at)
      VALUES ($1, $2, $3, NOW())
      RETURNING id`,
@@ -57,7 +76,7 @@ const createUser = async (email, passwordHash, role = null) => {
 };
 
 const getProfileByEmail = async (email) => {
-  const { rows } = await pool.query(
+  const { rows } = await poolQuery(
     `SELECT 
       u.*,
       c.club_name,
@@ -100,11 +119,11 @@ const updateProfile = async (
     params = [name, branch, roll_number, email.toLowerCase()];
   }
 
-  await pool.query(query, params);
+  await poolQuery(query, params);
 };
 
 const updatePassword = async (email, passwordHash) => {
-  await pool.query(
+  await poolQuery(
     `UPDATE users SET password_hash=$1, updated_at=NOW() WHERE email=$2`,
     [passwordHash, email.toLowerCase()]
   );
@@ -115,7 +134,7 @@ const updatePassword = async (email, passwordHash) => {
 ========================= */
 
 const getAllClubs = async () => {
-  const { rows } = await pool.query(
+  const { rows } = await poolQuery(
     `SELECT id, club_name, club_code, description, category
      FROM clubs
      WHERE is_active=true
@@ -125,7 +144,7 @@ const getAllClubs = async () => {
 };
 
 const getClubById = async (clubId) => {
-  const { rows } = await pool.query(
+  const { rows } = await poolQuery(
     `SELECT * FROM clubs WHERE id=$1 AND is_active=true LIMIT 1`,
     [clubId]
   );
@@ -133,7 +152,7 @@ const getClubById = async (clubId) => {
 };
 
 const getClubMembers = async (clubId) => {
-  const { rows } = await pool.query(
+  const { rows } = await poolQuery(
     `SELECT email, name, branch, roll_number, role, admin_requested
      FROM users
      WHERE club_id=$1
@@ -148,7 +167,7 @@ const getClubMembers = async (clubId) => {
 ========================= */
 
 const getAllAnnouncements = async (limit = 50, offset = 0) => {
-  const { rows } = await pool.query(
+  const { rows } = await poolQuery(
     `SELECT 
       a.id, a.title, a.content, a.image_url, a.created_at,
       a.club_id, c.club_name, c.club_code,
@@ -165,7 +184,7 @@ const getAllAnnouncements = async (limit = 50, offset = 0) => {
 };
 
 const getAnnouncementsByClub = async (clubId, limit = 50) => {
-  const { rows } = await pool.query(
+  const { rows } = await poolQuery(
     `SELECT 
         a.id,
         a.title,
@@ -187,7 +206,7 @@ const getAnnouncementsByClub = async (clubId, limit = 50) => {
 };
 
 const createAnnouncement = async (clubId, title, content, createdBy) => {
-  const { rows } = await pool.query(
+  const { rows } = await poolQuery(
     `INSERT INTO announcements (club_id, title, content, created_by)
      VALUES ($1,$2,$3,$4)
      RETURNING id`,
@@ -197,7 +216,7 @@ const createAnnouncement = async (clubId, title, content, createdBy) => {
 };
 
 const deleteAnnouncement = async (announcementId, userEmail) => {
-  const res = await pool.query(
+  const res = await poolQuery(
     `UPDATE announcements SET is_active=false WHERE id=$1 AND created_by=$2`,
     [announcementId, userEmail]
   );
@@ -205,7 +224,7 @@ const deleteAnnouncement = async (announcementId, userEmail) => {
 };
 
 const updateAnnouncement = async (announcementId, title, content, userEmail) => {
-  const res = await pool.query(
+  const res = await poolQuery(
     `UPDATE announcements
      SET title=$1, content=$2, updated_at=NOW()
      WHERE id=$3 AND created_by=$4`,
@@ -216,6 +235,7 @@ const updateAnnouncement = async (announcementId, title, content, userEmail) => 
 
 module.exports = {
   pool,
+  poolQuery,
   findUserByEmail,
   createUser,
   getProfileByEmail,
