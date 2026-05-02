@@ -1,7 +1,7 @@
 // frontend/src/components/AnnouncementCard.js
 // CLEAN VERSION - NO CSS IN THIS FILE!
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:4000";
 
@@ -9,6 +9,44 @@ export default function AnnouncementCard({ announcement, currentUser }) {
     const [showComments, setShowComments] = useState(false);
     const [commentText, setCommentText] = useState('');
     const [showRegistrations, setShowRegistrations] = useState(false);
+
+    // Video Player State
+    const videoRef = useRef(null);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [isMuted, setIsMuted] = useState(true);
+
+    function togglePlay() {
+        if (videoRef.current) {
+            if (isPlaying) {
+                videoRef.current.pause();
+            } else {
+                videoRef.current.play();
+            }
+            setIsPlaying(!isPlaying);
+        }
+    }
+
+    function toggleMute(e) {
+        e.stopPropagation();
+        if (videoRef.current) {
+            videoRef.current.muted = !isMuted;
+            setIsMuted(!isMuted);
+        }
+    }
+
+    function handleShare() {
+        const shareUrl = `${window.location.origin}/announcements/${announcement.id}`;
+        if (navigator.share) {
+            navigator.share({
+                title: announcement.title,
+                text: announcement.content,
+                url: shareUrl,
+            }).catch(console.error);
+        } else {
+            navigator.clipboard.writeText(shareUrl);
+            alert('Link copied to clipboard!');
+        }
+    }
 
     // Likes & Comments state
     const [isLiked, setIsLiked] = useState(announcement.has_liked || false);
@@ -284,21 +322,47 @@ export default function AnnouncementCard({ announcement, currentUser }) {
                 </div>
             </div>
 
-            <h3 className="announcement-title">{announcement.title}</h3>
-            <p className="announcement-content">{announcement.content}</p>
-
+            {/* Media Section (Instagram Style - Before Title/Desc) */}
             {announcement.image_url && (
                 announcement.image_url.startsWith('data:video') || announcement.image_url.match(/\.(mp4|webm|mov)$/i) ? (
-                    <video
-                        src={
-                            announcement.image_url.startsWith('http') || announcement.image_url.startsWith('data:')
-                                ? announcement.image_url
-                                : `${API_BASE}${announcement.image_url}`
-                        }
-                        controls
-                        className="announcement-image"
-                        style={{ width: '100%', borderRadius: '8px', marginTop: '1rem' }}
-                    />
+                    <div className="reels-container" style={{ position: 'relative', width: '100%', borderRadius: '8px', overflow: 'hidden', backgroundColor: '#000', marginTop: '10px' }} onClick={togglePlay}>
+                        <video
+                            ref={videoRef}
+                            src={
+                                announcement.image_url.startsWith('http') || announcement.image_url.startsWith('data:')
+                                    ? announcement.image_url
+                                    : `${API_BASE}${announcement.image_url}`
+                            }
+                            className="announcement-video"
+                            style={{ width: '100%', display: 'block', maxHeight: '500px', objectFit: 'cover' }}
+                            loop
+                            playsInline
+                            muted={isMuted}
+                        />
+                        {/* Play/Pause Overlay */}
+                        {!isPlaying && (
+                            <div className="play-overlay" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', background: 'rgba(0,0,0,0.5)', borderRadius: '50%', padding: '15px', color: 'white' }}>
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M8 5v14l11-7z" />
+                                </svg>
+                            </div>
+                        )}
+                        {/* Mute/Unmute Overlay */}
+                        <div className="sound-overlay" onClick={toggleMute} style={{ position: 'absolute', bottom: '15px', right: '15px', background: 'rgba(0,0,0,0.5)', borderRadius: '50%', padding: '8px', color: 'white', cursor: 'pointer' }}>
+                            {isMuted ? (
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                                    <line x1="23" y1="9" x2="17" y2="15"></line>
+                                    <line x1="17" y1="9" x2="23" y2="15"></line>
+                                </svg>
+                            ) : (
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                                </svg>
+                            )}
+                        </div>
+                    </div>
                 ) : (
                     <img
                         src={
@@ -308,9 +372,47 @@ export default function AnnouncementCard({ announcement, currentUser }) {
                         }
                         alt={announcement.title}
                         className="announcement-image"
+                        style={{ width: '100%', borderRadius: '8px', marginTop: '10px', maxHeight: '500px', objectFit: 'cover' }}
                     />
                 )
             )}
+
+            {/* Interactions Bar (Moved above title) */}
+            <div className="interactions-bar" style={{ marginTop: '10px', padding: '5px 0', display: 'flex', gap: '15px' }}>
+                <button
+                    className={`interaction-btn ${isLiked ? 'liked' : ''}`}
+                    onClick={handleLike}
+                    style={{ color: isLiked ? '#C41E3A' : 'inherit', background: 'none', border: 'none', display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer' }}
+                >
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill={isLiked ? '#C41E3A' : 'none'}>
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    <span style={{ fontWeight: 'bold' }}>{likeCount}</span>
+                </button>
+
+                <button className="interaction-btn" onClick={toggleComments} style={{ background: 'none', border: 'none', display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer' }}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    <span style={{ fontWeight: 'bold' }}>{commentCount}</span>
+                </button>
+
+                <button className="interaction-btn" onClick={handleShare} style={{ background: 'none', border: 'none', display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer', marginLeft: 'auto' }}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                </button>
+            </div>
+
+            {/* Title and Content (Instagram Style - Below Interactions) */}
+            <div style={{ marginTop: '10px' }}>
+                <h3 className="announcement-title" style={{ margin: '0 0 5px 0', fontSize: '1rem' }}>{announcement.title}</h3>
+                <p className="announcement-content" style={{ margin: 0, fontSize: '0.9rem', color: '#4B5563' }}>
+                    <span style={{ fontWeight: 'bold', marginRight: '5px' }}>{announcement.club_name || 'Club'}</span>
+                    {announcement.content}
+                </p>
+            </div>
 
             {/* Registration Section */}
             {announcement.registration_enabled && registrationInfo && (
@@ -382,26 +484,7 @@ export default function AnnouncementCard({ announcement, currentUser }) {
                 </div>
             )}
 
-            {/* Existing Interactions Bar */}
-            <div className="interactions-bar">
-                <button
-                    className={`interaction-btn ${isLiked ? 'liked' : ''}`}
-                    onClick={handleLike}
-                    style={{ color: isLiked ? '#C41E3A' : 'inherit' }}
-                >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill={isLiked ? '#C41E3A' : 'none'}>
-                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                    <span>{likeCount}</span>
-                </button>
 
-                <button className="interaction-btn" onClick={toggleComments}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                    <span>{commentCount}</span>
-                </button>
-            </div>
 
             {/* Comments Section */}
             {showComments && (
