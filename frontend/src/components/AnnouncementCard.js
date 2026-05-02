@@ -322,6 +322,9 @@ export default function AnnouncementCard({ announcement, currentUser }) {
                 </div>
             </div>
 
+            {/* Title (Moved above media as requested) */}
+            <h3 className="announcement-title" style={{ margin: '15px 0 5px 0', fontSize: '1.1rem' }}>{announcement.title}</h3>
+
             {/* Media Section (Instagram Style - Before Title/Desc) */}
             {announcement.image_url && (
                 announcement.image_url.startsWith('data:video') || announcement.image_url.match(/\.(mp4|webm|mov)$/i) ? (
@@ -405,9 +408,8 @@ export default function AnnouncementCard({ announcement, currentUser }) {
                 </button>
             </div>
 
-            {/* Title and Content (Instagram Style - Below Interactions) */}
-            <div style={{ marginTop: '10px' }}>
-                <h3 className="announcement-title" style={{ margin: '0 0 5px 0', fontSize: '1rem' }}>{announcement.title}</h3>
+            {/* Content (Instagram Style - Below Interactions) */}
+            <div style={{ marginTop: '5px' }}>
                 <p className="announcement-content" style={{ margin: 0, fontSize: '0.9rem', color: '#4B5563' }}>
                     <span style={{ fontWeight: 'bold', marginRight: '5px' }}>{announcement.club_name || 'Club'}</span>
                     {announcement.content}
