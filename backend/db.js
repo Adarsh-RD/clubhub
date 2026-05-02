@@ -157,7 +157,7 @@ const updatePassword = async (email, passwordHash) => {
 
 const getAllClubs = async () => {
   const { rows } = await poolQuery(
-    `SELECT id, club_name, club_code, description, category
+    `SELECT id, club_name, club_code, description, category, logo_url
      FROM clubs
      WHERE is_active=true
      ORDER BY club_name`
