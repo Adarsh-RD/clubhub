@@ -317,8 +317,8 @@ export default function AnnouncementCard({ announcement, currentUser }) {
                     {announcement.club_name || 'Club'}
                 </span>
                 <div className="announcement-meta">
-                    <span>📅 {new Date(announcement.created_at).toLocaleDateString()}</span>
-                    <span>🕒 {new Date(announcement.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                    <span>{new Date(announcement.created_at).toLocaleDateString()}</span>
+                    <span>{new Date(announcement.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                 </div>
             </div>
 
@@ -334,7 +334,7 @@ export default function AnnouncementCard({ announcement, currentUser }) {
                                     : `${API_BASE}${announcement.image_url}`
                             }
                             className="announcement-video"
-                            style={{ width: '100%', display: 'block', maxHeight: '500px', objectFit: 'cover' }}
+                            style={{ width: '100%', display: 'block', maxHeight: '80vh', objectFit: 'contain' }}
                             loop
                             playsInline
                             muted={isMuted}
