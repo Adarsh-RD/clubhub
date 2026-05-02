@@ -313,7 +313,7 @@ app.post('/auth/verify', async (req, res) => {
         await updatePassword(key, hash);
         const payload = { sub: key, role: existing.role };
         const token = jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES });
-        return res.json({ ok: true, token, user: { email: key, role: existing.role } });
+        return res.json({ ok: true, token, user: { email: key, role: existing.role, name: existing.name, branch: existing.branch, roll_number: existing.roll_number } });
       } else {
         await createUser(key, hash, null);
         const payload = { sub: key, role: null };
@@ -327,7 +327,7 @@ app.post('/auth/verify', async (req, res) => {
       const role = existing ? existing.role : null;
       const payload = { sub: key, role };
       const token = jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES });
-      return res.json({ ok: true, token, user: { email: key, role } });
+      return res.json({ ok: true, token, user: { email: key, role, name: existing ? existing.name : null, branch: existing ? existing.branch : null, roll_number: existing ? existing.roll_number : null } });
     }
   } catch (err) {
     console.error('Error in /auth/verify:', err);
@@ -363,7 +363,7 @@ app.post('/auth/login', async (req, res) => {
     res.json({
       ok: true,
       token,
-      user: { email: user.email, role: user.role }
+      user: { email: user.email, role: user.role, name: user.name, branch: user.branch, roll_number: user.roll_number }
     });
   } catch (err) {
     console.error("Login error:", err);
@@ -401,6 +401,7 @@ app.get('/me', async (req, res) => {
       user: {
         email: user.email,
         name: user.name,
+        branch: user.branch,
         role: user.role,
         roll_number: user.roll_number,
         admin_requested: user.admin_requested,
