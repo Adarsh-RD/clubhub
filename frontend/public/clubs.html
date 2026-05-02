@@ -671,7 +671,7 @@
                         card.innerHTML = `
                             <div class="club-icon" style="${club.logo_url ? 'background:transparent;box-shadow:none;' : ''}">${club.logo_url ? `<img src="${club.logo_url}" alt="${club.club_name}" style="width:100%;height:100%;border-radius:1.5rem;object-fit:cover;box-shadow:0 8px 20px rgba(0,0,0,0.3);" />` : club.club_name.charAt(0)}</div>
                             <h3 class="club-name">${club.club_name}</h3>
-                            <span class="club-code">${club.club_code}</span>
+                            <span class="club-code">${club.category || 'Club'}</span>
                             <p class="club-description">${club.description || 'No description available'}</p>
                             
                             <div class="club-footer">
