@@ -780,7 +780,7 @@
       }
     }
   </style>
-</head>
+<script src="/ui-alerts.js"></script></head>
 
 <body>
 
@@ -1347,7 +1347,7 @@
     }
 
     async function cancelRegistration(announcementId, title) {
-      if (!confirm(`Cancel your registration for "${title}"?`)) return;
+      if (!(await window.customConfirm(`Cancel your registration for "${title}"?`))) return;
 
       try {
         const res = await fetch(`${API}/announcements/${announcementId}/unregister`, {
@@ -1405,14 +1405,14 @@
       if (res.ok) {
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('complete') === 'true') {
-            alert("Profile complete! Taking you to the feed.");
+            await window.customAlert("Profile complete! Taking you to the feed.");
             window.location.href = "/";
         } else {
-            alert("Profile saved successfully");
+            await window.customAlert("Profile saved successfully");
             await loadProfile();
         }
       } else {
-        alert("Failed to save profile");
+        await window.customAlert("Failed to save profile");
       }
     };
 
@@ -1422,8 +1422,8 @@
       document.getElementById('editBtn').style.display = "none";
     };
 
-    document.getElementById("logoutBtn").onclick = () => {
-      if (confirm('Sign out?')) {
+    document.getElementById("logoutBtn").onclick = async () => {
+      if (await window.customConfirm('Sign out?')) {
         localStorage.removeItem("token");
         location.href = "/";
       }

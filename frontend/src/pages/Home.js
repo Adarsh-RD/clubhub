@@ -172,9 +172,9 @@ export default function Home() {
     }
   }
 
-  function logout() {
-    if (window.confirm('Are you sure you want to sign out?')) {
-      localStorage.removeItem('token');
+  async function handleLogout() {
+    if (await window.customConfirm('Are you sure you want to sign out?')) {
+      localStorage.removeItem("token");
       window.location.href = '/';
     }
   }
@@ -223,7 +223,7 @@ export default function Home() {
               </button>
             )}
 
-            <button className="btn btn-ghost btn-sm" onClick={logout} title="Sign Out">
+            <button className="btn btn-ghost btn-sm" onClick={handleLogout} title="Sign Out">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
                 <polyline points="16 17 21 12 16 7"></polyline>

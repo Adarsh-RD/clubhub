@@ -407,7 +407,7 @@
             }
         }
     </style>
-</head>
+<script src="/ui-alerts.js"></script></head>
 
 <body>
 
@@ -501,10 +501,12 @@
         const token = localStorage.getItem('token');
         const userEmail = localStorage.getItem('user_email');
 
-        if (!token || userEmail !== ADMIN_EMAIL) {
-            alert('⚠️ Access Denied: Admin privileges required');
-            window.location.href = '/';
-        }
+        (async () => {
+            if (!token || userEmail !== ADMIN_EMAIL) {
+                await window.customAlert('⚠️ Access Denied: Admin privileges required');
+                window.location.href = '/';
+            }
+        })();
 
         const headers = {
             'Authorization': `Bearer ${token}`,
@@ -580,7 +582,7 @@
         }
 
         async function approveRequest(email, clubId) {
-            if (!confirm(`Approve club admin access for ${email}?`)) return;
+            if (!(await window.customConfirm(`Approve club admin access for ${email}?`))) return;
 
             try {
                 const res = await fetch(`${API}/admin/approve-request`, {
@@ -604,7 +606,7 @@
         }
 
         async function rejectRequest(email) {
-            if (!confirm(`Reject club admin request from ${email}?`)) return;
+            if (!(await window.customConfirm(`Reject club admin request from ${email}?`))) return;
 
             try {
                 const res = await fetch(`${API}/admin/reject-request`, {
@@ -688,10 +690,12 @@
         loadRequests();
 
         // Logout function
-        function logout() {
-            localStorage.removeItem('token');
-            localStorage.removeItem('user_email');
-            window.location.href = '/';
+        async function logout() {
+            if (await window.customConfirm('Sign out?')) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user_email');
+                window.location.href = '/';
+            }
         }
     </script>
     <!-- Firebase SDKs -->

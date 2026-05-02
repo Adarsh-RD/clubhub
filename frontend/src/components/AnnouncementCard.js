@@ -140,7 +140,7 @@ export default function AnnouncementCard({ announcement, currentUser }) {
     }
 
     async function handleUnregister() {
-        if (!window.confirm('Are you sure you want to cancel your registration?')) return;
+        if (!(await window.customConfirm('Are you sure you want to cancel your registration?'))) return;
 
         setLoadingReg(true);
         try {
