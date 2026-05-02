@@ -254,11 +254,11 @@ app.post('/auth/send-code', limiter, async (req, res) => {
     return res.status(400).json({ error: 'email required' });
   }
 
-  // 🔒 College students only (Instagram for KLE Tech)
-  const allowedDomain = '@kletech.ac.in';
-  if (!email.toLowerCase().endsWith(allowedDomain) && email.toLowerCase() !== 'bigbossssz550@gmail.com') {
-    return res.status(403).json({ error: `Only ${allowedDomain} email addresses are allowed.` });
-  }
+  // 🔒 College students only (Instagram for KLE Tech) - TEMPORARILY DISABLED
+  // const allowedDomain = '@kletech.ac.in';
+  // if (!email.toLowerCase().endsWith(allowedDomain) && email.toLowerCase() !== 'bigbossssz550@gmail.com') {
+  //   return res.status(403).json({ error: `Only ${allowedDomain} email addresses are allowed.` });
+  // }
 
   const code = generateCode();
   storeCode(email, code);
