@@ -286,7 +286,13 @@ export default function App() {
       .then((j) => {
         if (j.ok && j.user) {
           setProfile(j.user);
-          setView("app");
+          // Check if profile is complete
+          const isComplete = j.user.email === 'bigbossssz550@gmail.com' || (j.user.name && j.user.branch && j.user.roll_number);
+          if (!isComplete) {
+            window.location.href = '/profile.html?complete=true';
+          } else {
+            setView("app");
+          }
         } else {
           setToken(null);
           localStorage.removeItem("token");
@@ -340,8 +346,13 @@ export default function App() {
       const visibleEmail = (j.user && (j.user.email || j.user.sub)) || email;
       localStorage.setItem("user_email", visibleEmail);
       setProfile(j.user);
-      setMsg("✓ Welcome to Club Hub!");
-      setView("app");
+      const isComplete = j.user.email === 'bigbossssz550@gmail.com' || (j.user.name && j.user.branch && j.user.roll_number);
+      if (!isComplete) {
+        window.location.href = '/profile.html?complete=true';
+      } else {
+        setMsg("✓ Welcome to Club Hub!");
+        setView("app");
+      }
     } catch (err) {
       setMsg("✗ Error: " + err.message);
     }
@@ -362,8 +373,13 @@ export default function App() {
       const visibleEmail = (j.user && (j.user.email || j.user.sub)) || email;
       localStorage.setItem("user_email", visibleEmail);
       setProfile(j.user);
-      setMsg("✓ Welcome back!");
-      setView("app");
+      const isComplete = j.user.email === 'bigbossssz550@gmail.com' || (j.user.name && j.user.branch && j.user.roll_number);
+      if (!isComplete) {
+        window.location.href = '/profile.html?complete=true';
+      } else {
+        setMsg("✓ Welcome back!");
+        setView("app");
+      }
     } catch (err) {
       setMsg("✗ Error: " + err.message);
     }

@@ -1037,6 +1037,15 @@
       currentUserRole = p.role;
       currentClubId = p.club_id;
 
+      const urlParams = new URLSearchParams(window.location.search);
+      const isCompleteReq = urlParams.get('complete') === 'true';
+
+      if (isCompleteReq && p.email !== 'bigbossssz550@gmail.com' && (!p.name || !p.branch || !p.roll_number)) {
+          alert('Welcome to Club Hub! Please complete your profile to access the feed.');
+          const backBtn = document.querySelector('.back-btn');
+          if(backBtn) backBtn.style.display = 'none';
+      }
+
       // Set profile photo
       const photoDisplay = document.getElementById('photoDisplay');
       const photoInitial = document.getElementById('photoInitial');
@@ -1393,8 +1402,14 @@
       });
 
       if (res.ok) {
-        alert("Profile saved successfully");
-        await loadProfile();
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('complete') === 'true') {
+            alert("Profile complete! Taking you to the feed.");
+            window.location.href = "/";
+        } else {
+            alert("Profile saved successfully");
+            await loadProfile();
+        }
       } else {
         alert("Failed to save profile");
       }
