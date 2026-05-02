@@ -341,8 +341,8 @@ export default function AnnouncementCard({ announcement, currentUser }) {
                         />
                         {/* Play/Pause Overlay */}
                         {!isPlaying && (
-                            <div className="play-overlay" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', background: 'rgba(0,0,0,0.5)', borderRadius: '50%', padding: '15px', color: 'white' }}>
-                                <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                            <div className="play-overlay" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: '#C41E3A', filter: 'drop-shadow(0px 2px 4px rgba(0,0,0,0.5))', pointerEvents: 'none' }}>
+                                <svg width="72" height="72" viewBox="0 0 24 24" fill="currentColor">
                                     <path d="M8 5v14l11-7z" />
                                 </svg>
                             </div>
