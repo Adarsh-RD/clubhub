@@ -288,15 +288,28 @@ export default function AnnouncementCard({ announcement, currentUser }) {
             <p className="announcement-content">{announcement.content}</p>
 
             {announcement.image_url && (
-                <img
-                    src={
-                        announcement.image_url.startsWith('http') || announcement.image_url.startsWith('data:')
-                            ? announcement.image_url
-                            : `${API_BASE}${announcement.image_url}`
-                    }
-                    alt={announcement.title}
-                    className="announcement-image"
-                />
+                announcement.image_url.startsWith('data:video') || announcement.image_url.match(/\.(mp4|webm|mov)$/i) ? (
+                    <video
+                        src={
+                            announcement.image_url.startsWith('http') || announcement.image_url.startsWith('data:')
+                                ? announcement.image_url
+                                : `${API_BASE}${announcement.image_url}`
+                        }
+                        controls
+                        className="announcement-image"
+                        style={{ width: '100%', borderRadius: '8px', marginTop: '1rem' }}
+                    />
+                ) : (
+                    <img
+                        src={
+                            announcement.image_url.startsWith('http') || announcement.image_url.startsWith('data:')
+                                ? announcement.image_url
+                                : `${API_BASE}${announcement.image_url}`
+                        }
+                        alt={announcement.title}
+                        className="announcement-image"
+                    />
+                )
             )}
 
             {/* Registration Section */}

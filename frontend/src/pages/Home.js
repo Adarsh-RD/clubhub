@@ -96,8 +96,8 @@ export default function Home() {
   function handleImageSelect(e) {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        alert('Image too large. Maximum 5MB.');
+      if (file.size > 10 * 1024 * 1024) {
+        alert('File too large. Maximum 10MB.');
         return;
       }
       setCreateForm({ ...createForm, image: file });
@@ -377,7 +377,11 @@ export default function Home() {
                 <div className="image-upload-zone">
                   {imagePreview ? (
                     <div className="image-preview-box">
-                      <img src={imagePreview} alt="Preview" />
+                      {createForm.image?.type?.startsWith('video/') ? (
+                        <video src={imagePreview} controls style={{ width: '100%', maxHeight: '300px', borderRadius: '8px' }} />
+                      ) : (
+                        <img src={imagePreview} alt="Preview" />
+                      )}
                       <button type="button" className="remove-img-btn" onClick={removeImage}>
                         ✕
                       </button>
@@ -387,14 +391,14 @@ export default function Home() {
                       <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
                         <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15M17 8L12 3M12 3L7 8M12 3V15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
-                      <p>Click to upload image</p>
-                      <span className="upload-hint">PNG, JPG, GIF up to 5MB</span>
+                      <p>Click to upload image or video</p>
+                      <span className="upload-hint">PNG, JPG, MP4, WEBM up to 10MB</span>
                     </div>
                   )}
                   <input
                     id="modalImageInput"
                     type="file"
-                    accept="image/*"
+                    accept="image/*,video/*"
                     onChange={handleImageSelect}
                     style={{ display: 'none' }}
                   />

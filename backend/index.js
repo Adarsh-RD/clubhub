@@ -55,15 +55,15 @@ const DEV_FALLBACK = String(process.env.DEV_FALLBACK || '').toLowerCase() === 't
 
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB to accommodate short videos
   fileFilter: (req, file, cb) => {
-    const allowedTypes = /jpeg|jpg|png|gif|webp|heic|heif/i;
+    const allowedTypes = /jpeg|jpg|png|gif|webp|heic|heif|mp4|webm|mov/i;
     const extname = allowedTypes.test(path.extname(file.originalname));
-    const mimetype = allowedTypes.test(file.mimetype);
+    const mimetype = allowedTypes.test(file.mimetype) || (file.mimetype && file.mimetype.startsWith('video/'));
     if (mimetype || extname) {
       return cb(null, true);
     }
-    cb(new Error('Only image files allowed! Received: ' + file.mimetype + ' | ' + file.originalname));
+    cb(new Error('Only image and video files allowed! Received: ' + file.mimetype + ' | ' + file.originalname));
   }
 });
 
@@ -252,6 +252,12 @@ app.post('/auth/send-code', limiter, async (req, res) => {
   const { email } = req.body || {};
   if (!email || typeof email !== 'string') {
     return res.status(400).json({ error: 'email required' });
+  }
+
+  // 🔒 College students only (Instagram for KLE Tech)
+  const allowedDomain = '@kletech.ac.in';
+  if (!email.toLowerCase().endsWith(allowedDomain) && email.toLowerCase() !== 'bigbossssz550@gmail.com') {
+    return res.status(403).json({ error: `Only ${allowedDomain} email addresses are allowed.` });
   }
 
   const code = generateCode();
