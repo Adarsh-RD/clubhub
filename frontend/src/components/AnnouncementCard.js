@@ -490,14 +490,14 @@ export default function AnnouncementCard({ announcement, currentUser }) {
 
             {/* Comments Section */}
             {showComments && (
-                <div className="comments-section" style={{ borderTop: '1px solid #E5E7EB', paddingTop: '1rem', marginTop: '1rem' }}>
-                    <div className="comment-input-wrapper" style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+                <div className="comments-section" style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '1rem', marginTop: '1rem' }}>
+                    <div className="comment-input-wrapper" style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
                         <textarea
                             className="comment-input"
                             placeholder="Write a comment..."
                             value={commentText}
                             onChange={(e) => setCommentText(e.target.value)}
-                            style={{ flex: 1, padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #E5E7EB', resize: 'vertical', minHeight: '40px' }}
+                            style={{ flex: 1, padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid rgba(255,255,255,0.1)', background: 'transparent', color: '#E2E8F0', resize: 'vertical', minHeight: '40px', outline: 'none' }}
                         />
                         <button
                             className="btn btn-primary btn-sm"
@@ -508,23 +508,27 @@ export default function AnnouncementCard({ announcement, currentUser }) {
                         </button>
                     </div>
 
-                    <div className="comment-list" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <div className="comment-list" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                         {loadingComments ? (
-                            <p style={{ textAlign: 'center', color: '#6B7280', padding: '1rem' }}>Loading comments...</p>
+                            <p style={{ textAlign: 'center', color: '#94A3B8', padding: '1rem' }}>Loading comments...</p>
                         ) : commentsList.length > 0 ? (
                             commentsList.map(comment => (
-                                <div key={comment.id} className="comment-item" style={{ background: '#F9FAFB', padding: '1rem', borderRadius: '0.5rem' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
-                                        <strong style={{ fontSize: '0.875rem', color: '#1F2937' }}>{comment.author_name || comment.author_email}</strong>
-                                        <span style={{ fontSize: '0.75rem', color: '#6B7280' }}>
-                                            {new Date(comment.created_at).toLocaleDateString()}
+                                <div key={comment.id} className="comment-item" style={{ marginBottom: '0.25rem' }}>
+                                    <div style={{ lineHeight: '1.4' }}>
+                                        <span style={{ fontSize: '0.875rem', color: '#FFFFFF', fontWeight: '600', marginRight: '0.5rem' }}>
+                                            {comment.author_name || comment.author_email}
+                                        </span>
+                                        <span style={{ fontSize: '0.875rem', color: '#E2E8F0' }}>
+                                            {comment.content}
                                         </span>
                                     </div>
-                                    <p style={{ fontSize: '0.875rem', color: '#4B5563', margin: 0 }}>{comment.content}</p>
+                                    <div style={{ fontSize: '0.7rem', color: '#94A3B8', marginTop: '2px' }}>
+                                        {new Date(comment.created_at).toLocaleDateString()}
+                                    </div>
                                 </div>
                             ))
                         ) : (
-                            <p style={{ textAlign: 'center', color: '#6B7280', padding: '1rem' }}>
+                            <p style={{ textAlign: 'center', color: '#94A3B8', padding: '1rem' }}>
                                 No comments yet. Be the first to comment!
                             </p>
                         )}
