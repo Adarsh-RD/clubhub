@@ -41,21 +41,28 @@ function createDialog(message, isConfirm, resolve) {
   box.style.fontFamily = "\"Inter\", -apple-system, sans-serif";
 
   const icon = document.createElement("div");
-  const isSuccess = message.includes("?") || message.includes("success");
-  const isError = message.includes("?") || message.includes("Failed") || message.includes("Error") || message.includes("Denied");
+  const msgLower = message.toLowerCase();
+  const isSuccess = msgLower.includes("success") || msgLower.includes("complete") || msgLower.includes("copied");
+  const isError = msgLower.includes("fail") || msgLower.includes("error") || msgLower.includes("denied") || msgLower.includes("large");
   
-  let svg = `<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#E11D48" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`;
+  // Default is Info (Blue 'i')
+  let svg = `<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`;
+  
   if (isSuccess) {
     svg = `<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`;
+  } else if (isError) {
+    svg = `<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`;
   } else if (isConfirm) {
-    svg = `<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`;
+    // Question mark
+    svg = `<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`;
   }
   
   icon.innerHTML = svg;
   icon.style.marginBottom = "1.5rem";
 
   const text = document.createElement("p");
-  text.innerText = message.replace("? ", "").replace("? ", "").replace("?? ", "");
+  // Remove possible mangled characters or emojis from previous bad encoding
+  text.innerText = message.replace(/^[✓✗⚠️?]\s*/, "");
   text.style.fontSize = "1.0625rem";
   text.style.lineHeight = "1.5";
   text.style.marginBottom = "2rem";
@@ -80,8 +87,18 @@ function createDialog(message, isConfirm, resolve) {
 
   const okBtn = document.createElement("button");
   okBtn.innerText = isConfirm ? "Yes, I am sure" : "Okay";
-  const okColor = isSuccess ? "#10B981" : "#E11D48";
-  const okColorDark = isSuccess ? "#059669" : "#BE123C";
+  
+  // Set button colors based on type
+  let okColor = "#3B82F6";
+  let okColorDark = "#2563EB";
+  if (isSuccess) {
+    okColor = "#10B981"; okColorDark = "#059669";
+  } else if (isError) {
+    okColor = "#EF4444"; okColorDark = "#DC2626";
+  } else if (isConfirm) {
+    okColor = "#E11D48"; okColorDark = "#BE123C";
+  }
+  
   okBtn.style.cssText = btnStyle + `background: linear-gradient(135deg, ${okColor} 0%, ${okColorDark} 100%); color: white; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);`;
   okBtn.onmouseover = () => okBtn.style.transform = "translateY(-2px)";
   okBtn.onmouseout = () => okBtn.style.transform = "translateY(0)";
