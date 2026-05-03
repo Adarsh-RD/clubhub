@@ -293,7 +293,7 @@ export default function Home() {
           <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '15px', marginBottom: '20px' }}>
             <a href="/about.html" style={{ color: '#94a3b8', textDecoration: 'none', transition: 'color 0.2s' }} onMouseOver={(e)=>e.currentTarget.style.color='#f8fafc'} onMouseOut={(e)=>e.currentTarget.style.color='#94a3b8'}>About</a>
             <a href="/accessibility.html" style={{ color: '#94a3b8', textDecoration: 'none', transition: 'color 0.2s' }} onMouseOver={(e)=>e.currentTarget.style.color='#f8fafc'} onMouseOut={(e)=>e.currentTarget.style.color='#94a3b8'}>Accessibility</a>
-            <a href="#" onClick={(e) => { e.preventDefault(); alert('Help Center under construction!'); }} style={{ color: '#94a3b8', textDecoration: 'none', transition: 'color 0.2s' }} onMouseOver={(e)=>e.currentTarget.style.color='#f8fafc'} onMouseOut={(e)=>e.currentTarget.style.color='#94a3b8'}>Help Center</a>
+            <a href="/help.html" style={{ color: '#94a3b8', textDecoration: 'none', transition: 'color 0.2s' }} onMouseOver={(e)=>e.currentTarget.style.color='#f8fafc'} onMouseOut={(e)=>e.currentTarget.style.color='#94a3b8'}>Help Center</a>
             <a href="#" onClick={(e) => { e.preventDefault(); alert('Privacy & Terms under construction!'); }} style={{ color: '#94a3b8', textDecoration: 'none', transition: 'color 0.2s' }} onMouseOver={(e)=>e.currentTarget.style.color='#f8fafc'} onMouseOut={(e)=>e.currentTarget.style.color='#94a3b8'}>Privacy & Terms</a>
           </div>
           
