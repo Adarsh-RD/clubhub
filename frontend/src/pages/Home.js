@@ -235,15 +235,21 @@ export default function Home() {
       </header>
 
       <main className="main-content">
-        <section className="hero-section">
-          <div className="hero-content">
-            <h2 className="hero-title">Welcome back, {firstName}! 👋</h2>
-            <p className="hero-description">
-              Stay updated with the latest announcements from clubs across campus.
-              Like, comment, and engage with your community!
-            </p>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 0 20px', borderBottom: '1px solid rgba(255,255,255,0.05)', marginBottom: '24px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+            <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'linear-gradient(135deg, #E11D48, #F59E0B)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', fontWeight: 'bold', color: 'white', boxShadow: '0 4px 12px rgba(225, 29, 72, 0.3)' }}>
+              {firstName.charAt(0)}
+            </div>
+            <div>
+              <h2 style={{ fontSize: '1.1rem', margin: 0, fontWeight: '600', color: '#f8fafc' }}>{firstName}</h2>
+              <p style={{ fontSize: '0.85rem', color: '#94a3b8', margin: '2px 0 0 0' }}>Your Campus Feed</p>
+            </div>
           </div>
-        </section>
+          <button style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '20px', padding: '8px 16px', color: '#fff', fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', transition: 'all 0.2s' }} onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'} onMouseOut={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'} onClick={() => window.location.href='/clubs.html'}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+            Explore
+          </button>
+        </div>
 
         <section>
           <h2 className="section-title">
