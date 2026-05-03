@@ -2590,13 +2590,41 @@ app.post('/announcements', upload.single('image'), async (req, res) => {
     console.log('  Verification:', verify[0]);
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 
-    // Send notification to subscribers (if function exists)
+    // Send EMAIL notification to SUBSCRIBED students only
     if (typeof notifySubscribers === 'function') {
       try {
         notifySubscribers(user.club_id, title, content, announcementId);
       } catch (err) {
         console.error('Error notifying subscribers:', err);
       }
+    }
+
+    // Send IN-APP notification to ALL students
+    try {
+      const club = await getClubById(user.club_id);
+      const clubName = club ? club.club_name : 'A club';
+      
+      // Get ALL students (not just subscribers)
+      const { rows: allStudents } = await pool.query(
+        `SELECT id FROM users WHERE id != $1`,
+        [user.id]
+      );
+
+      console.log(`[Notifications] Sending in-app notification to ${allStudents.length} students for announcement: "${title}"`);
+
+      for (const student of allStudents) {
+        await addNotification(
+          student.id,
+          `📢 ${clubName}`,
+          title,
+          'announcement',
+          announcementId
+        );
+      }
+
+      console.log(`[Notifications] ✅ In-app notifications sent to all ${allStudents.length} students`);
+    } catch (notifErr) {
+      console.error('[Notifications] Error sending in-app notifications:', notifErr);
     }
 
     return res.json({
