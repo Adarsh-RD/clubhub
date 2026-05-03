@@ -294,7 +294,7 @@ export default function Home() {
             <a href="/about.html" style={{ color: '#94a3b8', textDecoration: 'none', transition: 'color 0.2s' }} onMouseOver={(e)=>e.currentTarget.style.color='#f8fafc'} onMouseOut={(e)=>e.currentTarget.style.color='#94a3b8'}>About</a>
             <a href="/accessibility.html" style={{ color: '#94a3b8', textDecoration: 'none', transition: 'color 0.2s' }} onMouseOver={(e)=>e.currentTarget.style.color='#f8fafc'} onMouseOut={(e)=>e.currentTarget.style.color='#94a3b8'}>Accessibility</a>
             <a href="/help.html" style={{ color: '#94a3b8', textDecoration: 'none', transition: 'color 0.2s' }} onMouseOver={(e)=>e.currentTarget.style.color='#f8fafc'} onMouseOut={(e)=>e.currentTarget.style.color='#94a3b8'}>Help Center</a>
-            <a href="#" onClick={(e) => { e.preventDefault(); alert('Privacy & Terms under construction!'); }} style={{ color: '#94a3b8', textDecoration: 'none', transition: 'color 0.2s' }} onMouseOver={(e)=>e.currentTarget.style.color='#f8fafc'} onMouseOut={(e)=>e.currentTarget.style.color='#94a3b8'}>Privacy & Terms</a>
+            <a href="/privacy.html" style={{ color: '#94a3b8', textDecoration: 'none', transition: 'color 0.2s' }} onMouseOver={(e)=>e.currentTarget.style.color='#f8fafc'} onMouseOut={(e)=>e.currentTarget.style.color='#94a3b8'}>Privacy & Terms</a>
           </div>
           
           <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'center', gap: '20px' }}>
