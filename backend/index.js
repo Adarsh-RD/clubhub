@@ -371,6 +371,99 @@ app.post('/auth/login', async (req, res) => {
   }
 });
 
+const crypto = require('crypto');
+
+app.post('/auth/forgot-password', async (req, res) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ error: "email required" });
+
+  try {
+    const user = await findUserByEmail(email.toLowerCase());
+    if (!user) {
+      // Return 200 anyway to prevent email enumeration
+      return res.json({ ok: true, message: "If that email exists, a reset link was sent." });
+    }
+
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    // Save token and expire in 1 hour
+    await pool.query(
+      `UPDATE users SET reset_token = $1, reset_token_expires = NOW() + INTERVAL '1 hour' WHERE id = $2`,
+      [resetToken, user.id]
+    );
+
+    const resetLink = `${process.env.FRONTEND_ORIGIN || 'https://club-hub-vert.vercel.app'}/reset-password.html?token=${resetToken}`;
+
+    const payload = {
+        sender: { name: "Club Hub Security", email: process.env.EMAIL_USER },
+        to: [{ email: user.email, name: user.name || "Student" }],
+        subject: "Reset your Club Hub Password",
+        htmlContent: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #050505; color: #ffffff; border-radius: 10px;">
+            <h2 style="color: #E11D48; text-align: center;">Club Hub Password Reset</h2>
+            <p style="font-size: 16px; color: #e2e8f0;">Hello,</p>
+            <p style="font-size: 16px; color: #e2e8f0;">We received a request to reset your password. Click the button below to choose a new one:</p>
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${resetLink}" style="background-color: #E11D48; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">Reset Password</a>
+            </div>
+            <p style="font-size: 14px; color: #94a3b8;">If you did not request this, please ignore this email.</p>
+            <p style="font-size: 14px; color: #94a3b8; text-align: center; margin-top: 40px;">&copy; ${new Date().getFullYear()} Club Hub</p>
+          </div>
+        `
+    };
+
+    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'api-key': process.env.EMAIL_PASS
+        },
+        body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+        console.error('Brevo API Error:', await response.text());
+        return res.status(500).json({ error: "Failed to send email" });
+    }
+
+    res.json({ ok: true, message: "If that email exists, a reset link was sent." });
+  } catch (err) {
+    console.error("Forgot password error:", err);
+    res.status(500).json({ error: "server error" });
+  }
+});
+
+app.post('/auth/reset-password', async (req, res) => {
+  const { token, newPassword } = req.body;
+  if (!token || !newPassword) return res.status(400).json({ error: "Token and new password required" });
+
+  if (newPassword.length < 6) return res.status(400).json({ error: "Password must be at least 6 characters" });
+
+  try {
+    const { rows } = await pool.query(
+      `SELECT id, email FROM users WHERE reset_token = $1 AND reset_token_expires > NOW()`,
+      [token]
+    );
+
+    if (rows.length === 0) {
+      return res.status(400).json({ error: "Invalid or expired reset token" });
+    }
+
+    const user = rows[0];
+    const password_hash = await bcrypt.hash(newPassword, 10);
+
+    await pool.query(
+      `UPDATE users SET password_hash = $1, reset_token = NULL, reset_token_expires = NULL WHERE id = $2`,
+      [password_hash, user.id]
+    );
+
+    res.json({ ok: true, message: "Password has been successfully reset" });
+  } catch (err) {
+    console.error("Reset password error:", err);
+    res.status(500).json({ error: "server error" });
+  }
+});
+
 // ==================== USER PROFILE ROUTES ====================
 
 app.get('/me', async (req, res) => {

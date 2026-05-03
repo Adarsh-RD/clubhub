@@ -35,6 +35,7 @@ function AuthCard({
   onSendCode,
   onVerifyAndSetPassword,
   onLogin,
+  onForgotPassword,
   state,
   actions,
 }) {
@@ -118,7 +119,7 @@ function AuthCard({
             }
           />
 
-          <div className="auth-buttons">
+          <div className="auth-buttons" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             <button className="btn btn-primary btn-large" type="submit">
               Sign in
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
@@ -127,12 +128,65 @@ function AuthCard({
             </button>
           </div>
 
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem' }}>
+            <button
+              type="button"
+              className="link-button"
+              onClick={() => setView("signup-email")}
+            >
+              Don't have an account? <strong>Sign up</strong>
+            </button>
+            <button
+              type="button"
+              className="link-button"
+              style={{ fontSize: '0.85rem', color: '#94a3b8' }}
+              onClick={() => setView("forgot-password")}
+            >
+              Forgot Password?
+            </button>
+          </div>
+        </form>
+      )}
+
+      {view === "forgot-password" && (
+        <form
+          className="auth-form"
+          onSubmit={(e) => {
+            e.preventDefault();
+            onForgotPassword();
+          }}
+        >
+          <p className="form-title">Reset Password</p>
+          <p className="form-subtitle">Enter your email to receive a password reset link.</p>
+
+          <Input
+            label="Email Address"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="your.email@kletech.ac.in"
+            required
+            icon={
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                <polyline points="22,6 12,13 2,6"></polyline>
+              </svg>
+            }
+          />
+
+          <div className="auth-buttons">
+            <button className="btn btn-primary btn-large" type="submit">
+              Send Reset Link
+            </button>
+          </div>
+
           <button
             type="button"
             className="link-button"
-            onClick={() => setView("signup-email")}
+            style={{ marginTop: '1rem' }}
+            onClick={() => setView("login")}
           >
-            Don't have an account? <strong>Sign up</strong>
+            ← Back to Login
           </button>
         </form>
       )}
@@ -397,6 +451,22 @@ export default function App() {
     setView("choose");
   }
 
+  async function forgotPassword() {
+    setMsg("📤 Sending reset link...");
+    try {
+      const r = await fetch(`${API_BASE}/auth/forgot-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const j = await r.json();
+      if (!r.ok) throw new Error(j.error || "Failed to send reset link");
+      setMsg("✓ Reset link sent! Check your email inbox.");
+    } catch (err) {
+      setMsg("✗ Error: " + err.message);
+    }
+  }
+
   // Show auth screen if not logged in
   if (view !== "app") {
     if (view === "loading") {
@@ -417,6 +487,7 @@ export default function App() {
             onSendCode={sendCode}
             onVerifyAndSetPassword={verifyAndSetPassword}
             onLogin={login}
+            onForgotPassword={forgotPassword}
             state={{ view, email, code, password, confirm, msg }}
             actions={{ setEmail, setCode, setPassword, setConfirm, setView }}
           />
