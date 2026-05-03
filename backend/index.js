@@ -378,11 +378,16 @@ app.post('/auth/forgot-password', async (req, res) => {
   if (!email) return res.status(400).json({ error: "email required" });
 
   try {
-    const user = await findUserByEmail(email.toLowerCase());
+    console.log(`[Forgot Password] Request received for email: '${email}'`);
+    const cleanEmail = email.toLowerCase().trim();
+    const user = await findUserByEmail(cleanEmail);
     if (!user) {
+      console.log(`[Forgot Password] User not found for email: '${cleanEmail}'. Returning success to prevent enumeration.`);
       // Return 200 anyway to prevent email enumeration
       return res.json({ ok: true, message: "If that email exists, a reset link was sent." });
     }
+    
+    console.log(`[Forgot Password] User found. Generating token...`);
 
     const resetToken = crypto.randomBytes(32).toString('hex');
     // Save token and expire in 1 hour
@@ -422,10 +427,11 @@ app.post('/auth/forgot-password', async (req, res) => {
     });
 
     if (!response.ok) {
-        console.error('Brevo API Error:', await response.text());
+        console.error('[Forgot Password] Brevo API Error:', await response.text());
         return res.status(500).json({ error: "Failed to send email" });
     }
 
+    console.log(`[Forgot Password] Reset email sent successfully via Brevo to ${user.email}`);
     res.json({ ok: true, message: "If that email exists, a reset link was sent." });
   } catch (err) {
     console.error("Forgot password error:", err);
