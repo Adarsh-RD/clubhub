@@ -2599,32 +2599,58 @@ app.post('/announcements', upload.single('image'), async (req, res) => {
       }
     }
 
-    // Send IN-APP notification to ALL students
+    // Send IN-APP + PUSH notification to ALL students
     try {
       const club = await getClubById(user.club_id);
       const clubName = club ? club.club_name : 'A club';
       
-      // Get ALL students (not just subscribers)
+      // Get ALL students with their FCM tokens (not just subscribers)
       const { rows: allStudents } = await pool.query(
-        `SELECT id FROM users WHERE id != $1`,
+        `SELECT id, fcm_token FROM users WHERE id != $1`,
         [user.id]
       );
 
-      console.log(`[Notifications] Sending in-app notification to ${allStudents.length} students for announcement: "${title}"`);
+      console.log(`[Notifications] Sending in-app + push to ${allStudents.length} students for: "${title}"`);
+
+      const pushTitle = `📢 ${clubName}`;
+      const pushBody = title;
 
       for (const student of allStudents) {
+        // 1. Save in-app notification
         await addNotification(
           student.id,
-          `📢 ${clubName}`,
-          title,
+          pushTitle,
+          pushBody,
           'announcement',
           announcementId
         );
+
+        // 2. Send FCM push if student has a token and Firebase is initialized
+        if (admin.apps.length > 0 && student.fcm_token) {
+          try {
+            await admin.messaging().send({
+              token: student.fcm_token,
+              notification: {
+                title: pushTitle,
+                body: pushBody,
+              },
+              webpush: {
+                fcmOptions: { link: '/notifications.html' }
+              }
+            });
+          } catch (pushErr) {
+            // Token might be expired/invalid - don't break the loop
+            if (pushErr.code === 'messaging/registration-token-not-registered') {
+              // Clear invalid token
+              await pool.query('UPDATE users SET fcm_token = NULL WHERE id = $1', [student.id]);
+            }
+          }
+        }
       }
 
-      console.log(`[Notifications] ✅ In-app notifications sent to all ${allStudents.length} students`);
+      console.log(`[Notifications] ✅ In-app + push notifications sent to all ${allStudents.length} students`);
     } catch (notifErr) {
-      console.error('[Notifications] Error sending in-app notifications:', notifErr);
+      console.error('[Notifications] Error sending notifications:', notifErr);
     }
 
     return res.json({
