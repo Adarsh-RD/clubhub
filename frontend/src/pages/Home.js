@@ -247,7 +247,16 @@ export default function Home() {
 
         <section>
           <h2 className="section-title">
-            <span>📢</span>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="url(#announcement-gradient)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ filter: 'drop-shadow(0px 2px 10px rgba(225, 29, 72, 0.4))' }}>
+              <defs>
+                <linearGradient id="announcement-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#E11D48" />
+                  <stop offset="100%" stopColor="#F59E0B" />
+                </linearGradient>
+              </defs>
+              <circle cx="12" cy="12" r="2"></circle>
+              <path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"></path>
+            </svg>
             Latest Announcements
           </h2>
 
