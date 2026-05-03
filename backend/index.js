@@ -399,7 +399,7 @@ app.post('/auth/forgot-password', async (req, res) => {
     const resetLink = `${process.env.FRONTEND_ORIGIN || 'https://club-hub-vert.vercel.app'}/reset-password.html?token=${resetToken}`;
 
     const payload = {
-        sender: { name: "Club Hub Security", email: process.env.EMAIL_USER },
+        sender: { name: "Club Hub", email: "sportsshortsssss@gmail.com" },
         to: [{ email: user.email, name: user.name || "Student" }],
         subject: "Reset your Club Hub Password",
         htmlContent: `
