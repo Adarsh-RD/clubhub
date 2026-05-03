@@ -1197,7 +1197,7 @@
             ` : ''}
           </div>
 
-          <div class="event-actions">
+          <div class="event-actions" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
             <button class="btn-view-reg" onclick="toggleRegistrations(${event.id})">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
               <span id="btn-text-${event.id}">View Registrations</span>
@@ -1207,6 +1207,10 @@
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Export CSV
               </button>
             ` : ''}
+            <button class="btn-delete" onclick="deleteEvent(${event.id})" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); padding: 0.5rem 1rem; border-radius: 0.5rem; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; transition: all 0.2s; margin-left: auto;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+              Delete
+            </button>
           </div>
 
           <div id="registrations-${event.id}" style="display: none;"></div>
@@ -1215,6 +1219,28 @@
         document.getElementById('eventsList').appendChild(card);
       } catch (err) {
         console.error('Error loading event card:', err);
+      }
+    }
+
+    async function deleteEvent(eventId) {
+      if (await customConfirm("Are you sure you want to delete this announcement? This action cannot be undone.")) {
+        try {
+          const res = await fetch(`${API}/announcements/${eventId}`, {
+            method: 'DELETE',
+            headers
+          });
+          const data = await res.json();
+          if (res.ok && data.ok) {
+            customAlert("Announcement deleted successfully", "success");
+            loadClubEvents(); // reload list
+            updateDashboardStats(); // refresh stats
+          } else {
+            customAlert(data.error || "Failed to delete announcement", "error");
+          }
+        } catch (err) {
+          console.error('Error deleting announcement:', err);
+          customAlert("Error deleting announcement", "error");
+        }
       }
     }
 
