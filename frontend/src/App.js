@@ -9,7 +9,7 @@ function Logo() {
   return (
     <div className="auth-logo">
       <img
-        src="/kle-logo.png"
+        src="/kle-logo.jpeg"
         alt="KLE Tech"
         onError={(e) => {
           e.target.style.display = 'none';

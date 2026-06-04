@@ -206,7 +206,7 @@ export default function Home() {
         <div className="header-content">
           <div className="header-left">
             <div className="header-logo">
-              <img src="/kle-logo.png" alt="KLE Tech" onError={(e) => e.target.style.display = 'none'} />
+              <img src="/kle-logo.jpeg" alt="KLE Tech" onError={(e) => e.target.style.display = 'none'} />
             </div>
             <div className="header-branding">
               <h1 className="header-title">Club Hub</h1>

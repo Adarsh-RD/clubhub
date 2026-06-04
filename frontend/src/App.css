@@ -2362,7 +2362,6 @@ input[type="number"]:focus {
 .bc-message-time {
   font-size: 0.75rem;
   color: #64748B;
-  margin-left: auto;
 }
 
 .bc-message-delete {

@@ -136,6 +136,7 @@ function ChatView({ channel, messages, profile, onSendMessage, onDeleteMessage, 
   }
 
   async function handleReact(messageId, emoji) {
+    const token = localStorage.getItem('token');
     try {
       const res = await fetch(`${API_BASE}/broadcast/messages/${messageId}/react`, {
         method: 'POST',
@@ -225,8 +226,8 @@ function ChatView({ channel, messages, profile, onSendMessage, onDeleteMessage, 
               <div className="bc-message-header">
                 <span className="bc-message-sender">{msg.sender_name || msg.sender_email}</span>
                 {msg.is_urgent && <span className="bc-urgent-tag">🔴 URGENT</span>}
-                <span className="bc-message-time">{formatDateTime(msg.created_at)}</span>
                 <div className="bc-msg-actions-group">
+                  <span className="bc-message-time">{formatDateTime(msg.created_at)}</span>
                   <button className="bc-react-trigger-btn" onClick={() => setActiveReactionPickerId(activeReactionPickerId === msg.id ? null : msg.id)} title="React with emoji">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
                   </button>
@@ -501,7 +502,7 @@ export default function BroadcastChannel({ onBack }) {
         try {
           const data = JSON.parse(event.data);
           if (data.type === 'broadcast_event') {
-            const { club_id, action, message, id } = data;
+            const { club_id, action, message, id, message_id, reactions } = data;
 
             // Update channel preview in list
             setChannels(prev => prev.map(ch => {
@@ -634,7 +635,7 @@ export default function BroadcastChannel({ onBack }) {
     const data = await res.json();
     if (data.ok) {
       setMessages(prev => {
-        if (prev.some(m => String(m.id) === String(data.message.id)) return prev;
+        if (prev.some(m => String(m.id) === String(data.message.id))) return prev;
         return [...prev, data.message];
       });
     } else {
