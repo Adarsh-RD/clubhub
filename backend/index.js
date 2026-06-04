@@ -2717,13 +2717,55 @@ app.get('/my-registrations', authMiddleware, async (req, res) => {
     res.status(500).json({ ok: false, error: 'Failed to fetch registrations' });
   }
 });
+
+// ==================== WEBSOCKET SETUP ====================
+const WebSocket = require('ws');
+let wss;
+
+function initWebSocket(serverInstance) {
+  wss = new WebSocket.Server({ server: serverInstance });
+  console.log('🔌 WebSocket Server initialized');
+  wss.on('connection', (ws) => {
+    ws.isAlive = true;
+    ws.on('pong', () => { ws.isAlive = true; });
+  });
+
+  const interval = setInterval(() => {
+    wss.clients.forEach((ws) => {
+      if (ws.isAlive === false) return ws.terminate();
+      ws.isAlive = false;
+      ws.ping();
+    });
+  }, 30000);
+
+  wss.on('close', () => {
+    clearInterval(interval);
+  });
+}
+
+function broadcastWSMessage(clubId, data) {
+  if (!wss) return;
+  const payload = JSON.stringify({
+    type: 'broadcast_event',
+    club_id: clubId,
+    ...data
+  });
+  wss.clients.forEach((client) => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(payload);
+    }
+  });
+}
+
 app.use('/', socialRoutes(pool));
-app.use('/broadcast', broadcastRoutes(pool, poolQuery));
+app.use('/broadcast', broadcastRoutes(pool, poolQuery, broadcastWSMessage));
 
 // ==================== START SERVER ====================
 
-app.listen(PORT, async () => {
+const server = app.listen(PORT, async () => {
   console.log(`🚀 Server running on port ${PORT}`);
+});
+initWebSocket(server);
 
   // Ensure the image_url column is TEXT to support long base64 strings
   try {

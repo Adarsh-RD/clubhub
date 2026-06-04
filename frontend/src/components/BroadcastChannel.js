@@ -227,9 +227,7 @@ function ChatView({ channel, messages, profile, onSendMessage, onDeleteMessage, 
                   {msg.link_url.length > 50 ? msg.link_url.substring(0, 50) + '...' : msg.link_url}
                 </a>
               )}
-              <div className="bc-message-type-badge">
-                {getMessageTypeIcon(msg.message_type)}
-              </div>
+
             </div>
           </div>
         ))}
@@ -263,24 +261,7 @@ function ChatView({ channel, messages, profile, onSendMessage, onDeleteMessage, 
             </div>
           )}
 
-          {/* Message Type Selector above the input bar */}
-          <div className="bc-type-pills bc-insta-type-pills">
-            {[
-              { value: 'text', label: '💬 Text' },
-              { value: 'announcement', label: '📢 Announcement' },
-              { value: 'reminder', label: '⏰ Reminder' },
-              { value: 'update', label: '📋 Update' }
-            ].map(type => (
-              <button
-                key={type.value}
-                type="button"
-                className={`bc-type-pill ${messageType === type.value ? 'active' : ''}`}
-                onClick={() => setMessageType(type.value)}
-              >
-                {type.label}
-              </button>
-            ))}
-          </div>
+
 
           {/* Main Instagram-style input bar */}
           <form onSubmit={handleSend} className="bc-insta-input-bar">
@@ -437,16 +418,72 @@ export default function BroadcastChannel({ onBack }) {
     return () => clearInterval(channelInterval);
   }, []);
 
-  // ===== REALTIME: Poll messages every 5s when a channel is open =====
+  // ===== WEBSOCKETS FOR REAL-TIME UPDATES =====
   useEffect(() => {
-    if (!selectedChannel) return;
-    const msgInterval = setInterval(() => {
-      if (selectedChannelRef.current) {
-        pollMessages(selectedChannelRef.current.id);
-      }
-    }, 5000);
-    return () => clearInterval(msgInterval);
-  }, [selectedChannel?.id]);
+    const wsProtocol = API_BASE.startsWith('https') ? 'wss' : 'ws';
+    const wsHost = API_BASE.replace(/^https?:\/\//, '');
+    const wsUrl = `${wsProtocol}://${wsHost}`;
+
+    let socket;
+    let reconnectTimeout;
+
+    function connectWS() {
+      socket = new WebSocket(wsUrl);
+
+      socket.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.type === 'broadcast_event') {
+            const { club_id, action, message, id } = data;
+
+            // Update channel preview in list
+            setChannels(prev => prev.map(ch => {
+              if (ch.id === club_id) {
+                if (action === 'create') {
+                  return {
+                    ...ch,
+                    message_count: parseInt(ch.message_count || 0) + 1,
+                    last_message_at: message.created_at,
+                    last_message_preview: message.content || '[Image/Media]'
+                  };
+                }
+              }
+              return ch;
+            }));
+
+            // Append/delete message in active chat view if matching open channel
+            if (selectedChannelRef.current && selectedChannelRef.current.id === club_id) {
+              if (action === 'create') {
+                setMessages(prev => {
+                  if (prev.some(m => m.id === message.id)) return prev;
+                  return [...prev, message];
+                });
+              } else if (action === 'delete') {
+                setMessages(prev => prev.filter(m => m.id !== id));
+              }
+            }
+          }
+        } catch (err) {
+          console.error('WS parse error:', err);
+        }
+      };
+
+      socket.onclose = () => {
+        reconnectTimeout = setTimeout(connectWS, 5000);
+      };
+
+      socket.onerror = () => {
+        socket.close();
+      };
+    }
+
+    connectWS();
+
+    return () => {
+      if (socket) socket.close();
+      clearTimeout(reconnectTimeout);
+    };
+  }, []);
 
   async function loadProfile() {
     try {
@@ -484,26 +521,7 @@ export default function BroadcastChannel({ onBack }) {
     } catch (err) { /* silent */ }
   }
 
-  // Poll messages without resetting scroll
-  async function pollMessages(clubId) {
-    try {
-      const res = await fetch(`${API_BASE}/broadcast/channels/${clubId}/messages`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const data = await res.json();
-      if (data.ok) {
-        setMessages(prev => {
-          // Only update if there are new messages (avoid unnecessary rerenders)
-          if (data.messages.length !== prev.length ||
-              (data.messages.length > 0 && prev.length > 0 &&
-               data.messages[data.messages.length - 1].id !== prev[prev.length - 1].id)) {
-            return data.messages;
-          }
-          return prev;
-        });
-      }
-    } catch (err) { /* silent */ }
-  }
+
 
   async function selectChannel(channel) {
     setSelectedChannel(channel);

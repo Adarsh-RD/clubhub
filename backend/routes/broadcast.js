@@ -7,7 +7,7 @@ const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const path = require('path');
 
-module.exports = function (pool, poolQuery) {
+module.exports = function (pool, poolQuery, broadcastWSMessage) {
   const router = express.Router();
   const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret';
 
@@ -215,6 +215,10 @@ module.exports = function (pool, poolQuery) {
         sender_avatar: senderRows[0]?.profile_picture || null
       };
 
+      if (typeof broadcastWSMessage === 'function') {
+        broadcastWSMessage(clubId, { action: 'create', message });
+      }
+
       res.json({ ok: true, message });
     } catch (err) {
       console.error('Error posting broadcast message:', err);
@@ -246,6 +250,10 @@ module.exports = function (pool, poolQuery) {
         `UPDATE broadcast_messages SET is_active = false WHERE id = $1 AND club_id = $2`,
         [messageId, clubId]
       );
+
+      if (typeof broadcastWSMessage === 'function') {
+        broadcastWSMessage(clubId, { action: 'delete', id: messageId });
+      }
 
       res.json({ ok: true, message: 'Message deleted' });
     } catch (err) {
