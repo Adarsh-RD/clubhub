@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import AnnouncementCard from '../components/AnnouncementCard';
+import BroadcastChannel from '../components/BroadcastChannel';
 import { requestForToken, messaging } from '../firebase';
 import { onMessage } from 'firebase/messaging';
 
@@ -12,6 +13,7 @@ export default function Home() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);
   const [notifications, setNotifications] = useState([]);
+  const [currentView, setCurrentView] = useState('feed');
   const token = localStorage.getItem('token');
 
   // ✅ CORRECT: Registration fields in state
@@ -193,6 +195,11 @@ export default function Home() {
   const firstName = profile?.name?.split(' ')[0] || profile?.email?.split('@')[0] || 'User';
   const isClubAdmin = profile?.role === 'club_admin';
 
+  // ==================== BROADCAST CHANNEL VIEW ====================
+  if (currentView === 'broadcast') {
+    return <BroadcastChannel onBack={() => setCurrentView('feed')} />;
+  }
+
   return (
     <div className="app-container">
       <header className="app-header">
@@ -208,6 +215,17 @@ export default function Home() {
           </div>
 
           <div className="header-right">
+            {/* Broadcast Channels - like Instagram DMs */}
+            <button
+              className="btn btn-ghost btn-sm bc-header-icon"
+              onClick={() => setCurrentView('broadcast')}
+              title="Broadcast Channels"
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+              </svg>
+            </button>
+
             {/* Admin Dashboard Link - Only for Coordinator */}
             {profile?.email === 'bigbossssz550@gmail.com' && (
               <button
@@ -326,6 +344,7 @@ export default function Home() {
           </svg>
           <span className="dock-label">Home</span>
         </button>
+
 
         <button className="dock-item" onClick={() => window.location.href = '/clubs.html'}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

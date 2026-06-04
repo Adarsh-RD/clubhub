@@ -11,8 +11,10 @@ const path = require('path');
 const fs = require('fs');
 
 const socialRoutes = require('./routes/social');
+const broadcastRoutes = require('./routes/broadcast');
 const {
   pool,
+  poolQuery,
   findUserByEmail,
   createUser,
   updatePassword,
@@ -2715,6 +2717,7 @@ app.get('/my-registrations', authMiddleware, async (req, res) => {
   }
 });
 app.use('/', socialRoutes(pool));
+app.use('/broadcast', broadcastRoutes(pool, poolQuery));
 
 // ==================== START SERVER ====================
 
