@@ -2764,8 +2764,6 @@ app.use('/broadcast', broadcastRoutes(pool, poolQuery, broadcastWSMessage));
 
 const server = app.listen(PORT, async () => {
   console.log(`🚀 Server running on port ${PORT}`);
-});
-initWebSocket(server);
 
   // Ensure the image_url column is TEXT to support long base64 strings
   try {
@@ -2814,3 +2812,4 @@ initWebSocket(server);
     }
   }
 });
+initWebSocket(server);
