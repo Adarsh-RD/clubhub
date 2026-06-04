@@ -557,7 +557,10 @@ export default function BroadcastChannel({ onBack }) {
     });
     const data = await res.json();
     if (data.ok) {
-      setMessages(prev => [...prev, data.message]);
+      setMessages(prev => {
+        if (prev.some(m => m.id === data.message.id)) return prev;
+        return [...prev, data.message];
+      });
     } else {
       throw new Error(data.error);
     }

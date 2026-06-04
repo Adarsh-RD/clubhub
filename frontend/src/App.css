@@ -1888,11 +1888,13 @@ input[type="number"]:focus {
 /* Completely separate from main feed — Instagram-style broadcast */
 
 .bc-container {
-  min-height: 100vh;
+  height: 100vh;
+  max-height: 100vh;
   display: flex;
   flex-direction: column;
   background: var(--bg-dark);
   position: relative;
+  overflow: hidden;
 }
 
 .bc-header {
@@ -2121,7 +2123,8 @@ input[type="number"]:focus {
 .bc-chat-view {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 65px);
+  height: 100%;
+  overflow: hidden;
 }
 
 .bc-chat-empty {
