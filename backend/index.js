@@ -507,6 +507,7 @@ app.get('/me', async (req, res) => {
         roll_number: user.roll_number,
         admin_requested: user.admin_requested,
         profile_picture: user.profile_picture,
+        club_id: user.club_id,
       }
     });
   } catch (err) {

@@ -73,7 +73,7 @@ function ChatView({ channel, messages, profile, onSendMessage, onDeleteMessage, 
   const [linkUrl, setLinkUrl] = useState('');
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
-  const [showComposer, setShowComposer] = useState(false);
+  const [showLinkInput, setShowLinkInput] = useState(false);
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -123,7 +123,7 @@ function ChatView({ channel, messages, profile, onSendMessage, onDeleteMessage, 
       setMessageType('text');
       setImageFile(null);
       setImagePreview(null);
-      setShowComposer(false);
+      setShowLinkInput(false);
     } catch (err) {
       alert('Failed to send message');
     }
@@ -238,96 +238,120 @@ function ChatView({ channel, messages, profile, onSendMessage, onDeleteMessage, 
 
       {/* Composer (Admin Only) */}
       {canPost && (
-        <div className="bc-composer-area">
-          {!showComposer ? (
-            <button className="bc-compose-btn" onClick={() => setShowComposer(true)}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="22" y1="2" x2="11" y2="13"></line>
-                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-              </svg>
-              Broadcast a message
-            </button>
-          ) : (
-            <form className="bc-composer" onSubmit={handleSend}>
-              {/* Message type pills */}
-              <div className="bc-type-pills">
-                {[
-                  { value: 'text', label: '💬 Message', },
-                  { value: 'announcement', label: '📢 Announcement' },
-                  { value: 'reminder', label: '⏰ Reminder' },
-                  { value: 'update', label: '📋 Update' },
-                ].map(type => (
-                  <button
-                    key={type.value}
-                    type="button"
-                    className={`bc-type-pill ${messageType === type.value ? 'active' : ''}`}
-                    onClick={() => setMessageType(type.value)}
-                  >
-                    {type.label}
-                  </button>
-                ))}
-              </div>
+        <div className="bc-composer-area bc-insta-composer-area">
+          {/* Dynamic image preview above the composer */}
+          {imagePreview && (
+            <div className="bc-image-preview bc-insta-image-preview">
+              <img src={imagePreview} alt="Selected preview" />
+              <button type="button" className="bc-remove-image" onClick={() => { setImageFile(null); setImagePreview(null); }}>
+                ✕
+              </button>
+            </div>
+          )}
 
-              {/* Text input */}
-              <textarea
-                className="bc-message-input"
-                placeholder="Type your broadcast message..."
-                value={messageText}
-                onChange={(e) => setMessageText(e.target.value)}
-                rows="3"
-              />
-
-              {/* Image preview */}
-              {imagePreview && (
-                <div className="bc-image-preview">
-                  <img src={imagePreview} alt="Preview" />
-                  <button type="button" className="bc-remove-image" onClick={() => { setImageFile(null); setImagePreview(null); }}>✕</button>
-                </div>
-              )}
-
-              {/* Link input */}
+          {/* Dynamic link input box above the main composer, toggled by a link button */}
+          {showLinkInput && (
+            <div className="bc-insta-link-input-wrapper">
               <input
-                className="bc-link-input"
                 type="url"
-                placeholder="Add a link (optional)"
+                className="bc-insta-link-input"
+                placeholder="Paste link URL (e.g., https://example.com)..."
                 value={linkUrl}
                 onChange={(e) => setLinkUrl(e.target.value)}
               />
-
-              {/* Bottom actions */}
-              <div className="bc-composer-actions">
-                <div className="bc-composer-tools">
-                  <button type="button" className="bc-tool-btn" onClick={() => fileInputRef.current?.click()} title="Attach image">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                  </button>
-                  <input ref={fileInputRef} type="file" accept="image/*,video/*" onChange={handleImageSelect} style={{ display: 'none' }} />
-                  <button
-                    type="button"
-                    className={`bc-tool-btn ${isUrgent ? 'active-urgent' : ''}`}
-                    onClick={() => setIsUrgent(!isUrgent)}
-                    title="Mark as urgent"
-                  >
-                    🔴
-                  </button>
-                </div>
-                <div className="bc-composer-submit">
-                  <button type="button" className="bc-cancel-btn" onClick={() => { setShowComposer(false); setImageFile(null); setImagePreview(null); }}>
-                    Cancel
-                  </button>
-                  <button type="submit" className="bc-send-btn" disabled={sending || (!messageText.trim() && !imageFile)}>
-                    {sending ? (
-                      <span className="bc-sending-spinner"></span>
-                    ) : (
-                      <>
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-                        Broadcast
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
-            </form>
+              <button type="button" className="bc-insta-link-close-btn" onClick={() => { setLinkUrl(''); setShowLinkInput(false); }}>✕</button>
+            </div>
           )}
+
+          {/* Message Type Selector above the input bar */}
+          <div className="bc-type-pills bc-insta-type-pills">
+            {[
+              { value: 'text', label: '💬 Text' },
+              { value: 'announcement', label: '📢 Announcement' },
+              { value: 'reminder', label: '⏰ Reminder' },
+              { value: 'update', label: '📋 Update' }
+            ].map(type => (
+              <button
+                key={type.value}
+                type="button"
+                className={`bc-type-pill ${messageType === type.value ? 'active' : ''}`}
+                onClick={() => setMessageType(type.value)}
+              >
+                {type.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Main Instagram-style input bar */}
+          <form onSubmit={handleSend} className="bc-insta-input-bar">
+            {/* Attachment Button */}
+            <button
+              type="button"
+              className="bc-insta-tool-btn"
+              onClick={() => fileInputRef.current?.click()}
+              title="Add photo/video"
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <polyline points="21 15 16 10 5 21"/>
+              </svg>
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*,video/*"
+              onChange={handleImageSelect}
+              style={{ display: 'none' }}
+            />
+
+            {/* Link toggle button */}
+            <button
+              type="button"
+              className={`bc-insta-tool-btn ${linkUrl || showLinkInput ? 'active' : ''}`}
+              onClick={() => setShowLinkInput(!showLinkInput)}
+              title="Add link"
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/>
+                <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/>
+              </svg>
+            </button>
+
+            {/* Urgent indicator toggle button */}
+            <button
+              type="button"
+              className={`bc-insta-tool-btn bc-urgent-toggle ${isUrgent ? 'active-urgent' : ''}`}
+              onClick={() => setIsUrgent(!isUrgent)}
+              title="Toggle Urgent Announcement"
+            >
+              <span className="bc-urgent-dot"></span>
+            </button>
+
+            {/* Text Input area */}
+            <div className="bc-insta-input-wrapper">
+              <input
+                type="text"
+                className="bc-insta-text-input"
+                placeholder="Message..."
+                value={messageText}
+                onChange={(e) => setMessageText(e.target.value)}
+              />
+            </div>
+
+            {/* Send Button */}
+            <button
+              type="submit"
+              className="bc-insta-send-btn"
+              disabled={sending || (!messageText.trim() && !imageFile)}
+            >
+              {sending ? (
+                <span className="bc-sending-spinner"></span>
+              ) : (
+                "Send"
+              )}
+            </button>
+          </form>
         </div>
       )}
 
