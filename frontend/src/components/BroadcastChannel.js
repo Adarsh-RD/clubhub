@@ -66,7 +66,7 @@ function ChannelList({ channels, onSelectChannel, selectedChannelId, profile }) 
 }
 
 // ==================== CHAT VIEW ====================
-function ChatView({ channel, messages, profile, onSendMessage, onDeleteMessage, onToggleSubscribe, onBack }) {
+function ChatView({ channel, messages, profile, onSendMessage, onDeleteMessage, onToggleSubscribe, onReactMessage, onBack }) {
   const [messageText, setMessageText] = useState('');
   const [messageType, setMessageType] = useState('text');
   const [isUrgent, setIsUrgent] = useState(false);
@@ -78,6 +78,7 @@ function ChatView({ channel, messages, profile, onSendMessage, onDeleteMessage, 
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
   const sendingRef = useRef(false);
+  const [activeReactionPickerId, setActiveReactionPickerId] = useState(null);
 
   const isAdmin = profile?.role === 'club_admin' && profile?.club_id === channel?.id;
   const isCoordinator = profile?.email === 'bigbossssz550@gmail.com';
@@ -132,6 +133,26 @@ function ChatView({ channel, messages, profile, onSendMessage, onDeleteMessage, 
       sendingRef.current = false;
       setSending(false);
     }
+  }
+
+  async function handleReact(messageId, emoji) {
+    try {
+      const res = await fetch(`${API_BASE}/broadcast/messages/${messageId}/react`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ emoji })
+      });
+      const data = await res.json();
+      if (data.ok) {
+        onReactMessage(messageId, data.reactions);
+      }
+    } catch (err) {
+      console.error('Error reacting:', err);
+    }
+    setActiveReactionPickerId(null);
   }
 
   if (!channel) {
@@ -205,11 +226,16 @@ function ChatView({ channel, messages, profile, onSendMessage, onDeleteMessage, 
                 <span className="bc-message-sender">{msg.sender_name || msg.sender_email}</span>
                 {msg.is_urgent && <span className="bc-urgent-tag">🔴 URGENT</span>}
                 <span className="bc-message-time">{formatDateTime(msg.created_at)}</span>
-                {canPost && (
-                  <button className="bc-message-delete" onClick={() => onDeleteMessage(msg.id)} title="Delete message">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+                <div className="bc-msg-actions-group">
+                  <button className="bc-react-trigger-btn" onClick={() => setActiveReactionPickerId(activeReactionPickerId === msg.id ? null : msg.id)} title="React with emoji">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
                   </button>
-                )}
+                  {canPost && (
+                    <button className="bc-message-delete" onClick={() => onDeleteMessage(msg.id)} title="Delete message">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+                    </button>
+                  )}
+                </div>
               </div>
               {msg.content && (
                 <div className="bc-message-content">
@@ -230,6 +256,40 @@ function ChatView({ channel, messages, profile, onSendMessage, onDeleteMessage, 
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
                   {msg.link_url.length > 50 ? msg.link_url.substring(0, 50) + '...' : msg.link_url}
                 </a>
+              )}
+
+              {activeReactionPickerId === msg.id && (
+                <div className="bc-reaction-picker">
+                  {['❤️', '👍', '😂', '😮', '😢', '🙏'].map(emoji => (
+                    <button key={emoji} className="bc-reaction-emoji-btn" onClick={() => handleReact(msg.id, emoji)}>
+                      {emoji}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Message Reactions display */}
+              {msg.reactions && msg.reactions.length > 0 && (
+                <div className="bc-msg-reactions">
+                  {Object.entries(
+                    msg.reactions.reduce((acc, r) => {
+                      acc[r.emoji] = (acc[r.emoji] || 0) + 1;
+                      return acc;
+                    }, {})
+                  ).map(([emoji, count]) => {
+                    const hasReacted = msg.reactions.some(r => r.user_email === profile?.email && r.emoji === emoji);
+                    return (
+                      <button
+                        key={emoji}
+                        className={`bc-reaction-pill ${hasReacted ? 'active' : ''}`}
+                        onClick={() => handleReact(msg.id, emoji)}
+                      >
+                        <span className="bc-reaction-pill-emoji">{emoji}</span>
+                        <span className="bc-reaction-pill-count">{count}</span>
+                      </button>
+                    );
+                  })}
+                </div>
               )}
 
             </div>
@@ -467,6 +527,13 @@ export default function BroadcastChannel({ onBack }) {
                 });
               } else if (action === 'delete') {
                 setMessages(prev => prev.filter(m => String(m.id) !== String(id)));
+              } else if (action === 'react') {
+                setMessages(prev => prev.map(m => {
+                  if (String(m.id) === String(message_id)) {
+                    return { ...m, reactions };
+                  }
+                  return m;
+                }));
               }
             }
           }
@@ -610,6 +677,15 @@ export default function BroadcastChannel({ onBack }) {
     }
   }
 
+  function handleReactMessage(messageId, reactions) {
+    setMessages(prev => prev.map(m => {
+      if (String(m.id) === String(messageId)) {
+        return { ...m, reactions };
+      }
+      return m;
+    }));
+  }
+
   function handleBack() {
     if (!showChannelList) {
       setShowChannelList(true);
@@ -672,6 +748,7 @@ export default function BroadcastChannel({ onBack }) {
             onSendMessage={sendMessage}
             onDeleteMessage={deleteMessage}
             onToggleSubscribe={toggleSubscribe}
+            onReactMessage={handleReactMessage}
             onBack={() => { setShowChannelList(true); setSelectedChannel(null); }}
           />
         </div>

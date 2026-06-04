@@ -66,6 +66,17 @@ module.exports = function (pool, poolQuery, broadcastWSMessage) {
         )
       `);
 
+      await poolQuery(`
+        CREATE TABLE IF NOT EXISTS broadcast_reactions (
+          id SERIAL PRIMARY KEY,
+          message_id INTEGER REFERENCES broadcast_messages(id) ON DELETE CASCADE NOT NULL,
+          user_email VARCHAR(255) REFERENCES users(email) ON DELETE CASCADE NOT NULL,
+          emoji VARCHAR(50) NOT NULL,
+          created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+          UNIQUE(message_id, user_email)
+        )
+      `);
+
       console.log('✅ Broadcast tables ready');
     } catch (err) {
       console.error('⚠️ Broadcast table creation error (may already exist):', err.message);
@@ -120,7 +131,13 @@ module.exports = function (pool, poolQuery, broadcastWSMessage) {
           bm.content, bm.image_url, bm.link_url, bm.is_urgent,
           bm.created_at,
           u.name AS sender_name, u.profile_picture AS sender_avatar,
-          c.club_name, c.club_code
+          c.club_name, c.club_code,
+          COALESCE(
+            (SELECT json_agg(json_build_object('user_email', br.user_email, 'emoji', br.emoji))
+             FROM broadcast_reactions br
+             WHERE br.message_id = bm.id),
+            '[]'::json
+          ) AS reactions
         FROM broadcast_messages bm
         JOIN users u ON bm.sender_email = u.email
         JOIN clubs c ON bm.club_id = c.id
@@ -322,6 +339,71 @@ module.exports = function (pool, poolQuery, broadcastWSMessage) {
     } catch (err) {
       console.error('Error fetching subscribed channels:', err);
       res.status(500).json({ ok: false, error: 'Failed to fetch channels' });
+    }
+  });
+
+  // ==================== TOGGLE EMOJI REACTION ====================
+  router.post('/messages/:messageId/react', authenticateToken, async (req, res) => {
+    try {
+      const messageId = parseInt(req.params.messageId);
+      const userEmail = req.user.sub;
+      const { emoji } = req.body;
+
+      if (!emoji) return res.status(400).json({ ok: false, error: 'Emoji is required' });
+
+      // First check if user already has a reaction on this message
+      const { rows: existing } = await poolQuery(
+        `SELECT id, emoji FROM broadcast_reactions WHERE message_id = $1 AND user_email = $2`,
+        [messageId, userEmail]
+      );
+
+      let actionType = 'create';
+      if (existing.length > 0) {
+        if (existing[0].emoji === emoji) {
+          // If it's the exact same emoji, delete it (toggle off)
+          await poolQuery(`DELETE FROM broadcast_reactions WHERE id = $1`, [existing[0].id]);
+          actionType = 'delete';
+        } else {
+          // If it's a different emoji, update it (change reaction)
+          await poolQuery(`UPDATE broadcast_reactions SET emoji = $1 WHERE id = $2`, [emoji, existing[0].id]);
+          actionType = 'update';
+        }
+      } else {
+        // Create new reaction
+        await poolQuery(
+          `INSERT INTO broadcast_reactions (message_id, user_email, emoji) VALUES ($1, $2, $3)`,
+          [messageId, userEmail, emoji]
+        );
+        actionType = 'create';
+      }
+
+      // Fetch all reactions for this message
+      const { rows: allReactions } = await poolQuery(
+        `SELECT user_email, emoji FROM broadcast_reactions WHERE message_id = $1`,
+        [messageId]
+      );
+
+      // Find club_id of this message to broadcast WebSocket event to the channel
+      const { rows: msgInfo } = await poolQuery(
+        `SELECT club_id FROM broadcast_messages WHERE id = $1`,
+        [messageId]
+      );
+
+      if (msgInfo.length > 0) {
+        const clubId = msgInfo[0].club_id;
+        if (typeof broadcastWSMessage === 'function') {
+          broadcastWSMessage(clubId, {
+            action: 'react',
+            message_id: messageId,
+            reactions: allReactions
+          });
+        }
+      }
+
+      res.json({ ok: true, action: actionType, reactions: allReactions });
+    } catch (err) {
+      console.error('Error toggling reaction:', err);
+      res.status(500).json({ ok: false, error: 'Failed to toggle reaction' });
     }
   });
 
