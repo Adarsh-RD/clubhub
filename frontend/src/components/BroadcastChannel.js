@@ -23,8 +23,12 @@ function ChannelList({ channels, onSelectChannel, selectedChannelId, profile }) 
             className={`bc-channel-item ${selectedChannelId === channel.id ? 'active' : ''}`}
             onClick={() => onSelectChannel(channel)}
           >
-            <div className="bc-channel-avatar">
-              {channel.club_code?.charAt(0) || '?'}
+            <div className="bc-channel-avatar" style={channel.logo_url ? { background: '#ffffff', padding: '2px' } : {}}>
+              {channel.logo_url ? (
+                <img src={channel.logo_url} alt="" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'contain' }} />
+              ) : (
+                channel.club_code?.charAt(0) || '?'
+              )}
             </div>
             <div className="bc-channel-info">
               <div className="bc-channel-name">
@@ -179,8 +183,12 @@ function ChatView({ channel, messages, profile, onSendMessage, onDeleteMessage, 
             <polyline points="15 18 9 12 15 6"></polyline>
           </svg>
         </button>
-        <div className="bc-chat-header-avatar">
-          {channel.club_code?.charAt(0) || '?'}
+        <div class="bc-chat-header-avatar" style={channel.logo_url ? { background: '#ffffff', padding: '2px' } : {}}>
+          {channel.logo_url ? (
+            <img src={channel.logo_url} alt="" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'contain' }} />
+          ) : (
+            channel.club_code?.charAt(0) || '?'
+          )}
         </div>
         <div className="bc-chat-header-info">
           <h3>{channel.club_name}</h3>
@@ -215,16 +223,16 @@ function ChatView({ channel, messages, profile, onSendMessage, onDeleteMessage, 
 
         {messages.map((msg) => (
           <div key={msg.id} className={`bc-message ${msg.is_urgent ? 'urgent' : ''}`}>
-            <div className="bc-message-avatar">
-              {msg.sender_avatar ? (
-                <img src={msg.sender_avatar} alt="" />
+            <div className="bc-message-avatar" style={msg.club_logo || channel.logo_url ? { background: '#ffffff', padding: '2px' } : {}}>
+              {msg.club_logo || channel.logo_url ? (
+                <img src={msg.club_logo || channel.logo_url} alt="" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'contain' }} />
               ) : (
-                (msg.sender_name?.charAt(0) || '?')
+                (channel.club_code?.charAt(0) || '?')
               )}
             </div>
             <div className="bc-message-body">
               <div className="bc-message-header">
-                <span className="bc-message-sender">{msg.sender_name || msg.sender_email}</span>
+                <span className="bc-message-sender">{msg.club_name || channel.club_name || msg.sender_name || msg.sender_email}</span>
                 {msg.is_urgent && <span className="bc-urgent-tag">🔴 URGENT</span>}
                 <div className="bc-msg-actions-group">
                   <span className="bc-message-time">{formatDateTime(msg.created_at)}</span>

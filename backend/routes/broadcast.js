@@ -93,7 +93,7 @@ module.exports = function (pool, poolQuery, broadcastWSMessage) {
 
       const { rows } = await poolQuery(`
         SELECT 
-          c.id, c.club_name, c.club_code, c.category, c.description,
+          c.id, c.club_name, c.club_code, c.category, c.description, c.logo_url,
           (SELECT COUNT(*) FROM broadcast_subscriptions bs 
            WHERE bs.club_id = c.id AND bs.is_active = true) AS subscriber_count,
           (SELECT COUNT(*) FROM broadcast_messages bm 
@@ -131,7 +131,7 @@ module.exports = function (pool, poolQuery, broadcastWSMessage) {
           bm.content, bm.image_url, bm.link_url, bm.is_urgent,
           bm.created_at,
           u.name AS sender_name, u.profile_picture AS sender_avatar,
-          c.club_name, c.club_code,
+          c.club_name, c.club_code, c.logo_url AS club_logo,
           COALESCE(
             (SELECT json_agg(json_build_object('user_email', br.user_email, 'emoji', br.emoji))
              FROM broadcast_reactions br
@@ -149,7 +149,7 @@ module.exports = function (pool, poolQuery, broadcastWSMessage) {
       // Also get channel info
       const { rows: channelRows } = await poolQuery(`
         SELECT 
-          c.id, c.club_name, c.club_code, c.category, c.description,
+          c.id, c.club_name, c.club_code, c.category, c.description, c.logo_url,
           (SELECT COUNT(*) FROM broadcast_subscriptions bs 
            WHERE bs.club_id = c.id AND bs.is_active = true) AS subscriber_count,
           EXISTS(SELECT 1 FROM broadcast_subscriptions bs 
@@ -220,16 +220,25 @@ module.exports = function (pool, poolQuery, broadcastWSMessage) {
         is_urgent === 'true' || is_urgent === true
       ]);
 
-      // Get sender info for response
+      // Get sender info and club info for response
       const { rows: senderRows } = await poolQuery(
         `SELECT name, profile_picture FROM users WHERE email = $1`,
         [userEmail]
       );
 
+      const { rows: clubRows } = await poolQuery(
+        `SELECT club_name, club_code, logo_url FROM clubs WHERE id = $1`,
+        [clubId]
+      );
+      const clubInfo = clubRows[0] || {};
+ 
       const message = {
         ...rows[0],
         sender_name: senderRows[0]?.name || userEmail,
-        sender_avatar: senderRows[0]?.profile_picture || null
+        sender_avatar: senderRows[0]?.profile_picture || null,
+        club_name: clubInfo.club_name || null,
+        club_code: clubInfo.club_code || null,
+        club_logo: clubInfo.logo_url || null
       };
 
       if (typeof broadcastWSMessage === 'function') {
@@ -320,7 +329,7 @@ module.exports = function (pool, poolQuery, broadcastWSMessage) {
 
       const { rows } = await poolQuery(`
         SELECT 
-          c.id, c.club_name, c.club_code, c.category,
+          c.id, c.club_name, c.club_code, c.category, c.logo_url,
           (SELECT COUNT(*) FROM broadcast_subscriptions bs 
            WHERE bs.club_id = c.id AND bs.is_active = true) AS subscriber_count,
           (SELECT bm.created_at FROM broadcast_messages bm 
