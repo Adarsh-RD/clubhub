@@ -77,6 +77,7 @@ function ChatView({ channel, messages, profile, onSendMessage, onDeleteMessage, 
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
+  const sendingRef = useRef(false);
 
   const isAdmin = profile?.role === 'club_admin' && profile?.club_id === channel?.id;
   const isCoordinator = profile?.email === 'bigbossssz550@gmail.com';
@@ -106,8 +107,9 @@ function ChatView({ channel, messages, profile, onSendMessage, onDeleteMessage, 
 
   async function handleSend(e) {
     e.preventDefault();
-    if ((!messageText.trim() && !imageFile) || sending) return;
+    if ((!messageText.trim() && !imageFile) || sendingRef.current) return;
 
+    sendingRef.current = true;
     setSending(true);
     try {
       await onSendMessage({
@@ -126,8 +128,10 @@ function ChatView({ channel, messages, profile, onSendMessage, onDeleteMessage, 
       setShowLinkInput(false);
     } catch (err) {
       alert('Failed to send message');
+    } finally {
+      sendingRef.current = false;
+      setSending(false);
     }
-    setSending(false);
   }
 
   if (!channel) {
@@ -424,13 +428,16 @@ export default function BroadcastChannel({ onBack }) {
     const wsHost = API_BASE.replace(/^https?:\/\//, '');
     const wsUrl = `${wsProtocol}://${wsHost}`;
 
-    let socket;
-    let reconnectTimeout;
+    let socket = null;
+    let reconnectTimeout = null;
+    let isUnmounted = false;
 
     function connectWS() {
+      if (isUnmounted) return;
       socket = new WebSocket(wsUrl);
 
       socket.onmessage = (event) => {
+        if (isUnmounted) return;
         try {
           const data = JSON.parse(event.data);
           if (data.type === 'broadcast_event') {
@@ -455,11 +462,11 @@ export default function BroadcastChannel({ onBack }) {
             if (selectedChannelRef.current && selectedChannelRef.current.id === club_id) {
               if (action === 'create') {
                 setMessages(prev => {
-                  if (prev.some(m => m.id === message.id)) return prev;
+                  if (prev.some(m => String(m.id) === String(message.id))) return prev;
                   return [...prev, message];
                 });
               } else if (action === 'delete') {
-                setMessages(prev => prev.filter(m => m.id !== id));
+                setMessages(prev => prev.filter(m => String(m.id) !== String(id)));
               }
             }
           }
@@ -469,19 +476,21 @@ export default function BroadcastChannel({ onBack }) {
       };
 
       socket.onclose = () => {
+        if (isUnmounted) return;
         reconnectTimeout = setTimeout(connectWS, 5000);
       };
 
       socket.onerror = () => {
-        socket.close();
+        if (socket) socket.close();
       };
     }
 
     connectWS();
 
     return () => {
+      isUnmounted = true;
       if (socket) socket.close();
-      clearTimeout(reconnectTimeout);
+      if (reconnectTimeout) clearTimeout(reconnectTimeout);
     };
   }, []);
 
@@ -558,7 +567,7 @@ export default function BroadcastChannel({ onBack }) {
     const data = await res.json();
     if (data.ok) {
       setMessages(prev => {
-        if (prev.some(m => m.id === data.message.id)) return prev;
+        if (prev.some(m => String(m.id) === String(data.message.id)) return prev;
         return [...prev, data.message];
       });
     } else {
