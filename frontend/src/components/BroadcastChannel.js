@@ -23,9 +23,9 @@ function ChannelList({ channels, onSelectChannel, selectedChannelId, profile }) 
             className={`bc-channel-item ${selectedChannelId === channel.id ? 'active' : ''}`}
             onClick={() => onSelectChannel(channel)}
           >
-            <div className="bc-channel-avatar" style={channel.logo_url ? { border: '2.5px solid #ffffff', background: '#ffffff', overflow: 'hidden' } : {}}>
+            <div className="bc-channel-avatar" style={channel.logo_url ? { border: '2.5px solid #ffffff', background: '#ffffff', overflow: 'hidden', padding: '3px' } : {}}>
               {channel.logo_url ? (
-                <img src={channel.logo_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <img src={channel.logo_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: '50%' }} />
               ) : (
                 channel.club_code?.charAt(0) || '?'
               )}
@@ -183,9 +183,9 @@ function ChatView({ channel, messages, profile, onSendMessage, onDeleteMessage, 
             <polyline points="15 18 9 12 15 6"></polyline>
           </svg>
         </button>
-        <div class="bc-chat-header-avatar" style={channel.logo_url ? { border: '2.5px solid #ffffff', background: '#ffffff', overflow: 'hidden' } : {}}>
+        <div class="bc-chat-header-avatar" style={channel.logo_url ? { border: '2.5px solid #ffffff', background: '#ffffff', overflow: 'hidden', padding: '3px' } : {}}>
           {channel.logo_url ? (
-            <img src={channel.logo_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <img src={channel.logo_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: '50%' }} />
           ) : (
             channel.club_code?.charAt(0) || '?'
           )}
@@ -223,9 +223,9 @@ function ChatView({ channel, messages, profile, onSendMessage, onDeleteMessage, 
 
         {messages.map((msg) => (
           <div key={msg.id} className={`bc-message ${msg.is_urgent ? 'urgent' : ''}`}>
-            <div className="bc-message-avatar" style={msg.club_logo || channel.logo_url ? { border: '2px solid #ffffff', background: '#ffffff', overflow: 'hidden' } : {}}>
+            <div className="bc-message-avatar" style={msg.club_logo || channel.logo_url ? { border: '2px solid #ffffff', background: '#ffffff', overflow: 'hidden', padding: '2px' } : {}}>
               {msg.club_logo || channel.logo_url ? (
-                <img src={msg.club_logo || channel.logo_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <img src={msg.club_logo || channel.logo_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: '50%' }} />
               ) : (
                 (channel.club_code?.charAt(0) || '?')
               )}

@@ -75,6 +75,8 @@ const findUserByEmail = async (email) => {
       u.club_id,
       u.admin_requested,
       u.profile_picture,
+      u.dob,
+      u.year,
       c.club_name,
       c.club_code,
       c.description AS club_description
@@ -115,7 +117,7 @@ const getProfileByEmail = async (email) => {
 
 const updateProfile = async (
   email,
-  { name = null, branch = null, roll_number = null, role = null, club_id = null, request_admin = false }
+  { name = null, branch = null, roll_number = null, role = null, club_id = null, request_admin = false, dob = null, year = null }
 ) => {
   let query;
   let params;
@@ -124,21 +126,21 @@ const updateProfile = async (
     query = `
       UPDATE users
       SET name=$1, branch=$2, roll_number=$3, club_id=$4,
-          admin_requested=true, requested_at=NOW(), updated_at=NOW()
-      WHERE email=$5`;
-    params = [name, branch, roll_number, club_id, email.toLowerCase()];
+          admin_requested=true, requested_at=NOW(), dob=$5, year=$6, updated_at=NOW()
+      WHERE email=$7`;
+    params = [name, branch, roll_number, club_id, dob, year, email.toLowerCase()];
   } else if (role) {
     query = `
       UPDATE users
-      SET name=$1, branch=$2, roll_number=$3, role=$4, updated_at=NOW()
-      WHERE email=$5`;
-    params = [name, branch, roll_number, role, email.toLowerCase()];
+      SET name=$1, branch=$2, roll_number=$3, role=$4, dob=$5, year=$6, updated_at=NOW()
+      WHERE email=$7`;
+    params = [name, branch, roll_number, role, dob, year, email.toLowerCase()];
   } else {
     query = `
       UPDATE users
-      SET name=$1, branch=$2, roll_number=$3, updated_at=NOW()
-      WHERE email=$4`;
-    params = [name, branch, roll_number, email.toLowerCase()];
+      SET name=$1, branch=$2, roll_number=$3, dob=$4, year=$5, updated_at=NOW()
+      WHERE email=$6`;
+    params = [name, branch, roll_number, dob, year, email.toLowerCase()];
   }
 
   await poolQuery(query, params);

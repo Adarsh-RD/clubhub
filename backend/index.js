@@ -472,6 +472,93 @@ app.post('/auth/reset-password', async (req, res) => {
   }
 });
 
+// ==================== USN PARSING ====================
+
+const BRANCH_CODES = {
+  'BCS': 'Computer Science & Engineering',
+  'BCI': 'CSE (Artificial Intelligence & ML)',
+  'BCV': 'CSE (Cyber Security)',
+  'BIS': 'Information Science & Engineering',
+  'BEC': 'Electronics & Communication Engineering',
+  'BEE': 'Electrical & Electronics Engineering',
+  'BME': 'Mechanical Engineering',
+  'BCE': 'Civil Engineering',
+  'BCH': 'Chemical Engineering',
+  'BBT': 'Biotechnology',
+  'BAD': 'Artificial Intelligence & Data Science',
+  'BRO': 'Robotics & Automation',
+  'BML': 'Machine Learning',
+};
+
+function parseUSN(email) {
+  if (!email || !email.toLowerCase().endsWith('@kletech.ac.in')) {
+    return null;
+  }
+
+  const usn = email.split('@')[0].toUpperCase();
+
+  // USN format: 01FE23BCI050
+  // Pattern: 2-digit college code + 2-char campus + 2-digit year + 2-3 char branch + 3-digit roll
+  const match = usn.match(/^(\d{2})([A-Z]{2})(\d{2})([A-Z]{2,3})(\d{3})$/);
+  if (!match) {
+    return { usn, raw: true }; // Return raw USN if pattern doesn't match
+  }
+
+  const [, collegeCode, campusCode, admissionYearShort, branchCode, rollSerial] = match;
+  const admissionYear = 2000 + parseInt(admissionYearShort);
+  const currentYear = new Date().getFullYear();
+  const currentMonth = new Date().getMonth(); // 0-indexed
+  // Academic year starts in July (month 6)
+  const academicYear = currentMonth >= 6 ? currentYear : currentYear - 1;
+  const yearOfStudy = academicYear - admissionYear + 1;
+
+  const yearSuffix = yearOfStudy === 1 ? 'st' : yearOfStudy === 2 ? 'nd' : yearOfStudy === 3 ? 'rd' : 'th';
+  const yearLabel = yearOfStudy > 0 && yearOfStudy <= 6 ? `${yearOfStudy}${yearSuffix} Year` : null;
+
+  const branchName = BRANCH_CODES[branchCode] || branchCode;
+
+  return {
+    usn,
+    college_code: collegeCode,
+    campus_code: campusCode,
+    admission_year: admissionYear,
+    branch_code: branchCode,
+    branch: branchName,
+    roll_serial: rollSerial,
+    year: yearLabel,
+    year_of_study: yearOfStudy,
+  };
+}
+
+app.post('/api/parse-usn', (req, res) => {
+  const { email } = req.body || {};
+  if (!email) {
+    return res.status(400).json({ ok: false, error: 'email required' });
+  }
+
+  const parsed = parseUSN(email);
+  if (!parsed) {
+    return res.json({ ok: true, is_kletech: false, message: 'Not a KLE Tech email' });
+  }
+
+  if (parsed.raw) {
+    return res.json({ ok: true, is_kletech: true, usn: parsed.usn, parsed: false, message: 'USN format not recognized' });
+  }
+
+  return res.json({
+    ok: true,
+    is_kletech: true,
+    parsed: true,
+    usn: parsed.usn,
+    branch: parsed.branch,
+    branch_code: parsed.branch_code,
+    year: parsed.year,
+    year_of_study: parsed.year_of_study,
+    admission_year: parsed.admission_year,
+    roll_number: parsed.usn,
+  });
+});
+
 // ==================== USER PROFILE ROUTES ====================
 
 app.get('/me', async (req, res) => {
@@ -508,6 +595,8 @@ app.get('/me', async (req, res) => {
         admin_requested: user.admin_requested,
         profile_picture: user.profile_picture,
         club_id: user.club_id,
+        dob: user.dob,
+        year: user.year,
       }
     });
   } catch (err) {
@@ -547,6 +636,8 @@ app.get('/profile', async (req, res) => {
         club_name: user.club_name,
         club_code: user.club_code,
         profile_picture: user.profile_picture,
+        dob: user.dob,
+        year: user.year,
       }
     });
   } catch (err) {
@@ -572,7 +663,7 @@ app.post('/profile', async (req, res) => {
     }
     const email = payload.sub.toLowerCase();
 
-    const { name, branch, roll_number, role, club_id } = req.body;
+    const { name, branch, roll_number, role, club_id, dob, year } = req.body;
 
     const currentUser = await findUserByEmail(email);
 
@@ -584,7 +675,9 @@ app.post('/profile', async (req, res) => {
           roll_number: roll_number || null,
           role: 'student',
           club_id: null,
-          request_admin: false
+          request_admin: false,
+          dob: dob || null,
+          year: year || null
         });
       } else if (role === 'club_admin') {
         await updateProfile(email, {
@@ -593,7 +686,9 @@ app.post('/profile', async (req, res) => {
           roll_number: roll_number || null,
           role: null,
           club_id: club_id || null,
-          request_admin: true
+          request_admin: true,
+          dob: dob || null,
+          year: year || null
         });
 
         // Send email notification to coordinator
@@ -606,7 +701,9 @@ app.post('/profile', async (req, res) => {
         roll_number: roll_number || null,
         role: null,
         club_id: null,
-        request_admin: false
+        request_admin: false,
+        dob: dob || null,
+        year: year || null
       });
     }
 

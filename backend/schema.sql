@@ -25,6 +25,8 @@ CREATE TABLE users (
     requested_at TIMESTAMP WITH TIME ZONE,
     profile_picture TEXT,
     fcm_token TEXT,
+    dob DATE,
+    year VARCHAR(20),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE
 );
