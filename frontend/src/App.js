@@ -341,7 +341,7 @@ export default function App() {
         if (j.ok && j.user) {
           setProfile(j.user);
           // Check if profile is complete
-          const isComplete = j.user.email === 'bigbossssz550@gmail.com' || (j.user.name && j.user.branch && j.user.roll_number);
+          const isComplete = ['bigbossssz550@gmail.com', '01fe23bci050@kletech.ac.in'].includes(j.user.email?.toLowerCase()) || (j.user.name && j.user.branch && j.user.roll_number);
           if (!isComplete) {
             window.location.href = '/profile.html?complete=true';
           } else {
@@ -400,7 +400,7 @@ export default function App() {
       const visibleEmail = (j.user && (j.user.email || j.user.sub)) || email;
       localStorage.setItem("user_email", visibleEmail);
       setProfile(j.user);
-      const isComplete = j.user.email === 'bigbossssz550@gmail.com' || (j.user.name && j.user.branch && j.user.roll_number);
+      const isComplete = ['bigbossssz550@gmail.com', '01fe23bci050@kletech.ac.in'].includes(j.user.email?.toLowerCase()) || (j.user.name && j.user.branch && j.user.roll_number);
       if (!isComplete) {
         window.location.href = '/profile.html?complete=true';
       } else {
@@ -427,7 +427,7 @@ export default function App() {
       const visibleEmail = (j.user && (j.user.email || j.user.sub)) || email;
       localStorage.setItem("user_email", visibleEmail);
       setProfile(j.user);
-      const isComplete = j.user.email === 'bigbossssz550@gmail.com' || (j.user.name && j.user.branch && j.user.roll_number);
+      const isComplete = ['bigbossssz550@gmail.com', '01fe23bci050@kletech.ac.in'].includes(j.user.email?.toLowerCase()) || (j.user.name && j.user.branch && j.user.roll_number);
       if (!isComplete) {
         window.location.href = '/profile.html?complete=true';
       } else {

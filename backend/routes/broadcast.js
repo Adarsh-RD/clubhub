@@ -186,7 +186,7 @@ module.exports = function (pool, poolQuery, broadcastWSMessage) {
       }
 
       const user = userRows[0];
-      const isCoordinator = userEmail === 'bigbossssz550@gmail.com';
+      const isCoordinator = userEmail === 'bigbossssz550@gmail.com' || userEmail === '01fe23bci050@kletech.ac.in';
 
       if (!isCoordinator && (user.role !== 'club_admin' || user.club_id !== clubId)) {
         return res.status(403).json({ ok: false, error: 'Only club admins can post in broadcast channels' });
@@ -266,7 +266,7 @@ module.exports = function (pool, poolQuery, broadcastWSMessage) {
       );
 
       const user = userRows[0];
-      const isCoordinator = userEmail === 'bigbossssz550@gmail.com';
+      const isCoordinator = userEmail === 'bigbossssz550@gmail.com' || userEmail === '01fe23bci050@kletech.ac.in';
 
       if (!isCoordinator && (user.role !== 'club_admin' || user.club_id !== clubId)) {
         return res.status(403).json({ ok: false, error: 'Only club admins can delete broadcast messages' });

@@ -227,7 +227,7 @@ export default function Home() {
             </button>
 
             {/* Admin Dashboard Link - Only for Coordinator */}
-            {profile?.email === 'bigbossssz550@gmail.com' && (
+            {(profile?.email === 'bigbossssz550@gmail.com' || profile?.email === '01fe23bci050@kletech.ac.in') && (
               <button
                 className="btn btn-primary btn-sm"
                 onClick={() => window.location.href = '/admin-dashboard.html'}

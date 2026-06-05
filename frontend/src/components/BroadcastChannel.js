@@ -85,7 +85,7 @@ function ChatView({ channel, messages, profile, onSendMessage, onDeleteMessage, 
   const [activeReactionPickerId, setActiveReactionPickerId] = useState(null);
 
   const isAdmin = profile?.role === 'club_admin' && profile?.club_id === channel?.id;
-  const isCoordinator = profile?.email === 'bigbossssz550@gmail.com';
+  const isCoordinator = profile?.email === 'bigbossssz550@gmail.com' || profile?.email === '01fe23bci050@kletech.ac.in';
   const canPost = isAdmin || isCoordinator;
 
   useEffect(() => {

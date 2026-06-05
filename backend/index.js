@@ -186,8 +186,8 @@ function authMiddleware(req, res, next) {
 }
 
 function isCoordinator(req, res, next) {
-  const coordinatorEmail = 'bigbossssz550@gmail.com';
-  if (req.userEmail !== coordinatorEmail) {
+  const coordinators = ['bigbossssz550@gmail.com', '01fe23bci050@kletech.ac.in'];
+  if (!coordinators.includes(req.userEmail?.toLowerCase())) {
     return res.status(403).json({ ok: false, error: 'Access denied: Admin privileges required' });
   }
   next();
@@ -1321,7 +1321,7 @@ async function sendAdminRequestEmail(userEmail, userName, clubId) {
 
     const mailOptions = {
       from: process.env.FROM_EMAIL || process.env.EMAIL_USER,
-      to: 'bigbossssz550@gmail.com',
+      to: '01fe23bci050@kletech.ac.in',
       subject: '🎯 New Club Admin Request - Club Hub',
       html: `
         <!DOCTYPE html>
@@ -1521,7 +1521,7 @@ async function sendAdminRequestEmail(userEmail, userName, clubId) {
     };
 
     await sendEmailWrapper(mailOptions);
-    console.log(`✓ Admin notification email sent to bigbossssz550@gmail.com`);
+    console.log(`✓ Admin notification email sent to 01fe23bci050@kletech.ac.in`);
   } catch (err) {
     console.error('Failed to send admin notification email:', err);
     // Don't throw - request should still be saved even if email fails

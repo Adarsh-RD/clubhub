@@ -1225,7 +1225,8 @@
         }
       }
 
-      if (isCompleteReq && p.email !== 'bigbossssz550@gmail.com' && (!p.name || !p.branch || !p.roll_number)) {
+      const coordinatorEmails = ['bigbossssz550@gmail.com', '01fe23bci050@kletech.ac.in'];
+      if (isCompleteReq && !coordinatorEmails.includes(p.email?.toLowerCase()) && (!p.name || !p.branch || !p.roll_number)) {
           alert('Welcome to Club Hub! Please complete your profile to access the feed.');
           const backBtn = document.querySelector('.back-btn');
           if(backBtn) backBtn.style.display = 'none';

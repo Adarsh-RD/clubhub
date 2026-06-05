@@ -495,14 +495,14 @@
 
     <script>
         const API = 'https://clubhub-5eh7.onrender.com';
-        const ADMIN_EMAIL = 'bigbossssz550@gmail.com'; // Coordinator email
+        const ADMIN_EMAILS = ['bigbossssz550@gmail.com', '01fe23bci050@kletech.ac.in']; // Coordinator emails
 
         // Check if user is admin
         const token = localStorage.getItem('token');
         const userEmail = localStorage.getItem('user_email');
 
         (async () => {
-            if (!token || userEmail !== ADMIN_EMAIL) {
+            if (!token || !ADMIN_EMAILS.includes(userEmail?.toLowerCase())) {
                 await window.customAlert('⚠️ Access Denied: Admin privileges required');
                 window.location.href = '/';
             }
