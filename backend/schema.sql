@@ -38,7 +38,7 @@ CREATE TABLE announcements (
     title VARCHAR(255) NOT NULL,
     content TEXT NOT NULL,
     image_url TEXT,
-    created_by VARCHAR(255) REFERENCES users(email),
+    created_by VARCHAR(255) REFERENCES users(email) ON DELETE CASCADE,
     is_active BOOLEAN DEFAULT TRUE,
     
     -- Registration Features
@@ -53,7 +53,7 @@ CREATE TABLE announcements (
 -- 4. Club Subscriptions Table
 CREATE TABLE club_subscriptions (
     id SERIAL PRIMARY KEY,
-    user_id INTEGER REFERENCES users(id) NOT NULL,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL,
     club_id INTEGER REFERENCES clubs(id) NOT NULL,
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
@@ -64,7 +64,7 @@ CREATE TABLE club_subscriptions (
 CREATE TABLE event_registrations (
     id SERIAL PRIMARY KEY,
     announcement_id INTEGER REFERENCES announcements(id) NOT NULL,
-    user_id INTEGER REFERENCES users(id) NOT NULL,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL,
     registered_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     status VARCHAR(50) DEFAULT 'registered', -- 'registered', 'cancelled'
     UNIQUE(announcement_id, user_id)
