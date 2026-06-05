@@ -65,15 +65,15 @@
     }
 
     .header-logo {
-        width: 48px;
-        height: 48px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        overflow: hidden;
-        border-radius: 12px;
-        background: #ffffff;
-        padding: 4px;
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      border-radius: 12px;
+      background: #ffffff;
+      padding: 4px;
     }
 
     .header-logo img {
@@ -293,7 +293,7 @@
 
     /* Override browser autofill styles */
     input:-webkit-autofill,
-    input:-webkit-autofill:hover, 
+    input:-webkit-autofill:hover,
     input:-webkit-autofill:focus,
     input:-webkit-autofill:active {
       -webkit-text-fill-color: #FFFFFF !important;
@@ -336,8 +336,15 @@
     }
 
     @keyframes badgeFadeIn {
-      from { opacity: 0; transform: translateY(-4px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(-4px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     .auto-badge svg {
@@ -378,115 +385,38 @@
     }
 
     .radio-option {
-      position: relative;
-      flex: 1;
-    }
-
-    .radio-option input[type="radio"] {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      opacity: 0;
-      cursor: pointer;
-      z-index: 2;
-      margin: 0;
-    }
-
-    .radio-card {
       display: flex;
       align-items: center;
-      gap: 0.875rem;
+      gap: 0.75rem;
       padding: 1rem 1.25rem;
       background: rgba(15, 15, 20, 0.6);
       border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 0.75rem;
-      transition: all 0.3s ease;
-      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
-      width: 100%;
-      box-sizing: border-box;
       cursor: pointer;
+      transition: all 0.3s ease;
+      flex: 1;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
-    .radio-option:hover .radio-card {
+    .radio-option:hover {
       background: rgba(255, 255, 255, 0.05);
       border-color: rgba(255, 255, 255, 0.2);
     }
 
-    .radio-option input[type="radio"]:checked + .radio-card {
-      background: rgba(225, 29, 72, 0.1);
-      border-color: #E11D48;
-      box-shadow: 0 0 15px rgba(225, 29, 72, 0.2), inset 0 2px 4px rgba(225, 29, 72, 0.05);
+    .radio-option input[type="radio"] {
+      width: auto;
+      margin: 0;
+      cursor: pointer;
+      accent-color: #E11D48;
+      transform: scale(1.2);
     }
 
-    .radio-card svg {
-      color: #94A3B8;
-      transition: all 0.3s ease;
-      flex-shrink: 0;
-    }
-
-    .radio-option input[type="radio"]:checked + .radio-card svg {
-      color: #E11D48;
-      transform: scale(1.1);
-    }
-
-    .radio-card span {
+    .radio-option label {
+      margin: 0;
+      cursor: pointer;
       font-weight: 600;
       font-size: 0.9375rem;
       color: #E2E8F0;
-      transition: all 0.3s ease;
-    }
-
-    .radio-option input[type="radio"]:checked + .radio-card span {
-      color: #FFFFFF;
-      font-weight: 700;
-    }
-
-    /* Premium Input Icons styling */
-    .input-wrapper {
-      position: relative;
-      display: flex;
-      align-items: center;
-      width: 100%;
-    }
-
-    .input-icon {
-      position: absolute;
-      left: 1.25rem;
-      color: #94A3B8;
-      pointer-events: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0.7;
-      transition: all 0.3s ease;
-    }
-
-    .form-group input:focus ~ .input-icon,
-    .form-group select:focus ~ .input-icon {
-      color: #E11D48;
-      opacity: 1;
-    }
-
-    .locked-indicator {
-      position: absolute;
-      right: 1.25rem;
-      color: #64748B;
-      display: flex;
-      align-items: center;
-      pointer-events: none;
-      opacity: 0.7;
-    }
-
-    /* Adjust padding for inputs inside wrapper */
-    .form-section .form-group input,
-    .form-section .form-group select {
-      padding-left: 3.25rem;
-    }
-    
-    .form-section .form-group input[readonly] {
-      padding-right: 3rem;
     }
 
     .btn-group {
@@ -911,10 +841,9 @@
         border-radius: 0.75rem;
       }
 
-      .radio-card {
+      .radio-option {
         padding: 0.75rem 1rem;
         border-radius: 0.75rem;
-        gap: 0.625rem;
       }
 
       .btn-group {
@@ -1005,7 +934,8 @@
       }
     }
   </style>
-<script src="/ui-alerts.js"></script></head>
+  <script src="/ui-alerts.js"></script>
+</head>
 
 <body>
 
@@ -1054,82 +984,54 @@
       <div class="form-section">
         <div class="form-group">
           <label>Email Address</label>
-          <div class="input-wrapper">
-            <input id="email" type="email" readonly />
-            <span class="input-icon">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-            </span>
-            <span class="locked-indicator" title="Read-only email">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-            </span>
-          </div>
+          <input id="email" type="email" readonly />
         </div>
 
         <div class="form-group">
           <label>Full Name</label>
-          <div class="input-wrapper">
-            <input id="name" type="text" placeholder="Enter your full name" />
-            <span class="input-icon">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-            </span>
-          </div>
+          <input id="name" type="text" placeholder="Enter your full name" />
         </div>
 
         <div class="form-group auto-filled-group">
           <label>
             Branch
             <span id="branchBadge" class="auto-badge" style="display:none;">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-              Auto-filled
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              Auto-filled from USN
             </span>
           </label>
-          <div class="input-wrapper">
-            <input id="branch" type="text" placeholder="e.g., Computer Science & Engineering" readonly />
-            <span class="input-icon">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5-10 5z"></path><path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"></path></svg>
-            </span>
-            <span class="locked-indicator" title="Derived from USN (read-only)">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-            </span>
-          </div>
+          <input id="branch" type="text" placeholder="e.g., Computer Science & Engineering" readonly />
         </div>
 
         <div class="form-group auto-filled-group">
           <label>
             Year
             <span id="yearBadge" class="auto-badge" style="display:none;">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-              Auto-filled
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              Auto-filled from USN
             </span>
           </label>
-          <div class="input-wrapper">
-            <input id="year" type="text" placeholder="e.g., 3rd Year" readonly />
-            <span class="input-icon">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-            </span>
-            <span class="locked-indicator" title="Derived from USN (read-only)">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-            </span>
-          </div>
+          <input id="year" type="text" placeholder="e.g., 3rd Year" readonly />
         </div>
 
         <div class="form-group auto-filled-group">
           <label>
             Roll Number / USN
             <span id="rollBadge" class="auto-badge" style="display:none;">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-              Auto-filled
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              Auto-filled from USN
             </span>
           </label>
-          <div class="input-wrapper">
-            <input id="roll" type="text" placeholder="Enter your roll number" readonly />
-            <span class="input-icon">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2" fill="none"></rect><line x1="7" y1="8" x2="17" y2="8"></line><line x1="7" y1="12" x2="13" y2="12"></line><line x1="7" y1="16" x2="11" y2="16"></line></svg>
-            </span>
-            <span class="locked-indicator" title="Derived from USN (read-only)">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-            </span>
-          </div>
+          <input id="roll" type="text" placeholder="Enter your roll number" readonly />
         </div>
 
         <div id="roleSelect" class="form-group" style="display:none;">
@@ -1137,31 +1039,20 @@
           <div class="radio-group">
             <div class="radio-option">
               <input type="radio" name="role" value="student" id="roleStudent" onchange="toggleClubSelect()">
-              <label for="roleStudent" class="radio-card">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5-10 5z"></path><path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"></path></svg>
-                <span>Student</span>
-              </label>
+              <label for="roleStudent">Student</label>
             </div>
             <div class="radio-option">
               <input type="radio" name="role" value="club_admin" id="roleAdmin" onchange="toggleClubSelect()">
-              <label for="roleAdmin" class="radio-card">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                <span>Club Admin</span>
-              </label>
+              <label for="roleAdmin">Club Admin</label>
             </div>
           </div>
         </div>
 
         <div id="clubSelect" class="form-group" style="display:none;">
           <label>Select Club</label>
-          <div class="input-wrapper">
-            <select id="clubDropdown">
-              <option value="">-- Select a club --</option>
-            </select>
-            <span class="input-icon">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-            </span>
-          </div>
+          <select id="clubDropdown">
+            <option value="">-- Select a club --</option>
+          </select>
         </div>
 
         <div class="btn-group">
@@ -1178,7 +1069,8 @@
             Edit Profile
           </button>
           <button id="logoutBtn" class="btn btn-danger">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
               <polyline points="16 17 21 12 16 7"></polyline>
               <line x1="21" y1="12" x2="9" y2="12"></line>
@@ -1248,25 +1140,40 @@
     </div>
   </div>
 
-  <footer style="margin-top: 50px; padding: 30px 0 100px 0; border-top: 1px solid rgba(255,255,255,0.05); text-align: center; color: #64748b; font-size: 0.85rem;">
+  <footer
+    style="margin-top: 50px; padding: 30px 0 100px 0; border-top: 1px solid rgba(255,255,255,0.05); text-align: center; color: #64748b; font-size: 0.85rem;">
     <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;">
-      <a href="/about.html" style="color: #94a3b8; text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='#f8fafc'" onmouseout="this.style.color='#94a3b8'">About</a>
-      <a href="/accessibility.html" style="color: #94a3b8; text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='#f8fafc'" onmouseout="this.style.color='#94a3b8'">Accessibility</a>
-      <a href="/help.html" style="color: #94a3b8; text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='#f8fafc'" onmouseout="this.style.color='#94a3b8'">Help Center</a>
-      <a href="/privacy.html" style="color: #94a3b8; text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='#f8fafc'" onmouseout="this.style.color='#94a3b8'">Privacy & Terms</a>
+      <a href="/about.html" style="color: #94a3b8; text-decoration: none; transition: color 0.2s;"
+        onmouseover="this.style.color='#f8fafc'" onmouseout="this.style.color='#94a3b8'">About</a>
+      <a href="/accessibility.html" style="color: #94a3b8; text-decoration: none; transition: color 0.2s;"
+        onmouseover="this.style.color='#f8fafc'" onmouseout="this.style.color='#94a3b8'">Accessibility</a>
+      <a href="/help.html" style="color: #94a3b8; text-decoration: none; transition: color 0.2s;"
+        onmouseover="this.style.color='#f8fafc'" onmouseout="this.style.color='#94a3b8'">Help Center</a>
+      <a href="/privacy.html" style="color: #94a3b8; text-decoration: none; transition: color 0.2s;"
+        onmouseover="this.style.color='#f8fafc'" onmouseout="this.style.color='#94a3b8'">Privacy & Terms</a>
     </div>
-    
+
     <div style="margin-bottom: 20px; display: flex; justify-content: center; gap: 20px;">
-      <a href="https://www.linkedin.com/in/adarshhhhhhrd/" target="_blank" rel="noopener noreferrer" style="color: #0077b5; display: flex; align-items: center; gap: 6px; text-decoration: none; font-weight: 500; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+      <a href="https://www.linkedin.com/in/adarshhhhhhrd/" target="_blank" rel="noopener noreferrer"
+        style="color: #0077b5; display: flex; align-items: center; gap: 6px; text-decoration: none; font-weight: 500; transition: transform 0.2s;"
+        onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+          <path
+            d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+        </svg>
         LinkedIn
       </a>
-      <a href="https://instagram.com/_adxrshh.rd/" target="_blank" rel="noopener noreferrer" style="color: #E1306C; display: flex; align-items: center; gap: 6px; text-decoration: none; font-weight: 500; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+      <a href="https://instagram.com/_adxrshh.rd/" target="_blank" rel="noopener noreferrer"
+        style="color: #E1306C; display: flex; align-items: center; gap: 6px; text-decoration: none; font-weight: 500; transition: transform 0.2s;"
+        onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+          <path
+            d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" />
+        </svg>
         Instagram
       </a>
     </div>
-    
+
     <div style="display: flex; justify-content: center; align-items: center; gap: 8px;">
       <span style="font-weight: 500; color: #f8fafc;">Club Hub</span>
       <span style="font-size: 10px;">•</span>
@@ -1433,9 +1340,9 @@
 
       const coordinatorEmails = ['bigbossssz550@gmail.com', '01fe23bci050@kletech.ac.in'];
       if (isCompleteReq && !coordinatorEmails.includes(p.email?.toLowerCase()) && (!p.name || !p.branch || !p.roll_number)) {
-          alert('Welcome to Club Hub! Please complete your profile to access the feed.');
-          const backBtn = document.querySelector('.back-btn');
-          if(backBtn) backBtn.style.display = 'none';
+        alert('Welcome to Club Hub! Please complete your profile to access the feed.');
+        const backBtn = document.querySelector('.back-btn');
+        if (backBtn) backBtn.style.display = 'none';
       }
 
       // Set profile photo
@@ -1823,11 +1730,11 @@
       if (res.ok) {
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('complete') === 'true') {
-            await window.customAlert("Profile complete! Taking you to the feed.");
-            window.location.href = "/";
+          await window.customAlert("Profile complete! Taking you to the feed.");
+          window.location.href = "/";
         } else {
-            await window.customAlert("Profile saved successfully");
-            await loadProfile();
+          await window.customAlert("Profile saved successfully");
+          await loadProfile();
         }
       } else {
         await window.customAlert("Failed to save profile");
