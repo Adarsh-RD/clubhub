@@ -144,27 +144,18 @@
       position: relative;
     }
 
-    .logout-btn {
-      position: absolute;
-      top: 1.5rem;
-      right: 1.5rem;
-      padding: 0.5rem 1.25rem;
+    .btn-danger {
       background: rgba(239, 68, 68, 0.1);
       border: 1px solid rgba(239, 68, 68, 0.3);
-      border-radius: 0.75rem;
       color: #FCA5A5;
-      font-weight: 600;
-      font-size: 0.8125rem;
-      cursor: pointer;
-      transition: all 0.3s ease;
       backdrop-filter: blur(4px);
     }
 
-    .logout-btn:hover {
+    .btn-danger:hover {
       background: rgba(239, 68, 68, 0.2);
       border-color: rgba(239, 68, 68, 0.5);
       color: #FECACA;
-      transform: translateY(-1px);
+      transform: translateY(-2px);
     }
 
     /* Profile Photo */
@@ -298,6 +289,16 @@
       border-color: #E11D48;
       background: rgba(20, 20, 30, 0.9);
       box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.2), inset 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Override browser autofill styles */
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover, 
+    input:-webkit-autofill:focus,
+    input:-webkit-autofill:active {
+      -webkit-text-fill-color: #FFFFFF !important;
+      -webkit-box-shadow: 0 0 0px 1000px #0f0f14 inset !important;
+      transition: background-color 5000s ease-in-out 0s;
     }
 
     input::placeholder {
@@ -831,6 +832,13 @@
       .radio-group {
         flex-direction: column;
       }
+
+      .btn-group {
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-top: 2rem;
+        padding-top: 2rem;
+      }
     }
   </style>
 <script src="/ui-alerts.js"></script></head>
@@ -859,7 +867,6 @@
 
   <div class="container">
     <div class="profile-card">
-      <button id="logoutBtn" class="logout-btn">Sign out</button>
 
       <div class="profile-photo-section">
         <div class="profile-photo-wrapper">
@@ -957,6 +964,14 @@
               <path d="M11 2L14 5L6 13H3V10L11 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
             </svg>
             Edit Profile
+          </button>
+          <button id="logoutBtn" class="btn btn-danger">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+            Sign out
           </button>
         </div>
       </div>
