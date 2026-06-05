@@ -910,13 +910,6 @@
           <input id="name" type="text" placeholder="Enter your full name" />
         </div>
 
-        <div class="form-group">
-          <label>
-            Date of Birth
-          </label>
-          <input id="dob" type="date" />
-        </div>
-
         <div class="form-group auto-filled-group">
           <label>
             Branch
@@ -925,7 +918,7 @@
               Auto-filled from USN
             </span>
           </label>
-          <input id="branch" type="text" placeholder="e.g., Computer Science & Engineering" />
+          <input id="branch" type="text" placeholder="e.g., Computer Science & Engineering" readonly />
         </div>
 
         <div class="form-group auto-filled-group">
@@ -947,7 +940,7 @@
               Auto-filled from USN
             </span>
           </label>
-          <input id="roll" type="text" placeholder="Enter your roll number" />
+          <input id="roll" type="text" placeholder="Enter your roll number" readonly />
         </div>
 
         <div id="roleSelect" class="form-group" style="display:none;">
@@ -1089,11 +1082,11 @@
     let isAutoFilled = false;
 
     function setReadOnly(on) {
-      ['name', 'branch', 'roll', 'dob'].forEach(id => {
+      ['name'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.readOnly = on;
       });
-      // Year is always readonly (derived from USN)
+      // Branch, Roll, and Year are always readonly (derived from USN/email)
     }
 
     function toggleClubSelect() {
@@ -1214,14 +1207,6 @@
       document.getElementById('branch').value = p.branch || "";
       document.getElementById('roll').value = p.roll_number || "";
       document.getElementById('year').value = p.year || "";
-      if (p.dob) {
-        // Format date for input[type=date] (YYYY-MM-DD)
-        const dobDate = new Date(p.dob);
-        const yyyy = dobDate.getFullYear();
-        const mm = String(dobDate.getMonth() + 1).padStart(2, '0');
-        const dd = String(dobDate.getDate()).padStart(2, '0');
-        document.getElementById('dob').value = `${yyyy}-${mm}-${dd}`;
-      }
       currentUserRole = p.role;
       currentClubId = p.club_id;
 
@@ -1614,7 +1599,6 @@
         name: document.getElementById('name').value.trim(),
         branch: document.getElementById('branch').value.trim(),
         roll_number: document.getElementById('roll').value.trim(),
-        dob: document.getElementById('dob').value || null,
         year: document.getElementById('year').value.trim() || null
       };
 
