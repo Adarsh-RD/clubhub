@@ -738,31 +738,161 @@ body {
   }
 
   .main-content {
-    padding: 1.5rem 1rem;
+    padding: 1rem 0.75rem;
+  }
+
+  .main-content h2 {
+    font-size: 1.35rem !important;
+    margin-bottom: 1rem !important;
   }
 
   .hero-section {
-    padding: 2rem 1.5rem;
+    padding: 1.5rem 1rem;
+    margin-bottom: 1.5rem;
+    border-radius: 1rem;
   }
 
   .hero-title {
-    font-size: 1.75rem;
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
   }
 
   .hero-description {
-    font-size: 1rem;
+    font-size: 0.9375rem;
   }
 
   .announcement-card {
-    padding: 1.25rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 1rem;
   }
 
   .announcement-title {
-    font-size: 1.25rem;
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .announcement-content {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin-bottom: 1rem;
+  }
+
+  .announcement-header {
+    margin-bottom: 1rem;
   }
 
   .interactions-bar {
+    padding-top: 1rem;
+    gap: 0.75rem;
     flex-wrap: wrap;
+  }
+
+  .interaction-btn {
+    padding: 0.5rem 0.875rem;
+    font-size: 0.8125rem;
+    border-radius: 0.5rem;
+    gap: 0.5rem;
+  }
+
+  .interaction-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .empty-state {
+    padding: 2.5rem 1.5rem !important;
+    margin: 1rem 0 !important;
+    border-radius: 1rem !important;
+  }
+
+  .empty-icon {
+    font-size: 3rem !important;
+    margin-bottom: 1rem !important;
+  }
+
+  .empty-title {
+    font-size: 1.25rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  .empty-description {
+    font-size: 0.9375rem !important;
+  }
+
+  /* Auth / Landing Page compact styles */
+  .auth-page {
+    padding: 1rem 1rem;
+  }
+
+  .auth-card {
+    padding: 1.5rem 1.25rem;
+    border-radius: 1.5rem;
+  }
+
+  .auth-logo {
+    width: 64px;
+    height: 64px;
+    padding: 6px;
+    margin-bottom: 1rem;
+  }
+
+  .auth-header {
+    margin-bottom: 1.25rem;
+  }
+
+  .auth-title {
+    font-size: 1.75rem;
+  }
+
+  .auth-description {
+    font-size: 0.9375rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .live-counter {
+    font-size: 0.8125rem;
+  }
+
+  .auth-buttons {
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+  }
+
+  .btn-large {
+    padding: 0.875rem 1.25rem;
+    font-size: 1rem;
+    border-radius: 0.75rem;
+  }
+
+  .input-field {
+    gap: 0.5rem;
+  }
+
+  .input {
+    padding: 0.75rem 1rem;
+    padding-left: 2.75rem;
+    font-size: 0.95rem;
+    border-radius: 0.75rem;
+  }
+
+  .input-icon {
+    left: 1rem;
+    font-size: 1rem;
+  }
+
+  .auth-form {
+    gap: 1rem;
+  }
+
+  .form-title {
+    font-size: 1.25rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .form-subtitle {
+    font-size: 0.8125rem;
+    margin-bottom: 0.5rem;
   }
 }
 
