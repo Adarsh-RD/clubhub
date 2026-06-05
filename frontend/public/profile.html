@@ -241,16 +241,17 @@
 
     .role-badge {
       display: inline-block;
-      padding: 0.75rem 2rem;
+      padding: 0.5rem 1.5rem;
       background: linear-gradient(135deg, #E11D48 0%, #BE123C 100%);
       color: white;
       border-radius: 2rem;
       font-weight: 700;
-      font-size: 0.9375rem;
+      font-size: 0.8125rem;
       margin-bottom: 2.5rem;
       box-shadow: 0 4px 14px rgba(225, 29, 72, 0.4);
       letter-spacing: 0.05em;
       text-transform: uppercase;
+      border: 1px solid rgba(225, 29, 72, 0.2);
     }
 
     .role-badge.pending {
@@ -342,34 +343,16 @@
       flex-shrink: 0;
     }
 
-    .usn-display {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      padding: 0.5rem 1.25rem;
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 50px;
-      margin-bottom: 2rem;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-      animation: badgeFadeIn 0.6s ease;
-    }
-
-    .usn-display .usn-label {
-      font-size: 0.65rem;
-      color: #E11D48;
+    .profile-name-display {
+      font-size: 1.75rem;
       font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .usn-display .usn-value {
-      font-size: 0.95rem;
-      font-weight: 700;
       color: #FFFFFF;
-      letter-spacing: 0.02em;
-      font-family: inherit;
+      background: linear-gradient(135deg, #FFFFFF 30%, #a1a1aa 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin: 1.25rem 0 0.5rem 0;
+      letter-spacing: -0.02em;
     }
 
     /* Date input specific styles */
@@ -893,12 +876,9 @@
         <p class="photo-hint">Click the + button to upload your photo</p>
       </div>
 
-      <div id="roleDisplay" class="role-badge" style="display:none;"></div>
+      <h2 id="profileNameDisplay" class="profile-name-display">Student Profile</h2>
 
-      <div id="usnDisplay" class="usn-display" style="display:none;">
-        <span class="usn-label">USN</span>
-        <span class="usn-value" id="usnValue"></span>
-      </div>
+      <div id="roleDisplay" class="role-badge" style="display:none;"></div>
 
       <div class="form-section">
         <div class="form-group">
@@ -1166,10 +1146,6 @@
         if (data.ok && data.is_kletech && data.parsed) {
           isAutoFilled = true;
 
-          // Show USN display badge
-          document.getElementById('usnDisplay').style.display = 'flex';
-          document.getElementById('usnValue').textContent = data.usn;
-
           // Auto-fill branch
           const branchInput = document.getElementById('branch');
           if (!branchInput.value) {
@@ -1205,6 +1181,13 @@
 
       document.getElementById('email').value = p.email || "";
       document.getElementById('name').value = p.name || "";
+      document.getElementById('profileNameDisplay').textContent = p.name || "Student Profile";
+
+      // Live update of header name display as user types
+      document.getElementById('name').oninput = (e) => {
+        document.getElementById('profileNameDisplay').textContent = e.target.value.trim() || "Student Profile";
+      };
+
       document.getElementById('branch').value = p.branch || "";
       document.getElementById('roll').value = p.roll_number || "";
       document.getElementById('year').value = p.year || "";
@@ -1218,11 +1201,6 @@
       if (p.email && p.email.toLowerCase().endsWith('@kletech.ac.in')) {
         if (!p.branch || !p.roll_number) {
           await autoFillFromUSN(p.email);
-        } else {
-          // Already have data, still show USN badge
-          const usn = p.email.split('@')[0].toUpperCase();
-          document.getElementById('usnDisplay').style.display = 'flex';
-          document.getElementById('usnValue').textContent = usn;
         }
       }
 
