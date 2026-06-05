@@ -378,38 +378,115 @@
     }
 
     .radio-option {
+      position: relative;
+      flex: 1;
+    }
+
+    .radio-option input[type="radio"] {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+      z-index: 2;
+      margin: 0;
+    }
+
+    .radio-card {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
+      gap: 0.875rem;
       padding: 1rem 1.25rem;
       background: rgba(15, 15, 20, 0.6);
       border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 0.75rem;
-      cursor: pointer;
       transition: all 0.3s ease;
-      flex: 1;
       box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      box-sizing: border-box;
+      cursor: pointer;
     }
 
-    .radio-option:hover {
+    .radio-option:hover .radio-card {
       background: rgba(255, 255, 255, 0.05);
       border-color: rgba(255, 255, 255, 0.2);
     }
 
-    .radio-option input[type="radio"] {
-      width: auto;
-      margin: 0;
-      cursor: pointer;
-      accent-color: #E11D48;
-      transform: scale(1.2);
+    .radio-option input[type="radio"]:checked + .radio-card {
+      background: rgba(225, 29, 72, 0.1);
+      border-color: #E11D48;
+      box-shadow: 0 0 15px rgba(225, 29, 72, 0.2), inset 0 2px 4px rgba(225, 29, 72, 0.05);
     }
 
-    .radio-option label {
-      margin: 0;
-      cursor: pointer;
+    .radio-card svg {
+      color: #94A3B8;
+      transition: all 0.3s ease;
+      flex-shrink: 0;
+    }
+
+    .radio-option input[type="radio"]:checked + .radio-card svg {
+      color: #E11D48;
+      transform: scale(1.1);
+    }
+
+    .radio-card span {
       font-weight: 600;
       font-size: 0.9375rem;
       color: #E2E8F0;
+      transition: all 0.3s ease;
+    }
+
+    .radio-option input[type="radio"]:checked + .radio-card span {
+      color: #FFFFFF;
+      font-weight: 700;
+    }
+
+    /* Premium Input Icons styling */
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      width: 100%;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 1.25rem;
+      color: #94A3B8;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.7;
+      transition: all 0.3s ease;
+    }
+
+    .form-group input:focus ~ .input-icon,
+    .form-group select:focus ~ .input-icon {
+      color: #E11D48;
+      opacity: 1;
+    }
+
+    .locked-indicator {
+      position: absolute;
+      right: 1.25rem;
+      color: #64748B;
+      display: flex;
+      align-items: center;
+      pointer-events: none;
+      opacity: 0.7;
+    }
+
+    /* Adjust padding for inputs inside wrapper */
+    .form-section .form-group input,
+    .form-section .form-group select {
+      padding-left: 3.25rem;
+    }
+    
+    .form-section .form-group input[readonly] {
+      padding-right: 3rem;
     }
 
     .btn-group {
@@ -834,9 +911,10 @@
         border-radius: 0.75rem;
       }
 
-      .radio-option {
+      .radio-card {
         padding: 0.75rem 1rem;
         border-radius: 0.75rem;
+        gap: 0.625rem;
       }
 
       .btn-group {
@@ -976,12 +1054,25 @@
       <div class="form-section">
         <div class="form-group">
           <label>Email Address</label>
-          <input id="email" type="email" readonly />
+          <div class="input-wrapper">
+            <input id="email" type="email" readonly />
+            <span class="input-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+            </span>
+            <span class="locked-indicator" title="Read-only email">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            </span>
+          </div>
         </div>
 
         <div class="form-group">
           <label>Full Name</label>
-          <input id="name" type="text" placeholder="Enter your full name" />
+          <div class="input-wrapper">
+            <input id="name" type="text" placeholder="Enter your full name" />
+            <span class="input-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            </span>
+          </div>
         </div>
 
         <div class="form-group auto-filled-group">
@@ -989,10 +1080,18 @@
             Branch
             <span id="branchBadge" class="auto-badge" style="display:none;">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-              Auto-filled from USN
+              Auto-filled
             </span>
           </label>
-          <input id="branch" type="text" placeholder="e.g., Computer Science & Engineering" readonly />
+          <div class="input-wrapper">
+            <input id="branch" type="text" placeholder="e.g., Computer Science & Engineering" readonly />
+            <span class="input-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5-10 5z"></path><path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"></path></svg>
+            </span>
+            <span class="locked-indicator" title="Derived from USN (read-only)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            </span>
+          </div>
         </div>
 
         <div class="form-group auto-filled-group">
@@ -1000,10 +1099,18 @@
             Year
             <span id="yearBadge" class="auto-badge" style="display:none;">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-              Auto-filled from USN
+              Auto-filled
             </span>
           </label>
-          <input id="year" type="text" placeholder="e.g., 3rd Year" readonly />
+          <div class="input-wrapper">
+            <input id="year" type="text" placeholder="e.g., 3rd Year" readonly />
+            <span class="input-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            </span>
+            <span class="locked-indicator" title="Derived from USN (read-only)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            </span>
+          </div>
         </div>
 
         <div class="form-group auto-filled-group">
@@ -1011,10 +1118,18 @@
             Roll Number / USN
             <span id="rollBadge" class="auto-badge" style="display:none;">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-              Auto-filled from USN
+              Auto-filled
             </span>
           </label>
-          <input id="roll" type="text" placeholder="Enter your roll number" readonly />
+          <div class="input-wrapper">
+            <input id="roll" type="text" placeholder="Enter your roll number" readonly />
+            <span class="input-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2" fill="none"></rect><line x1="7" y1="8" x2="17" y2="8"></line><line x1="7" y1="12" x2="13" y2="12"></line><line x1="7" y1="16" x2="11" y2="16"></line></svg>
+            </span>
+            <span class="locked-indicator" title="Derived from USN (read-only)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            </span>
+          </div>
         </div>
 
         <div id="roleSelect" class="form-group" style="display:none;">
@@ -1022,20 +1137,31 @@
           <div class="radio-group">
             <div class="radio-option">
               <input type="radio" name="role" value="student" id="roleStudent" onchange="toggleClubSelect()">
-              <label for="roleStudent">Student</label>
+              <label for="roleStudent" class="radio-card">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5-10 5z"></path><path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"></path></svg>
+                <span>Student</span>
+              </label>
             </div>
             <div class="radio-option">
               <input type="radio" name="role" value="club_admin" id="roleAdmin" onchange="toggleClubSelect()">
-              <label for="roleAdmin">Club Admin</label>
+              <label for="roleAdmin" class="radio-card">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                <span>Club Admin</span>
+              </label>
             </div>
           </div>
         </div>
 
         <div id="clubSelect" class="form-group" style="display:none;">
           <label>Select Club</label>
-          <select id="clubDropdown">
-            <option value="">-- Select a club --</option>
-          </select>
+          <div class="input-wrapper">
+            <select id="clubDropdown">
+              <option value="">-- Select a club --</option>
+            </select>
+            <span class="input-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            </span>
+          </div>
         </div>
 
         <div class="btn-group">
