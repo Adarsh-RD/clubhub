@@ -68,10 +68,10 @@ function AuthCard({
                 <polyline points="10 17 15 12 10 7"></polyline>
                 <line x1="15" y1="12" x2="3" y2="12"></line>
               </svg>
-              Sign In
+              Let's Go!
             </button>
             <button className="btn btn-secondary btn-large btn-glass" onClick={() => setView("signup-email")}>
-              Sign Up
+              Count Me IN!
             </button>
           </div>
           <p className="auth-footer-text">
@@ -413,7 +413,7 @@ export default function App() {
   }
 
   async function login() {
-    setMsg("🔄 Signing you in...");
+    setMsg("🔄 have patience bruh...");
     try {
       const r = await fetch(`${API_BASE}/auth/login`, {
         method: "POST",
