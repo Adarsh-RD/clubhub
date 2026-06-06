@@ -1245,12 +1245,15 @@
                         document.getElementById('clubLogo').src = clubData.logo_url;
                     }
 
-                    // Set banner
-                    if (clubData.banner_url) {
-                        document.getElementById('clubBanner').src = clubData.banner_url;
-                        document.getElementById('clubBanner').style.display = 'block';
-                    } else {
-                        document.getElementById('clubBanner').style.display = 'none';
+                    // Set banner (if element exists)
+                    const bannerEl = document.getElementById('clubBanner');
+                    if (bannerEl) {
+                        if (clubData.banner_url) {
+                            bannerEl.src = clubData.banner_url;
+                            bannerEl.style.display = 'block';
+                        } else {
+                            bannerEl.style.display = 'none';
+                        }
                     }
 
                     // Set stats
@@ -1338,7 +1341,11 @@
         }
 
         function openBroadcast() {
-            // Redirects to broadcast channel of the club on main page
+            if (!token) {
+                showNotification('Please login to join the broadcast channel', 'error');
+                return;
+            }
+            // Navigate to broadcast channel of the club on the main app
             window.location.href = `/?tab=broadcast&club=${clubId}`;
         }
 
