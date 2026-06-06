@@ -955,7 +955,6 @@
                     <h2 id="clubName" class="club-name-title">Loading...</h2>
                     <span id="clubCategory" class="club-category-badge">...</span>
                 </div>
-                <div class="profile-bio-title" id="clubOfficialName"></div>
                 <p id="clubBio" style="white-space: pre-wrap;">No bio description available.</p>
             </div>
 
@@ -1012,8 +1011,8 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Bio description</label>
-                    <textarea id="editClubBio" rows="4" placeholder="Write something about your club..."></textarea>
+                    <label>Description / Bio</label>
+                    <textarea id="editClubBio" rows="4" placeholder="Write a description or bio about your club..."></textarea>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
@@ -1221,7 +1220,6 @@
                     // Set title and categories
                     document.title = `${clubData.club_name} | Club Hub`;
                     document.getElementById('clubName').textContent = clubData.club_name;
-                    document.getElementById('clubOfficialName').textContent = clubData.club_name;
                     document.getElementById('clubCategory').textContent = clubData.category || 'Student Club';
                     document.getElementById('clubBio').textContent = clubData.bio || clubData.description || 'No bio description available.';
 
