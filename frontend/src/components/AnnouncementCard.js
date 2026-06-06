@@ -445,21 +445,18 @@ export default function AnnouncementCard({ announcement, currentUser }) {
             {announcement.registration_enabled && registrationInfo && (
                 <div className="registration-section">
                     <div className="registration-info">
-                        <h4 className="registration-title">📝 Event Registration</h4>
+                        <h4 className="registration-title">Event Registration</h4>
 
                         <div className="registration-stats">
                             <div className="stat-item">
-                                <span className="stat-icon">👥</span>
                                 <span className="stat-text">
-                                    {registrationInfo.current_count}
+                                    Registered: {registrationInfo.current_count}
                                     {registrationInfo.max_registrations ? ` / ${registrationInfo.max_registrations}` : ''}
-                                    {' '}registered
                                 </span>
                             </div>
 
                             {registrationInfo.deadline && (
                                 <div className="stat-item">
-                                    <span className="stat-icon">⏰</span>
                                     <span className="stat-text">
                                         Deadline: {new Date(registrationInfo.deadline).toLocaleString()}
                                     </span>
@@ -470,13 +467,13 @@ export default function AnnouncementCard({ announcement, currentUser }) {
                         {/* Registration Status Messages */}
                         {registrationInfo.is_full && (
                             <div className="registration-status status-full">
-                                ⚠️ Event is full
+                                Event is full
                             </div>
                         )}
 
                         {registrationInfo.deadline_passed && (
                             <div className="registration-status status-closed">
-                                🔒 Registration closed
+                                Registration closed
                             </div>
                         )}
 
@@ -485,7 +482,7 @@ export default function AnnouncementCard({ announcement, currentUser }) {
                             <div className="registration-actions">
                                 {isRegistered ? (
                                     <div className="registered-badge">
-                                        <span>✓</span> You're registered
+                                        You're registered
                                         <button
                                             className="btn-cancel-reg"
                                             onClick={handleUnregister}
@@ -501,7 +498,7 @@ export default function AnnouncementCard({ announcement, currentUser }) {
                                             onClick={handleRegister}
                                             disabled={loadingReg || !canRegister}
                                         >
-                                            {loadingReg ? '...' : '📝 Register Now'}
+                                            {loadingReg ? '...' : 'Register Now'}
                                         </button>
 
                                         {/* Custom Fields Registration Form */}
@@ -509,12 +506,12 @@ export default function AnnouncementCard({ announcement, currentUser }) {
                                             <div style={{
                                                 marginTop: '12px',
                                                 padding: '16px',
-                                                background: 'rgba(0,0,0,0.3)',
+                                                background: 'rgba(255, 255, 255, 0.02)',
                                                 borderRadius: '10px',
-                                                border: '1px solid rgba(16, 185, 129, 0.2)'
+                                                border: '1px solid rgba(255, 255, 255, 0.08)'
                                             }}>
-                                                <p style={{ fontSize: '0.9rem', fontWeight: '600', color: '#10B981', marginBottom: '12px' }}>
-                                                    📋 Fill in the details below:
+                                                <p style={{ fontSize: '0.9rem', fontWeight: '600', color: '#FFFFFF', marginBottom: '12px' }}>
+                                                    Fill in the details below:
                                                 </p>
                                                 {customFields.map(field => (
                                                     <div key={field.id} style={{ marginBottom: '10px' }}>
@@ -553,7 +550,7 @@ export default function AnnouncementCard({ announcement, currentUser }) {
                                                         disabled={loadingReg}
                                                         style={{ flex: 1 }}
                                                     >
-                                                        {loadingReg ? '...' : '✓ Submit & Register'}
+                                                        {loadingReg ? '...' : 'Submit & Register'}
                                                     </button>
                                                     <button
                                                         onClick={() => { setShowRegForm(false); setRegFormData({}); }}

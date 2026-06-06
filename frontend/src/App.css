@@ -1700,8 +1700,8 @@ body {
 
 /* Registration Section */
 .registration-section {
-  background: rgba(16, 185, 129, 0.05);
-  border: 1px solid rgba(16, 185, 129, 0.2);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
   border-radius: 1.5rem;
   padding: 2rem;
   margin: 2rem 0;
@@ -1716,7 +1716,7 @@ body {
 .registration-title {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #34D399;
+  color: #FFFFFF;
   margin-bottom: 0.5rem;
   display: flex;
   align-items: center;
@@ -1773,7 +1773,7 @@ body {
 .btn-register {
   width: 100%;
   padding: 1.125rem;
-  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  background: linear-gradient(135deg, var(--kle-red) 0%, var(--kle-red-dark) 100%);
   color: white;
   border: none;
   border-radius: 0.75rem;
@@ -1785,12 +1785,12 @@ body {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 4px 15px rgba(225, 29, 72, 0.3);
 }
 
 .btn-register:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.5);
+  box-shadow: 0 8px 25px rgba(225, 29, 72, 0.5);
 }
 
 .btn-register:disabled {
@@ -1805,11 +1805,11 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 1.25rem 1.5rem;
-  background: rgba(16, 185, 129, 0.1);
-  border: 2px solid rgba(16, 185, 129, 0.3);
+  background: rgba(225, 29, 72, 0.1);
+  border: 2px solid rgba(225, 29, 72, 0.3);
   border-radius: 1rem;
   font-weight: 600;
-  color: #34D399;
+  color: #FFFFFF;
 }
 
 .btn-cancel-reg {
@@ -1840,9 +1840,9 @@ body {
 .btn-export-reg {
   flex: 1;
   padding: 0.875rem 1.25rem;
-  background: rgba(16, 185, 129, 0.1);
-  border: 1px solid rgba(16, 185, 129, 0.3);
-  color: #34D399;
+  background: rgba(225, 29, 72, 0.15);
+  border: 1px solid rgba(225, 29, 72, 0.3);
+  color: #FFFFFF;
   border-radius: 0.75rem;
   font-weight: 600;
   font-size: 0.9375rem;
@@ -1853,8 +1853,8 @@ body {
 
 .btn-view-reg:hover,
 .btn-export-reg:hover {
-  background: rgba(16, 185, 129, 0.2);
-  border-color: rgba(16, 185, 129, 0.6);
+  background: rgba(225, 29, 72, 0.25);
+  border-color: rgba(225, 29, 72, 0.6);
   transform: translateY(-2px);
 }
 

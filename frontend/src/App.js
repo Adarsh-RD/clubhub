@@ -71,7 +71,7 @@ function AuthCard({
               Let's Go!
             </button>
             <button className="btn btn-secondary btn-large btn-glass" onClick={() => setView("signup-email")}>
-              Count Me IN!
+              Count Me In!
             </button>
           </div>
           <p className="auth-footer-text">
@@ -474,7 +474,7 @@ export default function App() {
         <div className="page-wrapper">
           <div className="loading-container">
             <div className="spinner"></div>
-            <p className="loading-text">Verifying session...</p>
+            <p className="loading-text">have some patience bruh...</p>
           </div>
         </div>
       );
