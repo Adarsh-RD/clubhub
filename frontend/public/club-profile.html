@@ -1190,7 +1190,7 @@
                 if (token) {
                     const profileRes = await fetch(`${API}/profile`, { headers });
                     const profileData = await profileRes.json();
-                    if (profileRes.ok && profileData.ok) {
+                    if (profileRes.ok && profileData.profile) {
                         userProfile = profileData.profile;
                         const coordinators = ['bigbossssz550@gmail.com', '01fe23bci050@kletech.ac.in'];
                         isUserAdmin = coordinators.includes(userProfile.email.toLowerCase()) || 
