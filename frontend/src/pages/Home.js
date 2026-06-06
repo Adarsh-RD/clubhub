@@ -16,6 +16,13 @@ export default function Home() {
   const [currentView, setCurrentView] = useState('feed');
   const token = localStorage.getItem('token');
 
+  // Admin and Edit states
+  const [clubStats, setClubStats] = useState({ subscriberCount: 0, announcementCount: 0 });
+  const [activeRegs, setActiveRegs] = useState({});
+  const [showRegs, setShowRegs] = useState({});
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editForm, setEditForm] = useState({ id: null, content: '', title: '' });
+
   // ✅ CORRECT: Registration fields in state
   const [createForm, setCreateForm] = useState({
     content: '',
@@ -42,8 +49,10 @@ export default function Home() {
         headers: { Authorization: `Bearer ${token}` }
       });
       const profileData = await profileRes.json();
+      let currentUser = null;
       if (profileData.ok && profileData.user) {
-        setProfile(profileData.user);
+        currentUser = profileData.user;
+        setProfile(currentUser);
       }
 
       // Load announcements
@@ -61,6 +70,10 @@ export default function Home() {
           has_liked: ann.has_liked || false
         }));
         setAnnouncements(fetchedAnnouncements);
+      }
+
+      if (currentUser && currentUser.role === 'club_admin' && currentUser.club_id) {
+        loadClubStats(currentUser.club_id, fetchedAnnouncements);
       }
 
       setLoading(false);
@@ -176,6 +189,137 @@ export default function Home() {
     }
   }
 
+  async function loadClubStats(clubId, fetchedAnnouncements) {
+    if (!clubId) return;
+    try {
+      const subRes = await fetch(`${API_BASE}/clubs/${clubId}/subscriber-count`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const subData = await subRes.json();
+      
+      const annCount = fetchedAnnouncements.filter(a => a.club_id === clubId).length;
+
+      setClubStats({
+        subscriberCount: subData.ok ? subData.count : 0,
+        announcementCount: annCount
+      });
+    } catch (err) {
+      console.error('Error loading club stats:', err);
+    }
+  }
+
+  async function toggleRegistrations(announcementId) {
+    if (showRegs[announcementId]) {
+      setShowRegs(prev => ({ ...prev, [announcementId]: false }));
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_BASE}/announcements/${announcementId}/registrations`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.ok && data.registrations) {
+        setActiveRegs(prev => ({ ...prev, [announcementId]: data.registrations }));
+        setShowRegs(prev => ({ ...prev, [announcementId]: true }));
+      } else {
+        alert(data.error || 'Failed to load registrations');
+      }
+    } catch (err) {
+      console.error('Error loading registrations:', err);
+      alert('Failed to load registrations');
+    }
+  }
+
+  async function exportRegistrations(announcementId) {
+    try {
+      const res = await fetch(`${API_BASE}/announcements/${announcementId}/registrations/export`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (res.ok) {
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `registrations-${announcementId}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } else {
+        alert('Failed to export registrations');
+      }
+    } catch (err) {
+      console.error('Error exporting:', err);
+      alert('Error exporting registrations');
+    }
+  }
+
+  async function handleDeleteAnnouncement(announcementId) {
+    if (!window.confirm("Are you sure you want to delete this announcement? This action will set it inactive, and all registrations/comments/likes will be cascade-deleted or preserved accordingly.")) return;
+
+    try {
+      const res = await fetch(`${API_BASE}/announcements/${announcementId}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (res.ok && data.ok) {
+        alert('Announcement deleted successfully');
+        loadData(); // Reload feed
+      } else {
+        alert(data.error || 'Failed to delete announcement');
+      }
+    } catch (err) {
+      console.error('Error deleting announcement:', err);
+      alert('Error deleting announcement');
+    }
+  }
+
+  function openEditModal(announcement) {
+    setEditForm({
+      id: announcement.id,
+      content: announcement.content,
+      title: announcement.title || ''
+    });
+    setShowEditModal(true);
+  }
+
+  async function handleEditAnnouncement(e) {
+    e.preventDefault();
+    if (!editForm.content.trim()) {
+      alert('Please write description text');
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_BASE}/announcements/${editForm.id}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          content: editForm.content.trim(),
+          title: editForm.title.trim() || undefined
+        })
+      });
+      const data = await res.json();
+      if (res.ok && data.ok) {
+        alert('✓ Updated successfully!');
+        setShowEditModal(false);
+        setEditForm({ id: null, content: '', title: '' });
+        loadData();
+      } else {
+        throw new Error(data.error || 'Failed to update');
+      }
+    } catch (err) {
+      console.error('Error updating:', err);
+      alert('✗ Failed to update: ' + err.message);
+    }
+  }
+
   async function handleLogout() {
     if (await window.customConfirm('Are you sure you want to sign out?')) {
       localStorage.removeItem("token");
@@ -238,25 +382,138 @@ export default function Home() {
       </header>
 
       <main className="feed-main">
-        {announcements.length > 0 ? (
-          <div className="feed-list">
-            {announcements.map((announcement) => (
-              <AnnouncementCard
-                key={announcement.id}
-                announcement={announcement}
-                currentUser={profile}
-              />
-            ))}
+        {isClubAdmin && (
+          <div className="feed-tabs">
+            <button 
+              className={`feed-tab-btn ${currentView === 'feed' ? 'active' : ''}`}
+              onClick={() => setCurrentView('feed')}
+            >
+              All Feed
+            </button>
+            <button 
+              className={`feed-tab-btn ${currentView === 'manage' ? 'active' : ''}`}
+              onClick={() => setCurrentView('manage')}
+            >
+              Our Announcements
+            </button>
+          </div>
+        )}
+
+        {currentView === 'manage' && isClubAdmin ? (
+          <div className="admin-dashboard-panel">
+            {/* Club Stats Cards */}
+            <div className="admin-stats-box">
+              <div className="admin-stat-card">
+                <span className="admin-stat-label">Total Subscribers</span>
+                <span className="admin-stat-value">{clubStats.subscriberCount}</span>
+              </div>
+              <div className="admin-stat-card">
+                <span className="admin-stat-label">Total Announcements</span>
+                <span className="admin-stat-value">{clubStats.announcementCount}</span>
+              </div>
+            </div>
+
+            {/* List of Announcements */}
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '16px', color: '#f8fafc' }}>
+              Manage Announcements
+            </h2>
+            
+            {announcements.filter(a => a.club_id === profile?.club_id).length > 0 ? (
+              <div className="admin-events-list">
+                {announcements.filter(a => a.club_id === profile?.club_id).map((ann) => (
+                  <div key={ann.id} className="admin-event-card">
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+                      <div className="admin-event-title">{ann.content?.substring(0, 80)}...</div>
+                      <span className="admin-event-date">
+                        {new Date(ann.created_at).toLocaleDateString()}
+                      </span>
+                    </div>
+
+                    <div className="admin-event-actions">
+                      <button className="admin-btn admin-btn-secondary" onClick={() => toggleRegistrations(ann.id)}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                        {showRegs[ann.id] ? 'Hide Registrations' : 'View Registrations'}
+                      </button>
+
+                      {ann.registration_enabled && (
+                        <button className="admin-btn admin-btn-secondary" onClick={() => exportRegistrations(ann.id)}>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                          Export CSV
+                        </button>
+                      )}
+
+                      <button className="admin-btn admin-btn-primary" onClick={() => openEditModal(ann)}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                        Edit
+                      </button>
+
+                      <button className="admin-btn admin-btn-danger" onClick={() => handleDeleteAnnouncement(ann.id)}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                        Delete
+                      </button>
+                    </div>
+
+                    {showRegs[ann.id] && activeRegs[ann.id] && (
+                      <div className="admin-reg-table-container">
+                        {activeRegs[ann.id].length === 0 ? (
+                          <div style={{ padding: '12px', textAlign: 'center', color: '#94a3b8', fontSize: '0.875rem' }}>No registrations yet</div>
+                        ) : (
+                          <div style={{ overflowX: 'auto' }}>
+                            <table className="reg-table" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+                              <thead>
+                                <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+                                  <th style={{ padding: '8px', textAlign: 'left', color: '#94a3b8' }}>Name</th>
+                                  <th style={{ padding: '8px', textAlign: 'left', color: '#94a3b8' }}>USN</th>
+                                  <th style={{ padding: '8px', textAlign: 'left', color: '#94a3b8' }}>Branch</th>
+                                  <th style={{ padding: '8px', textAlign: 'left', color: '#94a3b8' }}>Date</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {activeRegs[ann.id].map(reg => (
+                                  <tr key={reg.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                                    <td style={{ padding: '8px', color: '#f8fafc' }}>{reg.user_name || 'N/A'}</td>
+                                    <td style={{ padding: '8px', color: '#e2e8f0' }}>{reg.roll_number || 'N/A'}</td>
+                                    <td style={{ padding: '8px', color: '#e2e8f0' }}>{reg.branch || 'N/A'}</td>
+                                    <td style={{ padding: '8px', color: '#64748b' }}>{new Date(reg.registered_at).toLocaleDateString()}</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="feed-empty" style={{ padding: '2rem 1rem' }}>
+                <p>No announcements yet for your club</p>
+                <span>Click the + button below to create one!</span>
+              </div>
+            )}
           </div>
         ) : (
-          <div className="feed-empty">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="1.5" style={{opacity:0.4}}>
-              <circle cx="12" cy="12" r="10"/>
-              <path d="M12 8v4M12 16h.01"/>
-            </svg>
-            <p>No announcements yet</p>
-            <span>Check back later for club updates</span>
-          </div>
+          announcements.length > 0 ? (
+            <div className="feed-list">
+              {announcements.map((announcement) => (
+                <AnnouncementCard
+                  key={announcement.id}
+                  announcement={announcement}
+                  currentUser={profile}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="feed-empty">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="1.5" style={{opacity:0.4}}>
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 8v4M12 16h.01"/>
+              </svg>
+              <p>No announcements yet</p>
+              <span>Check back later for club updates</span>
+            </div>
+          )
         )}
 
         <footer style={{ marginTop: '40px', padding: '20px 16px 100px', textAlign: 'center', color: '#475569', fontSize: '0.75rem' }}>
@@ -544,6 +801,45 @@ export default function Home() {
                     <path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                   Publish
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      {/* Edit Announcement Modal */}
+      {showEditModal && (
+        <div className="modal-overlay" onClick={() => setShowEditModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2 className="modal-title">
+                Edit Post
+              </h2>
+              <button className="modal-close" onClick={() => setShowEditModal(false)}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+
+            <form onSubmit={handleEditAnnouncement} className="modal-form">
+              {/* Content/Description Field */}
+              <div className="form-field">
+                <label>Description</label>
+                <textarea
+                  placeholder="Update your announcement details here..."
+                  value={editForm.content}
+                  onChange={(e) => setEditForm({ ...editForm, content: e.target.value })}
+                  rows="6"
+                  required
+                />
+              </div>
+
+              {/* Modal Actions */}
+              <div className="modal-actions">
+                <button type="button" className="btn btn-secondary" onClick={() => setShowEditModal(false)}>
+                  Cancel
+                </button>
+                <button type="submit" className="btn btn-primary">
+                  Save Changes
                 </button>
               </div>
             </form>

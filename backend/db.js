@@ -255,20 +255,20 @@ const createAnnouncement = async (clubId, title, content, createdBy) => {
   return rows[0];
 };
 
-const deleteAnnouncement = async (announcementId, userEmail) => {
+const deleteAnnouncement = async (announcementId) => {
   const res = await poolQuery(
-    `UPDATE announcements SET is_active=false WHERE id=$1 AND created_by=$2`,
-    [announcementId, userEmail]
+    `UPDATE announcements SET is_active=false WHERE id=$1`,
+    [announcementId]
   );
   return res.rowCount > 0;
 };
 
-const updateAnnouncement = async (announcementId, title, content, userEmail) => {
+const updateAnnouncement = async (announcementId, title, content) => {
   const res = await poolQuery(
     `UPDATE announcements
      SET title=$1, content=$2, updated_at=NOW()
-     WHERE id=$3 AND created_by=$4`,
-    [title, content, announcementId, userEmail]
+     WHERE id=$3`,
+    [title, content, announcementId]
   );
   return res.rowCount > 0;
 };

@@ -1149,10 +1149,30 @@ app.delete('/announcements/:id', async (req, res) => {
     const email = payload.sub.toLowerCase();
 
     const announcementId = parseInt(req.params.id);
-    const success = await deleteAnnouncement(announcementId, email);
+    const { rows: anns } = await pool.query('SELECT club_id, created_by FROM announcements WHERE id = $1', [announcementId]);
+    if (anns.length === 0) {
+      return res.status(404).json({ error: 'announcement not found' });
+    }
+    const ann = anns[0];
+
+    const { rows: users } = await pool.query('SELECT role, club_id FROM users WHERE email = $1', [email]);
+    if (users.length === 0) {
+      return res.status(404).json({ error: 'user not found' });
+    }
+    const user = users[0];
+
+    const isSuperAdmin = ['bigbossssz550@gmail.com', '01fe23bci050@kletech.ac.in'].includes(email);
+    const isCreator = ann.created_by && ann.created_by.toLowerCase() === email;
+    const isClubAdmin = user.role === 'club_admin' && user.club_id === ann.club_id;
+
+    if (!isSuperAdmin && !isCreator && !isClubAdmin) {
+      return res.status(403).json({ error: 'Unauthorized to delete this announcement' });
+    }
+
+    const success = await deleteAnnouncement(announcementId);
 
     if (!success) {
-      return res.status(404).json({ error: 'announcement not found or unauthorized' });
+      return res.status(404).json({ error: 'announcement not found' });
     }
 
     return res.json({ ok: true, message: 'Announcement deleted' });
@@ -1186,12 +1206,32 @@ app.put('/announcements/:id', async (req, res) => {
       return res.status(400).json({ error: 'content required' });
     }
 
+    const { rows: anns } = await pool.query('SELECT club_id, created_by FROM announcements WHERE id = $1', [announcementId]);
+    if (anns.length === 0) {
+      return res.status(404).json({ error: 'announcement not found' });
+    }
+    const ann = anns[0];
+
+    const { rows: users } = await pool.query('SELECT role, club_id FROM users WHERE email = $1', [email]);
+    if (users.length === 0) {
+      return res.status(404).json({ error: 'user not found' });
+    }
+    const user = users[0];
+
+    const isSuperAdmin = ['bigbossssz550@gmail.com', '01fe23bci050@kletech.ac.in'].includes(email);
+    const isCreator = ann.created_by && ann.created_by.toLowerCase() === email;
+    const isClubAdmin = user.role === 'club_admin' && user.club_id === ann.club_id;
+
+    if (!isSuperAdmin && !isCreator && !isClubAdmin) {
+      return res.status(403).json({ error: 'Unauthorized to update this announcement' });
+    }
+
     // Auto-generate title from content if not provided
     const finalTitle = title || content.substring(0, 80).trim();
-    const success = await updateAnnouncement(announcementId, finalTitle, content, email);
+    const success = await updateAnnouncement(announcementId, finalTitle, content);
 
     if (!success) {
-      return res.status(404).json({ error: 'announcement not found or unauthorized' });
+      return res.status(404).json({ error: 'announcement not found' });
     }
 
     return res.json({ ok: true, message: 'Announcement updated' });
