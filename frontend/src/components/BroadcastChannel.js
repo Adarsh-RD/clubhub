@@ -601,7 +601,32 @@ export default function BroadcastChannel({ onBack }) {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
-      if (data.ok) setChannels(data.channels);
+      if (data.ok) {
+        setChannels(data.channels);
+        
+        // Auto-select channel if club ID in query parameter
+        const params = new URLSearchParams(window.location.search);
+        const clubId = params.get('club');
+        if (clubId) {
+          const matchingChannel = data.channels.find(ch => String(ch.id) === String(clubId));
+          if (matchingChannel) {
+            setSelectedChannel(matchingChannel);
+            setShowChannelList(false);
+            
+            // Load messages for it
+            const msgRes = await fetch(`${API_BASE}/broadcast/channels/${matchingChannel.id}/messages`, {
+              headers: { Authorization: `Bearer ${token}` }
+            });
+            const msgData = await msgRes.json();
+            if (msgData.ok) {
+              setMessages(msgData.messages);
+              if (msgData.channel) {
+                setSelectedChannel(msgData.channel);
+              }
+            }
+          }
+        }
+      }
     } catch (err) {
       console.error('Error loading channels:', err);
     }
@@ -624,6 +649,10 @@ export default function BroadcastChannel({ onBack }) {
   async function selectChannel(channel) {
     setSelectedChannel(channel);
     setShowChannelList(false);
+    
+    // Update URL param without page reload
+    window.history.replaceState({}, document.title, window.location.pathname + `?tab=broadcast&club=${channel.id}`);
+    
     try {
       const res = await fetch(`${API_BASE}/broadcast/channels/${channel.id}/messages`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -710,6 +739,7 @@ export default function BroadcastChannel({ onBack }) {
 
   function handleBack() {
     if (!showChannelList) {
+      window.history.replaceState({}, document.title, window.location.pathname + '?tab=broadcast');
       setShowChannelList(true);
       setSelectedChannel(null);
     } else {

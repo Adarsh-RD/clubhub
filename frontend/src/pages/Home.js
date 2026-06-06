@@ -26,7 +26,10 @@ export default function Home() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);
   const [notifications, setNotifications] = useState([]);
-  const [currentView, setCurrentView] = useState('feed');
+  const [currentView, setCurrentView] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('tab') === 'broadcast' ? 'broadcast' : 'feed';
+  });
   const token = localStorage.getItem('token');
 
   // Admin and Edit states
@@ -356,7 +359,10 @@ export default function Home() {
 
   // ==================== BROADCAST CHANNEL VIEW ====================
   if (currentView === 'broadcast') {
-    return <BroadcastChannel onBack={() => setCurrentView('feed')} />;
+    return <BroadcastChannel onBack={() => {
+      window.history.replaceState({}, document.title, window.location.pathname);
+      setCurrentView('feed');
+    }} />;
   }
 
   return (
