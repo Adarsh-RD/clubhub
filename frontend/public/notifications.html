@@ -378,7 +378,14 @@
     </div>
 
     <script>
-        const API = "https://clubhub-5eh7.onrender.com";
+        const API = (window.location.hostname === 'localhost' || 
+                     window.location.hostname === '127.0.0.1' || 
+                     window.location.hostname.startsWith('192.168.') || 
+                     window.location.hostname.startsWith('10.') || 
+                     window.location.hostname.startsWith('172.') ||
+                     window.location.port !== '') 
+                    ? `http://${window.location.hostname}:4000` 
+                    : "https://clubhub-5eh7.onrender.com";
         const token = localStorage.getItem('token');
         const headers = token ? { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } : null;
 
@@ -407,9 +414,7 @@
 
             try {
                 // Determine API URL based on localhost vs prod
-                const baseUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-                    ? 'http://localhost:4000'
-                    : API;
+                const baseUrl = API;
 
                 const res = await fetch(`${baseUrl}/notifications`, { headers });
                 const data = await res.json();

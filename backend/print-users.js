@@ -9,15 +9,25 @@ const pool = new Pool({
   ssl: { rejectUnauthorized: false }
 });
 
+const getClubById = async (clubId) => {
+  const { rows } = await pool.query(
+    `SELECT 
+       c.*,
+       (SELECT COUNT(*) FROM club_subscriptions WHERE club_id = c.id AND is_active = true) AS follower_count,
+       (SELECT COUNT(*) FROM announcements WHERE club_id = c.id AND is_active = true) AS post_count,
+       (SELECT COUNT(*) FROM users WHERE club_id = c.id) AS member_count
+     FROM clubs c
+     WHERE c.id=$1 AND c.is_active=true 
+     LIMIT 1`,
+    [clubId]
+  );
+  return rows[0] || null;
+};
+
 async function main() {
-  const { rows: users } = await pool.query('SELECT id, email, name, role, club_id FROM users');
-  console.log('--- USERS IN DATABASE ---');
-  console.log(users);
-  
-  const { rows: clubs } = await pool.query('SELECT id, club_name, club_code FROM clubs');
-  console.log('--- CLUBS IN DATABASE ---');
-  console.log(clubs);
-  
+  const club = await getClubById(18);
+  console.log('--- CLUB 18 INFO ---');
+  console.log(club);
   pool.end();
 }
 main();

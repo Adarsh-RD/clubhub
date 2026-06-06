@@ -606,7 +606,14 @@
     </div>
 
     <script>
-        const API = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:4000' : 'https://clubhub-5eh7.onrender.com';
+        const API = (window.location.hostname === 'localhost' || 
+                     window.location.hostname === '127.0.0.1' || 
+                     window.location.hostname.startsWith('192.168.') || 
+                     window.location.hostname.startsWith('10.') || 
+                     window.location.hostname.startsWith('172.') ||
+                     window.location.port !== '') 
+                    ? `http://${window.location.hostname}:4000` 
+                    : 'https://clubhub-5eh7.onrender.com';
         const token = localStorage.getItem('token');
         const headers = token ? {
             'Authorization': `Bearer ${token}`,
@@ -714,8 +721,6 @@
 
                     // Load each club with subscription data
                     for (const club of data.clubs) {
-                        const isSubscribed = await checkSubscriptionStatus(club.id);
-
                         const card = document.createElement('div');
                         card.className = 'club-card';
                         card.setAttribute('data-club-id', club.id);
@@ -731,16 +736,12 @@
                             <span class="club-code">${club.category || 'Club'}</span>
                             <p class="club-description">${club.description || 'No description available'}</p>
                             
-                            <div class="club-footer" style="gap: 10px;">
-                                <button class="back-btn" style="margin:0;padding:0.625rem 1.25rem;flex:1;justify-content:center;" onclick="window.location.href='/club-profile.html?id=${club.id}'">
-                                    Visit Club
-                                </button>
-                                <button 
-                                    class="subscribe-btn ${isSubscribed ? 'subscribed' : ''}"
-                                    style="padding:0.625rem 1.25rem;border-radius:0.75rem;flex:1;justify-content:center;box-shadow:none;"
-                                    onclick="event.stopPropagation(); toggleSubscription(${club.id}, '${club.club_name.replace(/'/g, "\\'")}', this)"
-                                >
-                                    ${isSubscribed ? 'Following' : 'Follow'}
+                            <div class="club-footer" style="margin-top: auto; padding-top: 1.25rem;">
+                                <button class="back-btn" style="margin:0;padding:0.75rem 1.5rem;width:100%;justify-content:center;border-radius:1rem;gap:0.5rem;" onclick="window.location.href='/club-profile.html?id=${club.id}'">
+                                    <span>Visit Club</span>
+                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="display:inline-block;">
+                                        <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                                    </svg>
                                 </button>
                             </div>
                         `;

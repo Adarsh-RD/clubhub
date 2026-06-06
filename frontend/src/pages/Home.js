@@ -4,7 +4,20 @@ import BroadcastChannel from '../components/BroadcastChannel';
 import { requestForToken, messaging } from '../firebase';
 import { onMessage } from 'firebase/messaging';
 
-const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:4000";
+const getApiBase = () => {
+  if (process.env.REACT_APP_API_BASE) {
+    return process.env.REACT_APP_API_BASE;
+  }
+  const hostname = window.location.hostname;
+  const isLocal = hostname === 'localhost' || 
+                  hostname === '127.0.0.1' || 
+                  hostname.startsWith('192.168.') || 
+                  hostname.startsWith('10.') || 
+                  hostname.startsWith('172.') ||
+                  window.location.port !== '';
+  return isLocal ? `http://${hostname}:4000` : 'https://clubhub-5eh7.onrender.com';
+};
+const API_BASE = getApiBase();
 
 export default function Home() {
   const [profile, setProfile] = useState(null);

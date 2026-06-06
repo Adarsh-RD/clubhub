@@ -1138,7 +1138,14 @@
     </div>
 
     <script>
-        const API = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:4000' : 'https://clubhub-5eh7.onrender.com';
+        const API = (window.location.hostname === 'localhost' || 
+                     window.location.hostname === '127.0.0.1' || 
+                     window.location.hostname.startsWith('192.168.') || 
+                     window.location.hostname.startsWith('10.') || 
+                     window.location.hostname.startsWith('172.') ||
+                     window.location.port !== '') 
+                    ? `http://${window.location.hostname}:4000` 
+                    : 'https://clubhub-5eh7.onrender.com';
         const token = localStorage.getItem('token');
         const headers = token ? {
             'Authorization': `Bearer ${token}`,
@@ -1188,17 +1195,21 @@
             try {
                 // Get user role / permissions
                 if (token) {
-                    const profileRes = await fetch(`${API}/profile`, { headers });
-                    const profileData = await profileRes.json();
-                    if (profileRes.ok && profileData.profile) {
-                        userProfile = profileData.profile;
-                        const coordinators = ['bigbossssz550@gmail.com', '01fe23bci050@kletech.ac.in'];
-                        isUserAdmin = coordinators.includes(userProfile.email.toLowerCase()) || 
-                                     (userProfile.role === 'club_admin' && userProfile.club_id === clubId);
-                        
-                        if (isUserAdmin) {
-                            document.getElementById('editProfileBtn').style.display = 'inline-flex';
+                    try {
+                        const profileRes = await fetch(`${API}/profile`, { headers });
+                        const profileData = await profileRes.json();
+                        if (profileRes.ok && profileData.profile) {
+                            userProfile = profileData.profile;
+                            const coordinators = ['bigbossssz550@gmail.com', '01fe23bci050@kletech.ac.in'];
+                            isUserAdmin = coordinators.includes(userProfile.email.toLowerCase()) || 
+                                         (userProfile.role === 'club_admin' && userProfile.club_id === clubId);
+                            
+                            if (isUserAdmin) {
+                                document.getElementById('editProfileBtn').style.display = 'inline-flex';
+                            }
                         }
+                    } catch (e) {
+                        console.error('Error fetching user profile in init:', e);
                     }
                 }
 
