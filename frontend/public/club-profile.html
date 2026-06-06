@@ -1197,6 +1197,12 @@
                 if (token) {
                     try {
                         const profileRes = await fetch(`${API}/profile`, { headers });
+                        if (profileRes.status === 401) {
+                            localStorage.removeItem('token');
+                            localStorage.removeItem('user_email');
+                            window.location.href = '/';
+                            return;
+                        }
                         const profileData = await profileRes.json();
                         if (profileRes.ok && profileData.profile) {
                             userProfile = profileData.profile;
@@ -1254,16 +1260,26 @@
 
                     // Check subscription/follow status
                     if (token) {
-                        const subRes = await fetch(`${API}/clubs/${clubId}/subscription-status`, { headers });
-                        const subData = await subRes.json();
-                        const followBtn = document.getElementById('followBtn');
-                        
-                        if (subData.subscribed) {
-                            followBtn.classList.add('subscribed');
-                            followBtn.textContent = 'Following';
-                        } else {
-                            followBtn.classList.remove('subscribed');
-                            followBtn.textContent = 'Follow';
+                        try {
+                            const subRes = await fetch(`${API}/clubs/${clubId}/subscription-status`, { headers });
+                            if (subRes.status === 401) {
+                                localStorage.removeItem('token');
+                                localStorage.removeItem('user_email');
+                                window.location.href = '/';
+                                return;
+                            }
+                            const subData = await subRes.json();
+                            const followBtn = document.getElementById('followBtn');
+                            
+                            if (subData.subscribed) {
+                                followBtn.classList.add('subscribed');
+                                followBtn.textContent = 'Following';
+                            } else {
+                                followBtn.classList.remove('subscribed');
+                                followBtn.textContent = 'Follow';
+                            }
+                        } catch (subErr) {
+                            console.error('Error fetching subscription status:', subErr);
                         }
                     }
                 } else {
@@ -1291,6 +1307,12 @@
                     method: 'POST',
                     headers
                 });
+                if (res.status === 401) {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user_email');
+                    window.location.href = '/';
+                    return;
+                }
                 const data = await res.json();
 
                 if (res.ok && data.ok) {
