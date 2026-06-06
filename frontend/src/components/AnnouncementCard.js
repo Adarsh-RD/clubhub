@@ -364,7 +364,14 @@ export default function AnnouncementCard({ announcement, currentUser }) {
         <div className="card-v2">
             {/* Header Row: Avatar + Club name + time */}
             <div className="card-v2-header">
-                <div className="card-v2-avatar" style={announcement.club_logo ? { background: 'transparent' } : {}}>
+                <div 
+                    className="card-v2-avatar" 
+                    style={{ 
+                        ...(announcement.club_logo ? { background: 'transparent' } : {}),
+                        cursor: 'pointer' 
+                    }}
+                    onClick={() => window.location.href = `/club-profile.html?id=${announcement.club_id}`}
+                >
                     {announcement.club_logo ? (
                         <img 
                             src={announcement.club_logo} 
@@ -381,7 +388,13 @@ export default function AnnouncementCard({ announcement, currentUser }) {
                     )}
                 </div>
                 <div className="card-v2-meta">
-                    <span className="card-v2-club">{announcement.club_name || 'Club'}</span>
+                    <span 
+                        className="card-v2-club" 
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => window.location.href = `/club-profile.html?id=${announcement.club_id}`}
+                    >
+                        {announcement.club_name || 'Club'}
+                    </span>
                     <span className="card-v2-time">{timeAgo(announcement.created_at)}</span>
                 </div>
                 <button className="card-v2-share" onClick={handleShare} aria-label="Share">
@@ -447,7 +460,13 @@ export default function AnnouncementCard({ announcement, currentUser }) {
 
             {/* Caption text */}
             <div className="card-v2-caption">
-                <span className="card-v2-caption-club">{announcement.club_name || 'Club'}</span>
+                <span 
+                    className="card-v2-caption-club" 
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => window.location.href = `/club-profile.html?id=${announcement.club_id}`}
+                >
+                    {announcement.club_name || 'Club'}
+                </span>
                 {announcement.content}
             </div>
 

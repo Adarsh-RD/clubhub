@@ -1,0 +1,1869 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Club Profile | Club Hub</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            margin: 0;
+            color: #E2E8F0;
+            background-color: #050505;
+            background-image:
+                radial-gradient(at 0% 0%, rgba(255, 0, 127, 0.2) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(0, 255, 255, 0.15) 0px, transparent 50%),
+                radial-gradient(at 50% 100%, rgba(138, 43, 226, 0.15) 0px, transparent 50%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            padding-bottom: 50px;
+        }
+
+        /* Glassmorphism panel */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .app-header {
+            background: rgba(10, 10, 15, 0.7);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .header-content {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-logo {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border-radius: 10px;
+            background: #ffffff;
+            padding: 3px;
+        }
+
+        .header-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .header-branding {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #FFFFFF;
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+        }
+
+        .header-subtitle {
+            font-size: 0.7rem;
+            color: #94A3B8;
+            font-weight: 500;
+        }
+
+        .back-btn {
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.5rem;
+            color: #E2E8F0;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateX(-2px);
+        }
+
+        .profile-container {
+            max-width: 935px;
+            margin: 30px auto 0;
+            padding: 0 20px;
+        }
+
+        /* Cover banner */
+        .profile-banner-wrapper {
+            position: relative;
+            height: 250px;
+            border-radius: 18px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            margin-bottom: -70px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .profile-banner {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            background: linear-gradient(135deg, #1e1b4b, #311042, #180828);
+        }
+
+        /* Profile details card */
+        .profile-info-card {
+            border-radius: 18px;
+            padding: 90px 40px 30px;
+            margin-bottom: 28px;
+            position: relative;
+        }
+
+        .profile-avatar-wrapper {
+            position: absolute;
+            top: -75px;
+            left: 40px;
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            padding: 4px;
+            background: linear-gradient(135deg, #E11D48, #F59E0B);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.6);
+        }
+
+        .profile-avatar {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            background: #151520;
+            border: 3px solid #0a0a0f;
+        }
+
+        .profile-header-main {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .profile-header-main {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: flex-end;
+            }
+        }
+
+        .profile-title-section {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .club-name-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .club-name-title {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #FFFFFF;
+            letter-spacing: -0.03em;
+        }
+
+        .club-category-badge {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #BE123C;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            padding: 0.25rem 0.75rem;
+            background: rgba(225, 29, 72, 0.1);
+            border-radius: 20px;
+            border: 1px solid rgba(225, 29, 72, 0.2);
+            align-self: center;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .btn {
+            padding: 0.625rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #E11D48 0%, #BE123C 100%);
+            color: #FFFFFF;
+            box-shadow: 0 4px 14px rgba(225, 29, 72, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(225, 29, 72, 0.5);
+        }
+
+        .btn-primary.subscribed {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #FFFFFF;
+            box-shadow: none;
+        }
+
+        .btn-primary.subscribed:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #E2E8F0;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+
+        /* Stats list */
+        .profile-stats-row {
+            display: flex;
+            gap: 40px;
+            margin: 20px 0;
+            padding: 15px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .stat-item {
+            font-size: 0.95rem;
+            color: #94A3B8;
+        }
+
+        .stat-item strong {
+            color: #FFFFFF;
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-right: 4px;
+        }
+
+        /* Bio */
+        .profile-bio-container {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: #CBD5E1;
+            max-width: 650px;
+        }
+
+        .profile-bio-title {
+            color: #FFFFFF;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        /* Post grid */
+        .profile-grid-tabs {
+            display: flex;
+            justify-content: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        .grid-tab-btn {
+            background: none;
+            border: none;
+            padding: 15px 30px;
+            color: #94A3B8;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-top: 2px solid transparent;
+            margin-top: -1px;
+            transition: all 0.2s;
+        }
+
+        .grid-tab-btn.active {
+            color: #FFFFFF;
+            border-top-color: #FFFFFF;
+        }
+
+        .post-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 4px;
+        }
+
+        @media (min-width: 768px) {
+            .post-grid {
+                gap: 20px;
+            }
+        }
+
+        .grid-item {
+            position: relative;
+            aspect-ratio: 1 / 1;
+            background: #111118;
+            border-radius: 4px;
+            overflow: hidden;
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @media (min-width: 768px) {
+            .grid-item {
+                border-radius: 12px;
+            }
+        }
+
+        .grid-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+
+        .grid-item:hover img {
+            transform: scale(1.05);
+        }
+
+        .grid-item-no-image {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1e1b4b 0%, #2e1065 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .grid-item:hover .grid-item-no-image {
+            filter: brightness(1.2);
+        }
+
+        .grid-item-no-image-title {
+            color: #FFFFFF;
+            font-size: 1rem;
+            font-weight: 700;
+            line-height: 1.3;
+            margin-bottom: 6px;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .grid-item-no-image-tag {
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: rgba(255,255,255,0.5);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            background: rgba(255,255,255,0.08);
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        .grid-item-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 25px;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+            z-index: 2;
+        }
+
+        .grid-item:hover .grid-item-overlay {
+            opacity: 1;
+        }
+
+        .overlay-stat {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #FFFFFF;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        /* Modal common styling */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(12px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            padding: 20px;
+        }
+
+        .modal.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            background: #0d0d14;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 900px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            animation: modalPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes modalPop {
+            from {
+                transform: scale(0.95);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .close-modal-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #E2E8F0;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.2s;
+        }
+
+        .close-modal-btn:hover {
+            background: rgba(255,255,255,0.15);
+            transform: scale(1.05);
+        }
+
+        /* Post details modal grid (split screen) */
+        .post-details-split {
+            display: grid;
+            grid-template-columns: 1fr;
+            max-height: 90vh;
+        }
+
+        @media (min-width: 768px) {
+            .post-details-split {
+                grid-template-columns: 1.2fr 1fr;
+            }
+        }
+
+        .post-details-image-side {
+            background: #05050a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 20px 20px 0 0;
+            overflow: hidden;
+            aspect-ratio: 1;
+        }
+
+        @media (min-width: 768px) {
+            .post-details-image-side {
+                border-radius: 20px 0 0 20px;
+                height: 80vh;
+                aspect-ratio: auto;
+            }
+        }
+
+        .post-details-image-side img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .post-details-image-fallback {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1e1b4b, #2e1065);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+            color: white;
+            text-align: center;
+        }
+
+        .post-details-info-side {
+            display: flex;
+            flex-direction: column;
+            padding: 24px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        @media (min-width: 768px) {
+            .post-details-info-side {
+                height: 80vh;
+            }
+        }
+
+        .post-details-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .post-details-author-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .post-details-author-name {
+            font-weight: 700;
+            color: #FFFFFF;
+            font-size: 0.95rem;
+        }
+
+        .post-details-body {
+            flex-grow: 1;
+            padding: 15px 0;
+            overflow-y: auto;
+        }
+
+        .post-details-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #FFFFFF;
+            margin-bottom: 10px;
+        }
+
+        .post-details-content {
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: #CBD5E1;
+            white-space: pre-line;
+            margin-bottom: 15px;
+        }
+
+        .post-details-date {
+            font-size: 0.75rem;
+            color: #64748B;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        /* Post actions: Like, comment counts */
+        .post-details-actions {
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 15px 0;
+        }
+
+        .action-icon-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+
+        .like-icon-btn {
+            background: none;
+            border: none;
+            color: #E2E8F0;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .like-icon-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .like-icon-btn.liked {
+            color: #E11D48;
+        }
+
+        .likes-count-text {
+            font-weight: 700;
+            color: #FFFFFF;
+            font-size: 0.9rem;
+        }
+
+        /* Comments list */
+        .comments-section {
+            margin-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 15px;
+        }
+
+        .comments-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #FFFFFF;
+            margin-bottom: 10px;
+        }
+
+        .comments-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-bottom: 12px;
+        }
+
+        .comment-item {
+            display: flex;
+            gap: 8px;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+        .comment-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .comment-text-wrapper {
+            background: rgba(255,255,255,0.03);
+            padding: 8px 12px;
+            border-radius: 8px;
+            flex-grow: 1;
+        }
+
+        .comment-author {
+            font-weight: 700;
+            color: #FFFFFF;
+            margin-right: 6px;
+        }
+
+        .comment-text {
+            color: #CBD5E1;
+        }
+
+        .comment-input-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .comment-input {
+            flex-grow: 1;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 8px 12px;
+            border-radius: 8px;
+            color: white;
+            outline: none;
+            font-size: 0.85rem;
+        }
+
+        .comment-input:focus {
+            border-color: #E11D48;
+        }
+
+        /* Registration panel inside details modal */
+        .registration-panel {
+            background: rgba(225, 29, 72, 0.05);
+            border: 1px dashed rgba(225, 29, 72, 0.2);
+            border-radius: 12px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .registration-panel-title {
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: #E11D48;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .registration-info-text {
+            font-size: 0.8rem;
+            color: #94A3B8;
+            margin-bottom: 10px;
+        }
+
+        /* Custom forms inside modal */
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #94A3B8;
+            margin-bottom: 6px;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 10px 14px;
+            color: white;
+            font-size: 0.9rem;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            border-color: #E11D48;
+            box-shadow: 0 0 0 2px rgba(225, 29, 72, 0.2);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        @media (min-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        /* Notifications */
+        .notification {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            padding: 16px 24px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            font-size: 0.95rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            backdrop-filter: blur(10px);
+        }
+
+        .notification.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .notification-info {
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .notification-success {
+            background: rgba(6, 78, 59, 0.9);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .notification-error {
+            background: rgba(127, 29, 29, 0.9);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        /* registrations view list modal table */
+        .reg-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            color: #CBD5E1;
+            font-size: 0.85rem;
+        }
+
+        .reg-table th {
+            text-align: left;
+            padding: 10px;
+            border-bottom: 2px solid rgba(255,255,255,0.08);
+            color: #FFFFFF;
+            font-weight: 600;
+        }
+
+        .reg-table td {
+            padding: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .reg-table tr:hover {
+            background: rgba(255,255,255,0.02);
+        }
+
+        .loading-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 40vh;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top-color: #E11D48;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            grid-column: 1 / -1;
+            background: rgba(20, 20, 28, 0.2);
+            border: 1px dashed rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: #94A3B8;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="app-header">
+        <div class="header-content">
+            <div class="header-left">
+                <div class="header-logo">
+                    <img src="/kle-logo.jpg" alt="KLE Tech" onerror="this.style.display='none'" />
+                </div>
+                <div class="header-branding">
+                    <h1 class="header-title">Club Hub</h1>
+                    <p class="header-subtitle">KLE Technological University</p>
+                </div>
+            </div>
+            <a href="/clubs.html" class="back-btn">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M10 12L6 8L10 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                </svg>
+                Explore Clubs
+            </a>
+        </div>
+    </header>
+
+    <div class="profile-container">
+        <!-- Cover Banner -->
+        <div class="profile-banner-wrapper">
+            <img id="clubBanner" class="profile-banner" src="" alt="Club Banner" onerror="this.style.display='none'" />
+        </div>
+
+        <!-- Info details panel -->
+        <div id="clubInfoCard" class="profile-info-card glass-panel">
+            <div class="profile-avatar-wrapper">
+                <img id="clubLogo" class="profile-avatar" src="/kle-logo.jpg" alt="Club Avatar" />
+            </div>
+
+            <div class="profile-header-main">
+                <div class="profile-title-section">
+                    <div class="club-name-row">
+                        <h2 id="clubName" class="club-name-title">Loading...</h2>
+                        <span id="clubCategory" class="club-category-badge">...</span>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button id="followBtn" class="btn btn-primary" onclick="handleFollowToggle()">
+                        Follow
+                    </button>
+                    <button id="broadcastBtn" class="btn btn-secondary" onclick="openBroadcast()">
+                        Join Channel
+                    </button>
+                    <button id="editProfileBtn" class="btn btn-secondary" style="display: none;" onclick="openEditProfileModal()">
+                        Edit Profile
+                    </button>
+                </div>
+            </div>
+
+            <div class="profile-stats-row">
+                <div class="stat-item"><strong id="postCount">0</strong>posts</div>
+                <div class="stat-item"><strong id="followerCount">0</strong>followers</div>
+                <div class="stat-item"><strong id="memberCount">0</strong>members</div>
+            </div>
+
+            <div class="profile-bio-container">
+                <div class="profile-bio-title" id="clubOfficialName"></div>
+                <p id="clubBio" style="white-space: pre-wrap;">No bio description available.</p>
+            </div>
+        </div>
+
+        <!-- Grid layout -->
+        <div class="profile-grid-tabs">
+            <button class="grid-tab-btn active">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                Announcements
+            </button>
+        </div>
+
+        <div id="postsContainer" class="post-grid">
+            <!-- Loader -->
+            <div class="loading-container" style="grid-column:1/-1;">
+                <div class="spinner"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+
+    <!-- Edit Profile Modal -->
+    <div id="editProfileModal" class="modal">
+        <div class="modal-content" style="max-width: 600px; padding: 24px;">
+            <button class="close-modal-btn" onclick="closeModal('editProfileModal')">✕</button>
+            <h3 style="margin-bottom: 20px; font-size: 1.5rem; font-weight: 800; color: #FFFFFF;">Edit Club Profile</h3>
+            <form id="editProfileForm" onsubmit="saveClubProfile(event)">
+                <div class="form-group">
+                    <label>Club Name</label>
+                    <input type="text" id="editClubName" required />
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="editClubCategory">
+                        <option value="Technical">Technical</option>
+                        <option value="Cultural">Cultural</option>
+                        <option value="Literary">Literary</option>
+                        <option value="Media">Media</option>
+                        <option value="Sports">Sports</option>
+                        <option value="Social">Social</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Bio description</label>
+                    <textarea id="editClubBio" rows="4" placeholder="Write something about your club..."></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Club Logo Avatar</label>
+                        <input type="file" id="editClubLogoFile" accept="image/*" onchange="previewImage(this, 'logoPreview')" />
+                        <div style="margin-top: 10px; text-align: center;">
+                            <img id="logoPreview" style="max-height: 80px; border-radius: 50%; display: none;" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Profile Cover Banner</label>
+                        <input type="file" id="editClubBannerFile" accept="image/*" onchange="previewImage(this, 'bannerPreview')" />
+                        <div style="margin-top: 10px; text-align: center;">
+                            <img id="bannerPreview" style="max-height: 80px; max-width: 100%; border-radius: 6px; display: none;" />
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 15px; justify-content: center;">
+                    Save Profile Changes
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Post Details Modal -->
+    <div id="postDetailsModal" class="modal">
+        <div class="modal-content" style="max-width: 950px; padding: 0;">
+            <button class="close-modal-btn" onclick="closeModal('postDetailsModal')">✕</button>
+            <div class="post-details-split">
+                <div class="post-details-image-side" id="modalPostImageSide">
+                    <!-- Image or Fallback Gradient -->
+                </div>
+                <div class="post-details-info-side">
+                    <div class="post-details-header">
+                        <img id="modalPostLogo" class="post-details-author-avatar" src="" alt="Club Logo" />
+                        <span id="modalPostClubName" class="post-details-author-name">Club Name</span>
+                    </div>
+
+                    <div class="post-details-body">
+                        <h4 id="modalPostTitle" class="post-details-title">Post Title</h4>
+                        <p id="modalPostContent" class="post-details-content">Post content goes here...</p>
+                        <div id="modalPostDate" class="post-details-date">June 6, 2026</div>
+
+                        <!-- Registration Box -->
+                        <div id="modalRegistrationPanel" class="registration-panel" style="display: none;">
+                            <div class="registration-panel-title">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                                RSVP Event Registration
+                            </div>
+                            <div id="registrationDeadlineText" class="registration-info-text">Deadline: ...</div>
+                            <div id="registrationSlotsText" class="registration-info-text">Slots available: ...</div>
+                            
+                            <!-- Student registration controls -->
+                            <div id="studentRegControls">
+                                <div id="customRegFieldsContainer"></div>
+                                <button id="registerBtn" class="btn btn-primary" style="width:100%; justify-content:center;" onclick="handleRegistrationToggle()">
+                                    Register Now
+                                </button>
+                            </div>
+
+                            <!-- Admin registrations controls -->
+                            <div id="adminRegControls" style="display: none;">
+                                <div style="display: flex; gap: 8px;">
+                                    <button class="btn btn-secondary" style="flex:1; justify-content:center; padding: 0.5rem;" onclick="viewRegistrations()">
+                                        View Registrations
+                                    </button>
+                                    <button class="btn btn-secondary" style="padding: 0.5rem;" onclick="exportRegistrations()" title="Export CSV">
+                                        📥
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="post-details-actions">
+                        <div class="action-icon-row">
+                            <button id="modalLikeBtn" class="like-icon-btn" onclick="togglePostLike()">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                            </button>
+                        </div>
+                        <div id="modalLikeCount" class="likes-count-text">0 likes</div>
+                    </div>
+
+                    <div class="comments-section">
+                        <div class="comments-title">Comments</div>
+                        <div id="modalCommentsList" class="comments-list">
+                            <!-- Comments loop -->
+                        </div>
+                        <div class="comment-input-row">
+                            <input type="text" id="newCommentInput" class="comment-input" placeholder="Add a comment..." onkeydown="if(event.key==='Enter') submitComment()" />
+                            <button class="btn btn-primary" style="padding:8px 16px; border-radius:8px;" onclick="submitComment()">Post</button>
+                        </div>
+                    </div>
+
+                    <div id="adminPostActions" style="display: none; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px; margin-top: 15px; display: flex; gap: 10px;">
+                        <button class="btn btn-secondary" style="flex:1; justify-content:center;" onclick="editPostContent()">Edit Post</button>
+                        <button class="btn btn-secondary" style="flex:1; justify-content:center; color:#EF4444; border-color:rgba(239,68,68,0.2);" onclick="deletePost()">Delete Post</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Registrations List Modal -->
+    <div id="registrationsListModal" class="modal">
+        <div class="modal-content" style="max-width: 600px; padding: 24px;">
+            <button class="close-modal-btn" onclick="closeModal('registrationsListModal')">✕</button>
+            <h3 style="margin-bottom: 20px; font-size: 1.5rem; font-weight: 800; color: #FFFFFF;">Event Registrations</h3>
+            <div style="overflow-x: auto; max-height: 50vh;">
+                <table class="reg-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody id="registrationsTableBody">
+                        <!-- rows -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:4000' : 'https://clubhub-5eh7.onrender.com';
+        const token = localStorage.getItem('token');
+        const headers = token ? {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        } : {
+            'Content-Type': 'application/json'
+        };
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const clubId = parseInt(urlParams.get('id'));
+
+        if (isNaN(clubId)) {
+            alert('Invalid club ID');
+            window.location.href = '/clubs.html';
+        }
+
+        let clubData = null;
+        let isUserAdmin = false;
+        let userProfile = null;
+        let selectedPost = null;
+
+        // Image file picker helpers
+        let logoBase64 = null;
+        let bannerBase64 = null;
+
+        function previewImage(input, targetId) {
+            const file = input.files[0];
+            if (file) {
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('File is too large (max 5MB)');
+                    input.value = '';
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const img = document.getElementById(targetId);
+                    img.src = e.target.result;
+                    img.style.display = 'block';
+                    if (targetId === 'logoPreview') logoBase64 = e.target.result;
+                    if (targetId === 'bannerPreview') bannerBase64 = e.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        async function init() {
+            try {
+                // Get user role / permissions
+                if (token) {
+                    const profileRes = await fetch(`${API}/profile`, { headers });
+                    const profileData = await profileRes.json();
+                    if (profileRes.ok && profileData.ok) {
+                        userProfile = profileData.profile;
+                        const coordinators = ['bigbossssz550@gmail.com', '01fe23bci050@kletech.ac.in'];
+                        isUserAdmin = coordinators.includes(userProfile.email.toLowerCase()) || 
+                                     (userProfile.role === 'club_admin' && userProfile.club_id === clubId);
+                        
+                        if (isUserAdmin) {
+                            document.getElementById('editProfileBtn').style.display = 'inline-flex';
+                        }
+                    }
+                }
+
+                await loadClubProfile();
+                await loadClubAnnouncements();
+            } catch (err) {
+                console.error('Initialization error:', err);
+            }
+        }
+
+        async function loadClubProfile() {
+            try {
+                const res = await fetch(`${API}/clubs/${clubId}`);
+                const data = await res.json();
+
+                if (res.ok && data.ok && data.club) {
+                    clubData = data.club;
+
+                    // Set title and categories
+                    document.title = `${clubData.club_name} | Club Hub`;
+                    document.getElementById('clubName').textContent = clubData.club_name;
+                    document.getElementById('clubOfficialName').textContent = clubData.club_name;
+                    document.getElementById('clubCategory').textContent = clubData.category || 'Student Club';
+                    document.getElementById('clubBio').textContent = clubData.bio || clubData.description || 'No bio description available.';
+
+                    // Set logo
+                    if (clubData.logo_url) {
+                        document.getElementById('clubLogo').src = clubData.logo_url;
+                    }
+
+                    // Set banner
+                    if (clubData.banner_url) {
+                        document.getElementById('clubBanner').src = clubData.banner_url;
+                        document.getElementById('clubBanner').style.display = 'block';
+                    } else {
+                        document.getElementById('clubBanner').style.display = 'none';
+                    }
+
+                    // Set stats
+                    document.getElementById('postCount').textContent = clubData.post_count || 0;
+                    document.getElementById('followerCount').textContent = clubData.follower_count || 0;
+                    document.getElementById('memberCount').textContent = clubData.member_count || 0;
+
+                    // Check subscription/follow status
+                    if (token) {
+                        const subRes = await fetch(`${API}/clubs/${clubId}/subscription-status`, { headers });
+                        const subData = await subRes.json();
+                        const followBtn = document.getElementById('followBtn');
+                        
+                        if (subData.subscribed) {
+                            followBtn.classList.add('subscribed');
+                            followBtn.textContent = 'Following';
+                        } else {
+                            followBtn.classList.remove('subscribed');
+                            followBtn.textContent = 'Follow';
+                        }
+                    }
+                } else {
+                    alert('Failed to load club details');
+                    window.location.href = '/clubs.html';
+                }
+            } catch (err) {
+                console.error('Error fetching club profile:', err);
+            }
+        }
+
+        async function handleFollowToggle() {
+            if (!token) {
+                showNotification('Please login to follow clubs', 'error');
+                return;
+            }
+
+            const followBtn = document.getElementById('followBtn');
+            const isSubscribed = followBtn.classList.contains('subscribed');
+            const endpoint = isSubscribed ? 'unsubscribe' : 'subscribe';
+            
+            try {
+                followBtn.disabled = true;
+                const res = await fetch(`${API}/clubs/${clubId}/${endpoint}`, {
+                    method: 'POST',
+                    headers
+                });
+                const data = await res.json();
+
+                if (res.ok && data.ok) {
+                    if (isSubscribed) {
+                        followBtn.classList.remove('subscribed');
+                        followBtn.textContent = 'Follow';
+                        showNotification(`Unfollowed ${clubData.club_name}`, 'info');
+                    } else {
+                        followBtn.classList.add('subscribed');
+                        followBtn.textContent = 'Following';
+                        showNotification(`Following ${clubData.club_name}!`, 'success');
+                    }
+                    // Refresh stats counts
+                    await loadClubProfile();
+                } else {
+                    throw new Error(data.error || 'Failed to toggle');
+                }
+            } catch (err) {
+                showNotification('Failed to update follow status', 'error');
+            } finally {
+                followBtn.disabled = false;
+            }
+        }
+
+        function openBroadcast() {
+            // Redirects to broadcast channel of the club on main page
+            window.location.href = `/?tab=broadcast&club=${clubId}`;
+        }
+
+        async function loadClubAnnouncements() {
+            const container = document.getElementById('postsContainer');
+            try {
+                const res = await fetch(`${API}/announcements/club/${clubId}`);
+                const data = await res.json();
+
+                if (res.ok && data.ok && data.announcements) {
+                    container.innerHTML = '';
+                    if (data.announcements.length === 0) {
+                        container.innerHTML = `
+                            <div class="empty-state">
+                                <p style="font-weight:600; font-size:1.1rem; color:#FFFFFF; margin-bottom: 5px;">No posts yet</p>
+                                <p>This club hasn't dropped any announcements yet.</p>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    data.announcements.forEach(post => {
+                        const item = document.createElement('div');
+                        item.className = 'grid-item';
+                        item.onclick = () => openPostModal(post);
+
+                        // If there is an image, display it, otherwise display neon text card
+                        const hasImg = post.image_url && post.image_url.trim().length > 0;
+                        const absoluteImg = hasImg ? (post.image_url.startsWith('data:') ? post.image_url : `${API}${post.image_url}`) : '';
+
+                        item.innerHTML = `
+                            ${hasImg ? `<img src="${absoluteImg}" alt="Post thumbnail" />` : `
+                                <div class="grid-item-no-image">
+                                    <div class="grid-item-no-image-title">${post.title || 'Announcement'}</div>
+                                    <span class="grid-item-no-image-tag">${post.registration_enabled ? 'RSVP Event' : 'Info'}</span>
+                                </div>
+                            `}
+                            <div class="grid-item-overlay">
+                                <div class="overlay-stat">
+                                    <svg width="20" height="20" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                                    <span>${post.like_count || 0}</span>
+                                </div>
+                                <div class="overlay-stat">
+                                    <svg width="20" height="20" fill="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                                    <span>${post.comment_count || 0}</span>
+                                </div>
+                            </div>
+                        `;
+                        container.appendChild(item);
+                    });
+                }
+            } catch (err) {
+                console.error('Error fetching announcements:', err);
+            }
+        }
+
+        // Edit Profile modal controls
+        function openEditProfileModal() {
+            document.getElementById('editClubName').value = clubData.club_name;
+            document.getElementById('editClubCategory').value = clubData.category || 'Technical';
+            document.getElementById('editClubBio').value = clubData.bio || clubData.description || '';
+            
+            logoBase64 = null;
+            bannerBase64 = null;
+
+            const logoPrev = document.getElementById('logoPreview');
+            if (clubData.logo_url) {
+                logoPrev.src = clubData.logo_url;
+                logoPrev.style.display = 'block';
+            } else {
+                logoPrev.style.display = 'none';
+            }
+
+            const bannerPrev = document.getElementById('bannerPreview');
+            if (clubData.banner_url) {
+                bannerPrev.src = clubData.banner_url;
+                bannerPrev.style.display = 'block';
+            } else {
+                bannerPrev.style.display = 'none';
+            }
+
+            document.getElementById('editProfileModal').classList.add('active');
+        }
+
+        async function saveClubProfile(e) {
+            e.preventDefault();
+            const saveBtn = e.target.querySelector('button[type="submit"]');
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'Saving Changes...';
+
+            const payload = {
+                club_name: document.getElementById('editClubName').value.trim(),
+                category: document.getElementById('editClubCategory').value,
+                bio: document.getElementById('editClubBio').value.trim(),
+                description: document.getElementById('editClubBio').value.trim(), // sync description
+                logo_url: logoBase64 || undefined,
+                banner_url: bannerBase64 || undefined
+            };
+
+            try {
+                const res = await fetch(`${API}/clubs/${clubId}`, {
+                    method: 'PUT',
+                    headers,
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+
+                if (res.ok && data.ok) {
+                    showNotification('Club profile updated successfully!', 'success');
+                    closeModal('editProfileModal');
+                    await loadClubProfile();
+                } else {
+                    throw new Error(data.error || 'Failed to save');
+                }
+            } catch (err) {
+                alert(`Error saving profile: ${err.message}`);
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.textContent = 'Save Profile Changes';
+            }
+        }
+
+        // Post detail modal logic
+        async function openPostModal(post) {
+            selectedPost = post;
+
+            // Fill header info
+            document.getElementById('modalPostClubName').textContent = clubData.club_name;
+            if (clubData.logo_url) {
+                document.getElementById('modalPostLogo').src = clubData.logo_url;
+            }
+
+            // Fill body
+            document.getElementById('modalPostTitle').textContent = post.title || 'Announcement';
+            document.getElementById('modalPostContent').textContent = post.content || '';
+            document.getElementById('modalPostDate').textContent = new Date(post.created_at).toLocaleDateString(undefined, {
+                year: 'numeric', month: 'long', day: 'numeric'
+            });
+
+            // Set image
+            const imageSide = document.getElementById('modalPostImageSide');
+            const hasImg = post.image_url && post.image_url.trim().length > 0;
+            if (hasImg) {
+                const absoluteImg = post.image_url.startsWith('data:') ? post.image_url : `${API}${post.image_url}`;
+                imageSide.innerHTML = `<img src="${absoluteImg}" alt="Post image" />`;
+            } else {
+                imageSide.innerHTML = `
+                    <div class="post-details-image-fallback">
+                        <div style="font-size:1.5rem; font-weight:800;">${post.title || 'Announcement'}</div>
+                    </div>
+                `;
+            }
+
+            // Admin controls
+            if (isUserAdmin) {
+                document.getElementById('adminPostActions').style.display = 'flex';
+                document.getElementById('adminRegControls').style.display = 'block';
+                document.getElementById('studentRegControls').style.display = 'none';
+            } else {
+                document.getElementById('adminPostActions').style.display = 'none';
+                document.getElementById('adminRegControls').style.display = 'none';
+                document.getElementById('studentRegControls').style.display = 'block';
+            }
+
+            // Setup likes
+            document.getElementById('modalLikeCount').textContent = `${post.like_count || 0} likes`;
+            const likeBtn = document.getElementById('modalLikeBtn');
+            if (post.has_liked) {
+                likeBtn.classList.add('liked');
+            } else {
+                likeBtn.classList.remove('liked');
+            }
+
+            // Setup comments
+            await loadComments();
+
+            // Setup registrations
+            const regPanel = document.getElementById('modalRegistrationPanel');
+            if (post.registration_enabled) {
+                regPanel.style.display = 'block';
+                document.getElementById('registrationDeadlineText').textContent = `Deadline: ${new Date(post.registration_deadline).toLocaleString()}`;
+                
+                // Get slots count
+                const regInfoRes = await fetch(`${API}/announcements/${post.id}/registration-info`);
+                const regInfo = await regInfoRes.json();
+                
+                let slotsInfo = 'Unlimited slots';
+                if (post.max_registrations) {
+                    const filled = regInfo.registeredCount || 0;
+                    slotsInfo = `Slots: ${filled} / ${post.max_registrations} filled`;
+                }
+                document.getElementById('registrationSlotsText').textContent = slotsInfo;
+
+                // Load register button state for students
+                if (token && !isUserAdmin) {
+                    const statusRes = await fetch(`${API}/announcements/${post.id}/registration-status`, { headers });
+                    const statusData = await statusRes.json();
+                    
+                    const registerBtn = document.getElementById('registerBtn');
+                    if (statusData.registered) {
+                        registerBtn.classList.add('subscribed');
+                        registerBtn.textContent = 'Unregister RSVP';
+                        document.getElementById('customRegFieldsContainer').style.display = 'none';
+                    } else {
+                        registerBtn.classList.remove('subscribed');
+                        registerBtn.textContent = 'Register RSVP';
+                        document.getElementById('customRegFieldsContainer').style.display = 'block';
+                        await renderCustomRegFields();
+                    }
+                }
+            } else {
+                regPanel.style.display = 'none';
+            }
+
+            document.getElementById('postDetailsModal').classList.add('active');
+        }
+
+        async function togglePostLike() {
+            if (!token) {
+                showNotification('Please login to like posts', 'error');
+                return;
+            }
+
+            const likeBtn = document.getElementById('modalLikeBtn');
+            const hasLiked = likeBtn.classList.contains('liked');
+
+            try {
+                const res = await fetch(`${API}/announcements/${selectedPost.id}/like`, {
+                    method: 'POST',
+                    headers
+                });
+                const data = await res.json();
+
+                if (res.ok && data.ok) {
+                    if (data.liked) {
+                        likeBtn.classList.add('liked');
+                        showNotification('Liked post! ❤️', 'success');
+                    } else {
+                        likeBtn.classList.remove('liked');
+                    }
+                    document.getElementById('modalLikeCount').textContent = `${data.likeCount || 0} likes`;
+                    // Refresh announcements list background counters
+                    await loadClubAnnouncements();
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function loadComments() {
+            const list = document.getElementById('modalCommentsList');
+            list.innerHTML = '';
+            try {
+                const res = await fetch(`${API}/announcements/${selectedPost.id}/comments`);
+                const data = await res.json();
+
+                if (res.ok && data.ok && data.comments) {
+                    if (data.comments.length === 0) {
+                        list.innerHTML = '<div style="font-size:0.8rem; color:#64748B; padding:10px 0;">No comments yet. Be the first!</div>';
+                        return;
+                    }
+
+                    data.comments.forEach(comment => {
+                        const item = document.createElement('div');
+                        item.className = 'comment-item';
+
+                        const avatar = comment.profile_picture || '/kle-logo.jpg';
+
+                        item.innerHTML = `
+                            <img class="comment-avatar" src="${avatar}" />
+                            <div class="comment-text-wrapper">
+                                <span class="comment-author">${comment.author_name || comment.name || 'Student'}</span>
+                                <span class="comment-text">${comment.content || comment.comment_text}</span>
+                            </div>
+                        `;
+                        list.appendChild(item);
+                    });
+                    list.scrollTop = list.scrollHeight;
+                }
+            } catch (err) {
+                console.error('Error fetching comments:', err);
+            }
+        }
+
+        async function submitComment() {
+            if (!token) {
+                showNotification('Please login to comment', 'error');
+                return;
+            }
+
+            const input = document.getElementById('newCommentInput');
+            const commentText = input.value.trim();
+            if (!commentText) return;
+
+            try {
+                const res = await fetch(`${API}/announcements/${selectedPost.id}/comments`, {
+                    method: 'POST',
+                    headers,
+                    body: JSON.stringify({ comment_text: commentText })
+                });
+                const data = await res.json();
+
+                if (res.ok && data.ok) {
+                    input.value = '';
+                    await loadComments();
+                    await loadClubAnnouncements();
+                } else {
+                    showNotification(data.error || 'Failed to comment', 'error');
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function renderCustomRegFields() {
+            const container = document.getElementById('customRegFieldsContainer');
+            container.innerHTML = '';
+            try {
+                const res = await fetch(`${API}/announcements/${selectedPost.id}/registration-fields`);
+                const data = await res.json();
+
+                if (res.ok && data.ok && data.fields && data.fields.length > 0) {
+                    data.fields.forEach(field => {
+                        const grp = document.createElement('div');
+                        grp.className = 'form-group';
+                        grp.innerHTML = `
+                            <label>${field.field_name} ${field.is_required ? '<span style="color:#EF4444;">*</span>' : ''}</label>
+                            <input type="${field.field_type || 'text'}" data-field-id="${field.id}" data-field-name="${field.field_name}" ${field.is_required ? 'required' : ''} />
+                        `;
+                        container.appendChild(grp);
+                    });
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function handleRegistrationToggle() {
+            if (!token) {
+                showNotification('Please login to register', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('registerBtn');
+            const isRegistered = btn.classList.contains('subscribed');
+            const endpoint = isRegistered ? 'unregister' : 'register';
+
+            if (!isRegistered) {
+                // Collect custom fields
+                const customFieldsData = {};
+                const inputs = document.querySelectorAll('#customRegFieldsContainer input');
+                let valid = true;
+
+                inputs.forEach(inp => {
+                    const val = inp.value.trim();
+                    const name = inp.getAttribute('data-field-name');
+                    if (inp.required && !val) {
+                        valid = false;
+                        inp.style.borderColor = '#EF4444';
+                    } else {
+                        inp.style.borderColor = '';
+                        customFieldsData[name] = val;
+                    }
+                });
+
+                if (!valid) {
+                    showNotification('Please fill in all required custom fields', 'error');
+                    return;
+                }
+
+                try {
+                    btn.disabled = true;
+                    const res = await fetch(`${API}/announcements/${selectedPost.id}/register`, {
+                        method: 'POST',
+                        headers,
+                        body: JSON.stringify({ custom_fields_data: customFieldsData })
+                    });
+                    const data = await res.json();
+
+                    if (res.ok && data.ok) {
+                        btn.classList.add('subscribed');
+                        btn.textContent = 'Unregister RSVP';
+                        document.getElementById('customRegFieldsContainer').style.display = 'none';
+                        showNotification('Successfully registered for this event! 🎉', 'success');
+                        openPostModal(selectedPost); // reload slots counts
+                    } else {
+                        throw new Error(data.error || 'Failed to register');
+                    }
+                } catch (err) {
+                    showNotification(err.message, 'error');
+                } finally {
+                    btn.disabled = false;
+                }
+            } else {
+                if (!confirm('Are you sure you want to cancel your RSVP?')) return;
+                try {
+                    btn.disabled = true;
+                    const res = await fetch(`${API}/announcements/${selectedPost.id}/unregister`, {
+                        method: 'POST',
+                        headers
+                    });
+                    const data = await res.json();
+
+                    if (res.ok && data.ok) {
+                        btn.classList.remove('subscribed');
+                        btn.textContent = 'Register RSVP';
+                        document.getElementById('customRegFieldsContainer').style.display = 'block';
+                        showNotification('RSVP cancelled.', 'info');
+                        openPostModal(selectedPost); // reload slots counts
+                    } else {
+                        throw new Error(data.error || 'Failed to cancel');
+                    }
+                } catch (err) {
+                    showNotification(err.message, 'error');
+                } finally {
+                    btn.disabled = false;
+                }
+            }
+        }
+
+        async function viewRegistrations() {
+            const list = document.getElementById('registrationsTableBody');
+            list.innerHTML = '<tr><td colspan="3" style="text-align:center;">Loading...</td></tr>';
+            document.getElementById('registrationsListModal').classList.add('active');
+
+            try {
+                const res = await fetch(`${API}/announcements/${selectedPost.id}/registrations`, { headers });
+                const data = await res.json();
+
+                if (res.ok && data.ok && data.registrations) {
+                    list.innerHTML = '';
+                    if (data.registrations.length === 0) {
+                        list.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#64748B;">No registrations yet.</td></tr>';
+                        return;
+                    }
+
+                    data.registrations.forEach(reg => {
+                        // format custom fields details
+                        let details = `Branch: ${reg.branch || 'N/A'}<br/>Roll: ${reg.roll_number || 'N/A'}`;
+                        if (reg.custom_fields_data && Object.keys(reg.custom_fields_data).length > 0) {
+                            details += '<br/><strong>Custom Fields:</strong><br/>';
+                            for (const [k, v] of Object.entries(reg.custom_fields_data)) {
+                                details += `${k}: ${v}<br/>`;
+                            }
+                        }
+
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${reg.name || 'Student'}</td>
+                            <td>${reg.email || ''}</td>
+                            <td>${details}</td>
+                        `;
+                        list.appendChild(tr);
+                    });
+                } else {
+                    list.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#EF4444;">Failed to load data.</td></tr>';
+                }
+            } catch (err) {
+                console.error(err);
+                list.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#EF4444;">Network error.</td></tr>';
+            }
+        }
+
+        function exportRegistrations() {
+            window.open(`${API}/announcements/${selectedPost.id}/registrations/export?token=${token}`, '_blank');
+        }
+
+        // Post admin actions
+        async function editPostContent() {
+            const newContent = prompt('Edit Post Description:', selectedPost.content);
+            if (newContent === null) return;
+            if (!newContent.trim()) {
+                alert('Description cannot be empty');
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API}/announcements/${selectedPost.id}`, {
+                    method: 'PUT',
+                    headers,
+                    body: JSON.stringify({ content: newContent.trim(), title: selectedPost.title })
+                });
+                const data = await res.json();
+
+                if (res.ok && data.ok) {
+                    showNotification('Post description updated successfully!', 'success');
+                    selectedPost.content = newContent.trim();
+                    document.getElementById('modalPostContent').textContent = newContent.trim();
+                    await loadClubAnnouncements();
+                } else {
+                    alert(data.error || 'Failed to edit');
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function deletePost() {
+            if (!confirm('Are you sure you want to delete this announcement? This will hide it from the profile feed.')) return;
+            try {
+                const res = await fetch(`${API}/announcements/${selectedPost.id}`, {
+                    method: 'DELETE',
+                    headers
+                });
+                const data = await res.json();
+
+                if (res.ok && data.ok) {
+                    showNotification('Announcement deleted successfully', 'info');
+                    closeModal('postDetailsModal');
+                    await loadClubAnnouncements();
+                    await loadClubProfile(); // reload post count stats
+                } else {
+                    alert(data.error || 'Failed to delete');
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        // Modal triggers
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 10);
+
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => notification.remove(), 400);
+            }, 3000);
+        }
+
+        init();
+    </script>
+</body>
+
+</html>

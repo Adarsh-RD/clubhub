@@ -815,6 +815,43 @@ app.get('/clubs/:id', async (req, res) => {
   }
 });
 
+app.put('/clubs/:id', authMiddleware, async (req, res) => {
+  try {
+    const clubId = parseInt(req.params.id);
+    const { club_name, description, category, logo_url, banner_url, bio } = req.body;
+
+    const user = await findUserByEmail(req.userEmail);
+    if (!user) {
+      return res.status(404).json({ ok: false, error: 'User not found' });
+    }
+
+    const coordinators = ['bigbossssz550@gmail.com', '01fe23bci050@kletech.ac.in'];
+    const isCoordinator = coordinators.includes(user.email.toLowerCase());
+    const isClubAdmin = user.role === 'club_admin' && user.club_id === clubId;
+
+    if (!isCoordinator && !isClubAdmin) {
+      return res.status(403).json({ ok: false, error: 'Access denied: Admin privileges required for this club' });
+    }
+
+    await pool.query(
+      `UPDATE clubs
+       SET club_name = COALESCE($1, club_name),
+           description = COALESCE($2, description),
+           category = COALESCE($3, category),
+           logo_url = COALESCE($4, logo_url),
+           banner_url = COALESCE($5, banner_url),
+           bio = COALESCE($6, bio)
+       WHERE id = $7`,
+      [club_name, description, category, logo_url, banner_url, bio, clubId]
+    );
+
+    return res.json({ ok: true, message: 'Club profile updated successfully' });
+  } catch (err) {
+    console.error('Error updating club profile:', err);
+    return res.status(500).json({ ok: false, error: 'Internal server error' });
+  }
+});
+
 // ==================== ANNOUNCEMENT ROUTES ====================
 
 app.get('/announcements', async (req, res) => {
@@ -3011,6 +3048,8 @@ const server = app.listen(PORT, async () => {
   try {
     await pool.query('ALTER TABLE announcements ALTER COLUMN image_url TYPE TEXT;');
     await pool.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS fcm_token TEXT;');
+    await pool.query('ALTER TABLE clubs ADD COLUMN IF NOT EXISTS banner_url TEXT;');
+    await pool.query('ALTER TABLE clubs ADD COLUMN IF NOT EXISTS bio TEXT;');
 
     // Check for stale schema
     const checkLikeCols = await pool.query(`

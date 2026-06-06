@@ -165,6 +165,7 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            cursor: pointer;
         }
 
         .club-card::before {
@@ -194,7 +195,7 @@
         .club-icon {
             width: 80px;
             height: 80px;
-            border-radius: 1.5rem;
+            border-radius: 50%;
             background: linear-gradient(135deg, #E11D48 0%, #BE123C 100%);
             display: flex;
             align-items: center;
@@ -605,7 +606,7 @@
     </div>
 
     <script>
-        const API = "https://clubhub-5eh7.onrender.com";
+        const API = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:4000' : 'https://clubhub-5eh7.onrender.com';
         const token = localStorage.getItem('token');
         const headers = token ? {
             'Authorization': `Bearer ${token}`,
@@ -628,7 +629,7 @@
 
         async function toggleSubscription(clubId, clubName, button) {
             if (!token) {
-                showNotification('Please login to subscribe', 'error');
+                showNotification('Please login to follow clubs', 'error');
                 return;
             }
 
@@ -649,20 +650,19 @@
                 if (res.ok && data.ok) {
                     if (isSubscribed) {
                         button.classList.remove('subscribed');
-                        button.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg> Going';
-                        showNotification(`You bailed on ${clubName} ✌️`, 'info');
+                        button.textContent = 'Follow';
+                        showNotification(`Unfollowed ${clubName}`, 'info');
                     } else {
                         button.classList.add('subscribed');
-                        button.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Locked In';
-                        showNotification(`Locked in for ${clubName}! 🔥`, 'success');
+                        button.textContent = 'Following';
+                        showNotification(`Following ${clubName}!`, 'success');
                     }
-                    updateSubscriberCount(clubId);
                 } else {
                     throw new Error(data.error || 'Failed');
                 }
             } catch (err) {
                 console.error('Error toggling subscription:', err);
-                showNotification('Failed to update subscription', 'error');
+                showNotification('Failed to update follow status', 'error');
             } finally {
                 button.disabled = false;
             }
@@ -716,29 +716,31 @@
                     for (const club of data.clubs) {
                         const isSubscribed = await checkSubscriptionStatus(club.id);
 
-                        const countRes = await fetch(`${API}/clubs/${club.id}/subscriber-count`);
-                        const countData = await countRes.json();
-                        const subscriberCount = countData.ok ? countData.count : 0;
-
                         const card = document.createElement('div');
                         card.className = 'club-card';
                         card.setAttribute('data-club-id', club.id);
+                        card.onclick = (e) => {
+                            if (!e.target.closest('button')) {
+                                window.location.href = `/club-profile.html?id=${club.id}`;
+                            }
+                        };
 
                         card.innerHTML = `
-                            <div class="club-icon" style="${club.logo_url ? 'background:transparent;box-shadow:none;' : ''}">${club.logo_url ? `<img src="${club.logo_url}" alt="${club.club_name}" style="width:100%;height:100%;border-radius:1.5rem;object-fit:cover;box-shadow:0 8px 20px rgba(0,0,0,0.3);" />` : club.club_name.charAt(0)}</div>
+                            <div class="club-icon" style="${club.logo_url ? 'background:transparent;box-shadow:none;' : ''}">${club.logo_url ? `<img src="${club.logo_url}" alt="${club.club_name}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;box-shadow:0 8px 20px rgba(0,0,0,0.3);" />` : club.club_name.charAt(0)}</div>
                             <h3 class="club-name">${club.club_name}</h3>
                             <span class="club-code">${club.category || 'Club'}</span>
                             <p class="club-description">${club.description || 'No description available'}</p>
                             
-                            <div class="club-footer">
-                                <div class="subscriber-info">
-                                    <span class="subscriber-count">🔥 ${subscriberCount} pullin' up</span>
-                                </div>
+                            <div class="club-footer" style="gap: 10px;">
+                                <button class="back-btn" style="margin:0;padding:0.625rem 1.25rem;flex:1;justify-content:center;" onclick="window.location.href='/club-profile.html?id=${club.id}'">
+                                    Visit Club
+                                </button>
                                 <button 
                                     class="subscribe-btn ${isSubscribed ? 'subscribed' : ''}"
-                                    onclick="toggleSubscription(${club.id}, '${club.club_name.replace(/'/g, "\\'")}', this)"
+                                    style="padding:0.625rem 1.25rem;border-radius:0.75rem;flex:1;justify-content:center;box-shadow:none;"
+                                    onclick="event.stopPropagation(); toggleSubscription(${club.id}, '${club.club_name.replace(/'/g, "\\'")}', this)"
                                 >
-                                    ${isSubscribed ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Locked In' : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg> Going'}
+                                    ${isSubscribed ? 'Following' : 'Follow'}
                                 </button>
                             </div>
                         `;
