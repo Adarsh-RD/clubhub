@@ -59,7 +59,7 @@ function AuthCard({
           </p>
           <div className="live-counter">
             <span className="live-dot"></span>
-            450+ students pulling up RN 🔥
+            450+ students pullin' up RN🔥
           </div>
           <div className="auth-buttons">
             <button className="btn btn-primary btn-large btn-glow-cyan" onClick={() => setView("login")}>
