@@ -217,23 +217,24 @@ export default function Home() {
           </div>
 
           <div className="header-right">
-            {/* Admin Dashboard Link - Only for Coordinator */}
             {(profile?.email === 'bigbossssz550@gmail.com' || profile?.email === '01fe23bci050@kletech.ac.in') && (
               <button
-                className="btn btn-primary btn-sm"
+                className="header-icon-btn"
                 onClick={() => window.location.href = '/admin-dashboard.html'}
-                style={{ background: '#10B981', padding: '0.5rem' }}
                 title="Admin Dashboard"
               >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                  <path d="M12 4.5V19.5M19.5 12H4.5" stroke="currentColor" strokeWidth="2" />
-                  <circle cx="12" cy="12" r="2" fill="currentColor" />
-                </svg>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
               </button>
             )}
 
-            <button className="btn btn-ghost btn-sm" onClick={handleLogout} title="Sign Out">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <button className="header-icon-btn" onClick={() => setCurrentView('broadcast')} title="Broadcast Channels">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+              </svg>
+            </button>
+
+            <button className="header-icon-btn" onClick={handleLogout} title="Sign Out">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
                 <polyline points="16 17 21 12 16 7"></polyline>
                 <line x1="21" y1="12" x2="9" y2="12"></line>
@@ -243,114 +244,35 @@ export default function Home() {
         </div>
       </header>
 
-      <main className="main-content">
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 0 20px', borderBottom: '1px solid rgba(255,255,255,0.05)', marginBottom: '24px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-            <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'linear-gradient(135deg, #E11D48, #F59E0B)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', fontWeight: 'bold', color: 'white', boxShadow: '0 4px 12px rgba(225, 29, 72, 0.3)' }}>
-              {firstName.charAt(0)}
-            </div>
-            <div>
-              <h2 style={{ fontSize: '1.1rem', margin: 0, fontWeight: '600', color: '#f8fafc' }}>{firstName}</h2>
-              <p style={{ fontSize: '0.85rem', color: '#94a3b8', margin: '2px 0 0 0' }}>Your Campus Feed</p>
-            </div>
+      <main className="feed-main">
+        {announcements.length > 0 ? (
+          <div className="feed-list">
+            {announcements.map((announcement) => (
+              <AnnouncementCard
+                key={announcement.id}
+                announcement={announcement}
+                currentUser={profile}
+              />
+            ))}
           </div>
-          <button 
-            style={{ 
-              background: 'rgba(255,255,255,0.05)', 
-              border: '1px solid rgba(255,255,255,0.1)', 
-              borderRadius: '50%', 
-              width: '40px',
-              height: '40px',
-              color: '#fff', 
-              cursor: 'pointer', 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center',
-              transition: 'all 0.25s ease',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-            }} 
-            onMouseOver={(e) => {
-              e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
-              e.currentTarget.style.transform = 'scale(1.08)';
-              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)';
-            }} 
-            onMouseOut={(e) => {
-              e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
-              e.currentTarget.style.transform = 'scale(1)';
-              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)';
-            }} 
-            onClick={() => setCurrentView('broadcast')}
-            title="Broadcast Channels"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        ) : (
+          <div className="feed-empty">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="1.5" style={{opacity:0.4}}>
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 8v4M12 16h.01"/>
             </svg>
-          </button>
-        </div>
-
-        <section>
-          <h2 className="section-title">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="url(#announcement-gradient)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ filter: 'drop-shadow(0px 2px 10px rgba(225, 29, 72, 0.4))' }}>
-              <defs>
-                <linearGradient id="announcement-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#E11D48" />
-                  <stop offset="100%" stopColor="#F59E0B" />
-                </linearGradient>
-              </defs>
-              <circle cx="12" cy="12" r="2"></circle>
-              <path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"></path>
-            </svg>
-            Latest Announcements
-          </h2>
-
-          {announcements.length > 0 ? (
-            <div>
-              {announcements.map((announcement) => (
-                <AnnouncementCard
-                  key={announcement.id}
-                  announcement={announcement}
-                  currentUser={profile}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="empty-state">
-              <div className="empty-icon">📭</div>
-              <h3 className="empty-title">No announcements yet</h3>
-              <p className="empty-description">Check back later for updates from clubs</p>
-              <button className="btn btn-primary" onClick={() => window.location.href = '/clubs.html'} style={{ marginTop: '1.5rem' }}>
-                Explore Clubs
-              </button>
-            </div>
-          )}
-        </section>
-
-        {/* Professional Footer */}
-        <footer style={{ marginTop: '50px', padding: '30px 0 100px 0', borderTop: '1px solid rgba(255,255,255,0.05)', textAlign: 'center', color: '#64748b', fontSize: '0.85rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '15px', marginBottom: '20px' }}>
-            <a href="/about.html" style={{ color: '#94a3b8', textDecoration: 'none', transition: 'color 0.2s' }} onMouseOver={(e)=>e.currentTarget.style.color='#f8fafc'} onMouseOut={(e)=>e.currentTarget.style.color='#94a3b8'}>About</a>
-            <a href="/accessibility.html" style={{ color: '#94a3b8', textDecoration: 'none', transition: 'color 0.2s' }} onMouseOver={(e)=>e.currentTarget.style.color='#f8fafc'} onMouseOut={(e)=>e.currentTarget.style.color='#94a3b8'}>Accessibility</a>
-            <a href="/help.html" style={{ color: '#94a3b8', textDecoration: 'none', transition: 'color 0.2s' }} onMouseOver={(e)=>e.currentTarget.style.color='#f8fafc'} onMouseOut={(e)=>e.currentTarget.style.color='#94a3b8'}>Help Center</a>
-            <a href="/privacy.html" style={{ color: '#94a3b8', textDecoration: 'none', transition: 'color 0.2s' }} onMouseOver={(e)=>e.currentTarget.style.color='#f8fafc'} onMouseOut={(e)=>e.currentTarget.style.color='#94a3b8'}>Privacy & Terms</a>
+            <p>No announcements yet</p>
+            <span>Check back later for club updates</span>
           </div>
-          
-          <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'center', gap: '20px' }}>
-            <a href="https://www.linkedin.com/in/adarshhhhhhrd/" target="_blank" rel="noopener noreferrer" style={{ color: '#0077b5', display: 'flex', alignItems: 'center', gap: '6px', textDecoration: 'none', fontWeight: '500', transition: 'transform 0.2s' }} onMouseOver={(e)=>e.currentTarget.style.transform='scale(1.05)'} onMouseOut={(e)=>e.currentTarget.style.transform='scale(1)'}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
-              LinkedIn
-            </a>
-            <a href="https://instagram.com/_adxrshh.rd/" target="_blank" rel="noopener noreferrer" style={{ color: '#E1306C', display: 'flex', alignItems: 'center', gap: '6px', textDecoration: 'none', fontWeight: '500', transition: 'transform 0.2s' }} onMouseOver={(e)=>e.currentTarget.style.transform='scale(1.05)'} onMouseOut={(e)=>e.currentTarget.style.transform='scale(1)'}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
-              Instagram
-            </a>
+        )}
+
+        <footer style={{ marginTop: '40px', padding: '20px 16px 100px', textAlign: 'center', color: '#475569', fontSize: '0.75rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+            <span style={{ fontWeight: '600', color: '#94a3b8' }}>Club Hub</span>
+            <span style={{ fontSize: '8px', color: '#475569' }}>·</span>
+            <span>by <strong style={{ color: '#E11D48', fontWeight: '600' }}>Adarsh</strong></span>
           </div>
-          
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontWeight: '500', color: '#f8fafc' }}>Club Hub</span>
-            <span style={{ fontSize: '10px' }}>•</span>
-            <span>Developed by <strong style={{ color: '#E11D48' }}>Adarsh</strong></span>
-          </div>
-          <p style={{ margin: '8px 0 0 0', opacity: 0.6, fontSize: '0.8rem' }}>© {new Date().getFullYear()} Club Hub Corporation. All rights reserved.</p>
+          <p style={{ margin: 0, opacity: 0.5 }}>© {new Date().getFullYear()}</p>
         </footer>
       </main>
 
@@ -418,11 +340,10 @@ export default function Home() {
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2 className="modal-title">
-                <span>✨</span>
-                Create New Announcement
+                New Post
               </h2>
               <button className="modal-close" onClick={() => setShowCreateModal(false)}>
-                ✕
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
               </button>
             </div>
 

@@ -1,5 +1,5 @@
 // frontend/src/components/AnnouncementCard.js
-// CLEAN VERSION - NO CSS IN THIS FILE!
+// PREMIUM UI - Compact Instagram-style cards
 
 import React, { useState, useEffect, useRef } from 'react';
 
@@ -154,14 +154,14 @@ export default function AnnouncementCard({ announcement, currentUser }) {
                 setIsRegistered(true);
                 setShowRegForm(false);
                 setRegFormData({});
-                alert('✓ Successfully registered for this event!');
+                alert('Successfully registered for this event!');
                 loadRegistrationInfo();
             } else {
-                alert('✗ ' + (data.error || 'Registration failed'));
+                alert(data.error || 'Registration failed');
             }
         } catch (err) {
             console.error('Error registering:', err);
-            alert('✗ Failed to register');
+            alert('Failed to register');
         } finally {
             setLoadingReg(false);
         }
@@ -184,14 +184,14 @@ export default function AnnouncementCard({ announcement, currentUser }) {
 
             if (res.ok && data.ok) {
                 setIsRegistered(false);
-                alert('✓ Registration cancelled');
+                alert('Registration cancelled');
                 loadRegistrationInfo();
             } else {
-                alert('✗ ' + (data.error || 'Failed to cancel'));
+                alert(data.error || 'Failed to cancel');
             }
         } catch (err) {
             console.error('Error cancelling registration:', err);
-            alert('✗ Failed to cancel');
+            alert('Failed to cancel');
         } finally {
             setLoadingReg(false);
         }
@@ -329,294 +329,201 @@ export default function AnnouncementCard({ announcement, currentUser }) {
                 setCommentCount(prev => prev + 1);
                 loadComments(); // Refresh list to get new comment
             } else {
-                alert('✗ Failed to post comment: ' + (data.error || 'Unknown error'));
+                alert('Failed to post comment: ' + (data.error || 'Unknown error'));
             }
         } catch (err) {
             console.error('Error posting comment:', err);
-            alert('✗ Failed to post comment');
+            alert('Failed to post comment');
         }
     }
 
+    // Time ago helper
+    function timeAgo(dateStr) {
+        const now = new Date();
+        const date = new Date(dateStr);
+        const diff = Math.floor((now - date) / 1000);
+        if (diff < 60) return 'just now';
+        if (diff < 3600) return `${Math.floor(diff / 60)}m`;
+        if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
+        if (diff < 604800) return `${Math.floor(diff / 86400)}d`;
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }
+
+    const mediaUrl = announcement.image_url
+        ? (announcement.image_url.startsWith('http') || announcement.image_url.startsWith('data:')
+            ? announcement.image_url
+            : `${API_BASE}${announcement.image_url}`)
+        : null;
+
+    const isVideo = announcement.image_url && (
+        announcement.image_url.startsWith('data:video') ||
+        announcement.image_url.match(/\.(mp4|webm|mov)$/i)
+    );
+
     return (
-        <div className="announcement-card">
-            <div className="announcement-header">
-                <span className="club-badge">
-                    <span>🎯</span>
-                    {announcement.club_name || 'Club'}
-                </span>
-                <div className="announcement-meta">
-                    <span>{new Date(announcement.created_at).toLocaleDateString()}</span>
-                    <span>{new Date(announcement.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+        <div className="card-v2">
+            {/* Header Row: Avatar + Club name + time */}
+            <div className="card-v2-header">
+                <div className="card-v2-avatar">
+                    {(announcement.club_name || 'C').charAt(0)}
                 </div>
-            </div>
-
-            {/* Media Section (Instagram Style) */}
-            {announcement.image_url && (
-                announcement.image_url.startsWith('data:video') || announcement.image_url.match(/\.(mp4|webm|mov)$/i) ? (
-                    <div className="reels-container" style={{ position: 'relative', width: '100%', borderRadius: '8px', overflow: 'hidden', backgroundColor: '#000', marginTop: '10px' }} onClick={togglePlay}>
-                        <video
-                            ref={videoRef}
-                            src={
-                                announcement.image_url.startsWith('http') || announcement.image_url.startsWith('data:')
-                                    ? announcement.image_url
-                                    : `${API_BASE}${announcement.image_url}`
-                            }
-                            className="announcement-video"
-                            style={{ width: '100%', display: 'block', maxHeight: '80vh', objectFit: 'contain' }}
-                            loop
-                            playsInline
-                            muted={isMuted}
-                        />
-                        {/* Play/Pause Overlay */}
-                        {!isPlaying && (
-                            <div className="play-overlay" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: '#C41E3A', filter: 'drop-shadow(0px 2px 4px rgba(0,0,0,0.5))', pointerEvents: 'none' }}>
-                                <svg width="72" height="72" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M8 5v14l11-7z" />
-                                </svg>
-                            </div>
-                        )}
-                        {/* Mute/Unmute Overlay */}
-                        <div className="sound-overlay" onClick={toggleMute} style={{ position: 'absolute', bottom: '15px', right: '15px', background: 'rgba(0,0,0,0.5)', borderRadius: '50%', padding: '8px', color: 'white', cursor: 'pointer' }}>
-                            {isMuted ? (
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-                                    <line x1="23" y1="9" x2="17" y2="15"></line>
-                                    <line x1="17" y1="9" x2="23" y2="15"></line>
-                                </svg>
-                            ) : (
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-                                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-                                </svg>
-                            )}
-                        </div>
-                    </div>
-                ) : (
-                    <img
-                        src={
-                            announcement.image_url.startsWith('http') || announcement.image_url.startsWith('data:')
-                                ? announcement.image_url
-                                : `${API_BASE}${announcement.image_url}`
-                        }
-                        alt={announcement.title}
-                        className="announcement-image"
-                        style={{ width: '100%', borderRadius: '8px', marginTop: '10px', maxHeight: '500px', objectFit: 'cover' }}
-                    />
-                )
-            )}
-
-            {/* Interactions Bar (Moved above title) */}
-            <div className="interactions-bar" style={{ marginTop: '10px', padding: '5px 0', display: 'flex', gap: '15px' }}>
-                <button
-                    className={`interaction-btn ${isLiked ? 'liked' : ''}`}
-                    onClick={handleLike}
-                    style={{ color: isLiked ? '#C41E3A' : 'inherit', background: 'none', border: 'none', display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer' }}
-                >
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill={isLiked ? '#C41E3A' : 'none'}>
-                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                    <span style={{ fontWeight: 'bold' }}>{likeCount}</span>
-                </button>
-
-                <button className="interaction-btn" onClick={toggleComments} style={{ background: 'none', border: 'none', display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer' }}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                    <span style={{ fontWeight: 'bold' }}>{commentCount}</span>
-                </button>
-
-                <button className="interaction-btn" onClick={handleShare} style={{ background: 'none', border: 'none', display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer', marginLeft: 'auto' }}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <div className="card-v2-meta">
+                    <span className="card-v2-club">{announcement.club_name || 'Club'}</span>
+                    <span className="card-v2-time">{timeAgo(announcement.created_at)}</span>
+                </div>
+                <button className="card-v2-share" onClick={handleShare} aria-label="Share">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <line x1="22" y1="2" x2="11" y2="13"></line>
                         <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
                     </svg>
                 </button>
             </div>
 
-            {/* Content (Instagram Style - Below Interactions) */}
-            <div style={{ marginTop: '5px' }}>
-                <p className="announcement-content" style={{ margin: 0, fontSize: '0.9rem', color: '#4B5563' }}>
-                    <span style={{ fontWeight: 'bold', marginRight: '5px' }}>{announcement.club_name || 'Club'}</span>
-                    {announcement.content}
-                </p>
-            </div>
-
-            {/* Registration Section */}
-            {announcement.registration_enabled && registrationInfo && (
-                <div className="registration-section">
-                    <div className="registration-info">
-                        <h4 className="registration-title">Event Registration</h4>
-
-                        <div className="registration-stats">
-                            <div className="stat-item">
-                                <span className="stat-text">
-                                    Registered: {registrationInfo.current_count}
-                                    {registrationInfo.max_registrations ? ` / ${registrationInfo.max_registrations}` : ''}
-                                </span>
-                            </div>
-
-                            {registrationInfo.deadline && (
-                                <div className="stat-item">
-                                    <span className="stat-text">
-                                        Deadline: {new Date(registrationInfo.deadline).toLocaleString()}
-                                    </span>
+            {/* Media — edge-to-edge inside card */}
+            {mediaUrl && (
+                <div className="card-v2-media">
+                    {isVideo ? (
+                        <div className="card-v2-video-wrap" onClick={togglePlay}>
+                            <video
+                                ref={videoRef}
+                                src={mediaUrl}
+                                className="card-v2-video"
+                                loop
+                                playsInline
+                                muted={isMuted}
+                            />
+                            {!isPlaying && (
+                                <div className="card-v2-play-btn">
+                                    <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
                                 </div>
                             )}
-                        </div>
-
-                        {/* Registration Status Messages */}
-                        {registrationInfo.is_full && (
-                            <div className="registration-status status-full">
-                                Event is full
-                            </div>
-                        )}
-
-                        {registrationInfo.deadline_passed && (
-                            <div className="registration-status status-closed">
-                                Registration closed
-                            </div>
-                        )}
-
-                    {/* Registration Button for Students */}
-                        {isStudent && (
-                            <div className="registration-actions">
-                                {isRegistered ? (
-                                    <div className="registered-badge">
-                                        You're registered
-                                        <button
-                                            className="btn-cancel-reg"
-                                            onClick={handleUnregister}
-                                            disabled={loadingReg}
-                                        >
-                                            Cancel
-                                        </button>
-                                    </div>
+                            <button className="card-v2-mute-btn" onClick={toggleMute}>
+                                {isMuted ? (
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>
                                 ) : (
-                                    <>
-                                        <button
-                                            className="btn-register"
-                                            onClick={handleRegister}
-                                            disabled={loadingReg || !canRegister}
-                                        >
-                                            {loadingReg ? '...' : 'Register Now'}
-                                        </button>
-
-                                        {/* Custom Fields Registration Form */}
-                                        {showRegForm && customFields.length > 0 && (
-                                            <div style={{
-                                                marginTop: '12px',
-                                                padding: '16px',
-                                                background: 'rgba(255, 255, 255, 0.02)',
-                                                borderRadius: '10px',
-                                                border: '1px solid rgba(255, 255, 255, 0.08)'
-                                            }}>
-                                                <p style={{ fontSize: '0.9rem', fontWeight: '600', color: '#FFFFFF', marginBottom: '12px' }}>
-                                                    Fill in the details below:
-                                                </p>
-                                                {customFields.map(field => (
-                                                    <div key={field.id} style={{ marginBottom: '10px' }}>
-                                                        <label style={{ fontSize: '0.85rem', color: '#e2e8f0', display: 'block', marginBottom: '4px' }}>
-                                                            {field.field_name}
-                                                            {field.is_required && <span style={{ color: '#EF4444' }}> *</span>}
-                                                        </label>
-                                                        <input
-                                                            type={field.field_type === 'phone' ? 'tel' : field.field_type}
-                                                            placeholder={`Enter ${field.field_name.toLowerCase()}`}
-                                                            value={regFormData[field.id] || regFormData[field.field_name] || ''}
-                                                            onChange={(e) => setRegFormData({ 
-                                                                ...regFormData, 
-                                                                [field.id]: e.target.value,
-                                                                [field.field_name]: e.target.value
-                                                            })}
-                                                            required={field.is_required}
-                                                            style={{
-                                                                width: '100%',
-                                                                padding: '10px 12px',
-                                                                borderRadius: '8px',
-                                                                border: '1px solid rgba(255,255,255,0.15)',
-                                                                background: 'rgba(255,255,255,0.05)',
-                                                                color: '#f8fafc',
-                                                                fontSize: '0.9rem',
-                                                                outline: 'none',
-                                                                boxSizing: 'border-box'
-                                                            }}
-                                                        />
-                                                    </div>
-                                                ))}
-                                                <div style={{ display: 'flex', gap: '8px', marginTop: '14px' }}>
-                                                    <button
-                                                        className="btn-register"
-                                                        onClick={handleRegister}
-                                                        disabled={loadingReg}
-                                                        style={{ flex: 1 }}
-                                                    >
-                                                        {loadingReg ? '...' : 'Submit & Register'}
-                                                    </button>
-                                                    <button
-                                                        onClick={() => { setShowRegForm(false); setRegFormData({}); }}
-                                                        style={{ background: 'rgba(255,255,255,0.08)', color: '#94a3b8', border: 'none', borderRadius: '8px', padding: '8px 16px', cursor: 'pointer', fontSize: '0.85rem' }}
-                                                    >
-                                                        Cancel
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        )}
-                                    </>
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
                                 )}
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Admin View - Removed as requested (moved to Profile only) */}
+                            </button>
+                        </div>
+                    ) : (
+                        <img src={mediaUrl} alt="" className="card-v2-img" loading="lazy" />
+                    )}
                 </div>
             )}
 
+            {/* Action bar — compact icons */}
+            <div className="card-v2-actions">
+                <div className="card-v2-actions-left">
+                    <button className={`card-v2-action-btn ${isLiked ? 'liked' : ''}`} onClick={handleLike}>
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill={isLiked ? '#E11D48' : 'none'}>
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke={isLiked ? '#E11D48' : 'currentColor'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                    </button>
+                    <button className="card-v2-action-btn" onClick={toggleComments}>
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
 
+            {/* Likes count */}
+            {likeCount > 0 && (
+                <div className="card-v2-likes">{likeCount.toLocaleString()} {likeCount === 1 ? 'like' : 'likes'}</div>
+            )}
+
+            {/* Caption text */}
+            <div className="card-v2-caption">
+                <span className="card-v2-caption-club">{announcement.club_name || 'Club'}</span>
+                {announcement.content}
+            </div>
+
+            {/* Comment count teaser */}
+            {commentCount > 0 && !showComments && (
+                <button className="card-v2-comment-teaser" onClick={toggleComments}>
+                    View all {commentCount} comment{commentCount > 1 ? 's' : ''}
+                </button>
+            )}
+
+            {/* Registration — ultra-compact inline */}
+            {announcement.registration_enabled && registrationInfo && (
+                <div className="card-v2-reg-inline">
+                    {isStudent && (
+                        <>
+                            {isRegistered ? (
+                                <span className="card-v2-reg-chip registered">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                    Registered
+                                    <button className="card-v2-unreg-link" onClick={handleUnregister} disabled={loadingReg}>Undo</button>
+                                </span>
+                            ) : registrationInfo.is_full ? (
+                                <span className="card-v2-reg-chip closed">Spots filled</span>
+                            ) : registrationInfo.deadline_passed ? (
+                                <span className="card-v2-reg-chip closed">Closed</span>
+                            ) : (
+                                <button className="card-v2-reg-link" onClick={handleRegister} disabled={loadingReg}>
+                                    {loadingReg ? '...' : 'Register for this event'}
+                                </button>
+                            )}
+                        </>
+                    )}
+
+                    {/* Custom Fields Form — slide down */}
+                    {showRegForm && customFields.length > 0 && (
+                        <div className="card-v2-reg-form">
+                            {customFields.map(field => (
+                                <div key={field.id} className="card-v2-reg-field">
+                                    <input
+                                        type={field.field_type === 'phone' ? 'tel' : field.field_type}
+                                        placeholder={`${field.field_name}${field.is_required ? ' *' : ''}`}
+                                        value={regFormData[field.id] || regFormData[field.field_name] || ''}
+                                        onChange={(e) => setRegFormData({
+                                            ...regFormData,
+                                            [field.id]: e.target.value,
+                                            [field.field_name]: e.target.value
+                                        })}
+                                        required={field.is_required}
+                                    />
+                                </div>
+                            ))}
+                            <div className="card-v2-reg-form-actions">
+                                <button className="card-v2-reg-submit" onClick={handleRegister} disabled={loadingReg}>
+                                    {loadingReg ? '...' : 'Submit'}
+                                </button>
+                                <button className="card-v2-reg-cancel" onClick={() => { setShowRegForm(false); setRegFormData({}); }}>
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
 
             {/* Comments Section */}
             {showComments && (
-                <div className="comments-section" style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '1rem', marginTop: '1rem' }}>
-                    <div className="comment-input-wrapper" style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
-                        <textarea
-                            className="comment-input"
-                            placeholder="Write a comment..."
+                <div className="card-v2-comments">
+                    {loadingComments ? (
+                        <p className="card-v2-comments-loading">Loading...</p>
+                    ) : commentsList.length > 0 ? (
+                        commentsList.map(comment => (
+                            <div key={comment.id} className="card-v2-comment">
+                                <span className="card-v2-comment-author">{comment.author_name || comment.author_email}</span>
+                                <span className="card-v2-comment-text">{comment.content}</span>
+                                <span className="card-v2-comment-time">{timeAgo(comment.created_at)}</span>
+                            </div>
+                        ))
+                    ) : (
+                        <p className="card-v2-comments-empty">No comments yet</p>
+                    )}
+                    <div className="card-v2-comment-input">
+                        <input
+                            type="text"
+                            placeholder="Add a comment..."
                             value={commentText}
                             onChange={(e) => setCommentText(e.target.value)}
-                            style={{ flex: 1, padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid rgba(255,255,255,0.1)', background: 'transparent', color: '#E2E8F0', resize: 'vertical', minHeight: '40px', outline: 'none' }}
+                            onKeyDown={(e) => e.key === 'Enter' && handlePostComment()}
                         />
-                        <button
-                            className="btn btn-primary btn-sm"
-                            onClick={handlePostComment}
-                            disabled={!commentText.trim()}
-                        >
-                            Post
-                        </button>
-                    </div>
-
-                    <div className="comment-list" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                        {loadingComments ? (
-                            <p style={{ textAlign: 'center', color: '#94A3B8', padding: '1rem' }}>Loading comments...</p>
-                        ) : commentsList.length > 0 ? (
-                            commentsList.map(comment => (
-                                <div key={comment.id} className="comment-item" style={{ marginBottom: '0.25rem' }}>
-                                    <div style={{ lineHeight: '1.4' }}>
-                                        <span style={{ fontSize: '0.875rem', color: '#FFFFFF', fontWeight: '600', marginRight: '0.5rem' }}>
-                                            {comment.author_name || comment.author_email}
-                                        </span>
-                                        <span style={{ fontSize: '0.875rem', color: '#E2E8F0' }}>
-                                            {comment.content}
-                                        </span>
-                                    </div>
-                                    <div style={{ fontSize: '0.7rem', color: '#94A3B8', marginTop: '2px' }}>
-                                        {new Date(comment.created_at).toLocaleDateString()}
-                                    </div>
-                                </div>
-                            ))
-                        ) : (
-                            <p style={{ textAlign: 'center', color: '#94A3B8', padding: '1rem' }}>
-                                No comments yet. Be the first to comment!
-                            </p>
-                        )}
+                        <button onClick={handlePostComment} disabled={!commentText.trim()}>Post</button>
                     </div>
                 </div>
             )}
