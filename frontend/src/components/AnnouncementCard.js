@@ -364,8 +364,21 @@ export default function AnnouncementCard({ announcement, currentUser }) {
         <div className="card-v2">
             {/* Header Row: Avatar + Club name + time */}
             <div className="card-v2-header">
-                <div className="card-v2-avatar">
-                    {(announcement.club_name || 'C').charAt(0)}
+                <div className="card-v2-avatar" style={announcement.club_logo ? { background: 'transparent' } : {}}>
+                    {announcement.club_logo ? (
+                        <img 
+                            src={announcement.club_logo} 
+                            alt={announcement.club_name} 
+                            style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} 
+                            onError={(e) => {
+                                e.target.style.display = 'none';
+                                e.target.parentElement.style.background = 'linear-gradient(135deg, #E11D48 0%, #BE123C 100%)';
+                                e.target.parentElement.innerHTML = (announcement.club_name || 'C').charAt(0);
+                            }}
+                        />
+                    ) : (
+                        (announcement.club_name || 'C').charAt(0)
+                    )}
                 </div>
                 <div className="card-v2-meta">
                     <span className="card-v2-club">{announcement.club_name || 'Club'}</span>

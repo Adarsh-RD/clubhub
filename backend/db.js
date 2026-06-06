@@ -195,7 +195,7 @@ const getAllAnnouncements = async (limit = 50, offset = 0, userEmail = null) => 
     `SELECT 
       a.id, a.title, a.content, a.image_url, a.created_at,
       a.registration_enabled, a.registration_deadline, a.max_registrations,
-      a.club_id, c.club_name, c.club_code,
+      a.club_id, c.club_name, c.club_code, c.logo_url AS club_logo,
       a.created_by, u.name AS author_name,
       COUNT(DISTINCT al.id) AS like_count,
       COUNT(DISTINCT ac.id) AS comment_count,
@@ -206,7 +206,7 @@ const getAllAnnouncements = async (limit = 50, offset = 0, userEmail = null) => 
      LEFT JOIN announcement_likes al ON a.id = al.announcement_id
      LEFT JOIN announcement_comments ac ON a.id = ac.announcement_id
      WHERE a.is_active=true
-     GROUP BY a.id, c.club_name, c.club_code, u.name
+     GROUP BY a.id, c.club_name, c.club_code, c.logo_url, u.name
      ORDER BY a.created_at DESC
      LIMIT $1 OFFSET $2`,
     [limit, offset, userEmail]
@@ -225,6 +225,7 @@ const getAnnouncementsByClub = async (clubId, limit = 50, userEmail = null) => {
         a.registration_enabled, a.registration_deadline, a.max_registrations,
         a.club_id,
         c.club_name,
+        c.logo_url AS club_logo,
         a.created_by,
         u.name as author_name,
         COUNT(DISTINCT al.id) AS like_count,
@@ -236,7 +237,7 @@ const getAnnouncementsByClub = async (clubId, limit = 50, userEmail = null) => {
        LEFT JOIN announcement_likes al ON a.id = al.announcement_id
        LEFT JOIN announcement_comments ac ON a.id = ac.announcement_id
        WHERE a.club_id = $1 AND a.is_active = true
-       GROUP BY a.id, c.club_name, u.name
+       GROUP BY a.id, c.club_name, c.logo_url, u.name
        ORDER BY a.created_at DESC
        LIMIT $2`,
     [clubId, limit, userEmail]

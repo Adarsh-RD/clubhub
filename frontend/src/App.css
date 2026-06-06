@@ -3065,6 +3065,7 @@ input[type="number"]:focus {
 /* === Media === */
 .card-v2-media {
   width: 100%;
+  aspect-ratio: 1 / 1;
   position: relative;
   background: #000;
   overflow: hidden;
@@ -3072,21 +3073,23 @@ input[type="number"]:focus {
 
 .card-v2-img {
   width: 100%;
+  height: 100%;
   display: block;
-  max-height: 520px;
   object-fit: cover;
 }
 
 .card-v2-video-wrap {
   position: relative;
   cursor: pointer;
+  width: 100%;
+  height: 100%;
 }
 
 .card-v2-video {
   width: 100%;
+  height: 100%;
   display: block;
-  max-height: 80vh;
-  object-fit: contain;
+  object-fit: cover;
 }
 
 .card-v2-play-btn {
