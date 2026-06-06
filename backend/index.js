@@ -2290,8 +2290,19 @@ app.post('/announcements/:announcementId/register', authMiddleware, async (req, 
 
     if (customFields.length > 0) {
       const fieldsData = custom_fields_data || {};
+      const fieldsDataLower = {};
+      for (const key of Object.keys(fieldsData)) {
+        fieldsDataLower[String(key).toLowerCase().trim()] = fieldsData[key];
+      }
+
       for (const field of customFields) {
-        if (field.is_required && (!fieldsData[field.id] || !String(fieldsData[field.id]).trim())) {
+        const valById = fieldsData[field.id];
+        const valByName = fieldsData[field.field_name];
+        const valByNameLower = fieldsDataLower[String(field.field_name).toLowerCase().trim()];
+        
+        const value = valById !== undefined ? valById : (valByName !== undefined ? valByName : valByNameLower);
+
+        if (field.is_required && (value === undefined || value === null || !String(value).trim())) {
           return res.status(400).json({ ok: false, error: `"${field.field_name}" is required` });
         }
       }
@@ -2615,7 +2626,16 @@ app.get('/announcements/:announcementId/registrations/export', authMiddleware, a
           r.status
         ];
         const customValues = customFields.map(f => {
-          const val = r.custom_fields_data?.[f.id] || '';
+          const fieldsData = r.custom_fields_data || {};
+          const fieldsDataLower = {};
+          for (const key of Object.keys(fieldsData)) {
+            fieldsDataLower[String(key).toLowerCase().trim()] = fieldsData[key];
+          }
+          const valById = fieldsData[f.id];
+          const valByName = fieldsData[f.field_name];
+          const valByNameLower = fieldsDataLower[String(f.field_name).toLowerCase().trim()];
+          
+          const val = valById !== undefined ? valById : (valByName !== undefined ? valByName : (valByNameLower || ''));
           return `"${String(val).replace(/"/g, '""')}"`;
         });
         return [...baseRow, ...customValues].join(',');

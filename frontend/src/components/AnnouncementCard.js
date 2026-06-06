@@ -525,8 +525,12 @@ export default function AnnouncementCard({ announcement, currentUser }) {
                                                         <input
                                                             type={field.field_type === 'phone' ? 'tel' : field.field_type}
                                                             placeholder={`Enter ${field.field_name.toLowerCase()}`}
-                                                            value={regFormData[field.id] || ''}
-                                                            onChange={(e) => setRegFormData({ ...regFormData, [field.id]: e.target.value })}
+                                                            value={regFormData[field.id] || regFormData[field.field_name] || ''}
+                                                            onChange={(e) => setRegFormData({ 
+                                                                ...regFormData, 
+                                                                [field.id]: e.target.value,
+                                                                [field.field_name]: e.target.value
+                                                            })}
                                                             required={field.is_required}
                                                             style={{
                                                                 width: '100%',
