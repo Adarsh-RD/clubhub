@@ -38,7 +38,7 @@ export default function AnnouncementCard({ announcement, currentUser }) {
         const shareUrl = `${window.location.origin}/announcements/${announcement.id}`;
         if (navigator.share) {
             navigator.share({
-                title: announcement.title,
+                title: announcement.content?.substring(0, 60) || 'Announcement',
                 text: announcement.content,
                 url: shareUrl,
             }).catch(console.error);
@@ -60,6 +60,9 @@ export default function AnnouncementCard({ announcement, currentUser }) {
     const [isRegistered, setIsRegistered] = useState(false);
     const [loadingReg, setLoadingReg] = useState(false);
     const [registrations, setRegistrations] = useState([]);
+    const [customFields, setCustomFields] = useState([]);
+    const [showRegForm, setShowRegForm] = useState(false);
+    const [regFormData, setRegFormData] = useState({});
 
     const token = localStorage.getItem('token');
     const isClubAdmin = currentUser?.role === 'club_admin';
@@ -68,6 +71,7 @@ export default function AnnouncementCard({ announcement, currentUser }) {
     useEffect(() => {
         if (announcement.registration_enabled) {
             loadRegistrationInfo();
+            loadCustomFields();
             if (token && isStudent) {
                 checkRegistrationStatus();
             }
@@ -106,9 +110,27 @@ export default function AnnouncementCard({ announcement, currentUser }) {
         }
     }
 
+    async function loadCustomFields() {
+        try {
+            const res = await fetch(`${API_BASE}/announcements/${announcement.id}/registration-fields`);
+            const data = await res.json();
+            if (data.ok && data.fields) {
+                setCustomFields(data.fields);
+            }
+        } catch (err) {
+            console.error('Error loading custom fields:', err);
+        }
+    }
+
     async function handleRegister() {
         if (!token) {
             alert('Please login to register');
+            return;
+        }
+
+        // If there are custom fields, show the form first
+        if (customFields.length > 0 && !showRegForm) {
+            setShowRegForm(true);
             return;
         }
 
@@ -118,7 +140,11 @@ export default function AnnouncementCard({ announcement, currentUser }) {
                 `${API_BASE}/announcements/${announcement.id}/register`,
                 {
                     method: 'POST',
-                    headers: { Authorization: `Bearer ${token}` }
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ custom_fields_data: regFormData })
                 }
             );
 
@@ -126,6 +152,8 @@ export default function AnnouncementCard({ announcement, currentUser }) {
 
             if (res.ok && data.ok) {
                 setIsRegistered(true);
+                setShowRegForm(false);
+                setRegFormData({});
                 alert('✓ Successfully registered for this event!');
                 loadRegistrationInfo();
             } else {
@@ -322,10 +350,7 @@ export default function AnnouncementCard({ announcement, currentUser }) {
                 </div>
             </div>
 
-            {/* Title (Moved above media as requested) */}
-            <h3 className="announcement-title" style={{ margin: '15px 0 5px 0', fontSize: '1.1rem' }}>{announcement.title}</h3>
-
-            {/* Media Section (Instagram Style - Before Title/Desc) */}
+            {/* Media Section (Instagram Style) */}
             {announcement.image_url && (
                 announcement.image_url.startsWith('data:video') || announcement.image_url.match(/\.(mp4|webm|mov)$/i) ? (
                     <div className="reels-container" style={{ position: 'relative', width: '100%', borderRadius: '8px', overflow: 'hidden', backgroundColor: '#000', marginTop: '10px' }} onClick={togglePlay}>
@@ -455,7 +480,7 @@ export default function AnnouncementCard({ announcement, currentUser }) {
                             </div>
                         )}
 
-                        {/* Registration Button for Students */}
+                    {/* Registration Button for Students */}
                         {isStudent && (
                             <div className="registration-actions">
                                 {isRegistered ? (
@@ -470,13 +495,72 @@ export default function AnnouncementCard({ announcement, currentUser }) {
                                         </button>
                                     </div>
                                 ) : (
-                                    <button
-                                        className="btn-register"
-                                        onClick={handleRegister}
-                                        disabled={loadingReg || !canRegister}
-                                    >
-                                        {loadingReg ? '...' : '📝 Register Now'}
-                                    </button>
+                                    <>
+                                        <button
+                                            className="btn-register"
+                                            onClick={handleRegister}
+                                            disabled={loadingReg || !canRegister}
+                                        >
+                                            {loadingReg ? '...' : '📝 Register Now'}
+                                        </button>
+
+                                        {/* Custom Fields Registration Form */}
+                                        {showRegForm && customFields.length > 0 && (
+                                            <div style={{
+                                                marginTop: '12px',
+                                                padding: '16px',
+                                                background: 'rgba(0,0,0,0.3)',
+                                                borderRadius: '10px',
+                                                border: '1px solid rgba(16, 185, 129, 0.2)'
+                                            }}>
+                                                <p style={{ fontSize: '0.9rem', fontWeight: '600', color: '#10B981', marginBottom: '12px' }}>
+                                                    📋 Fill in the details below:
+                                                </p>
+                                                {customFields.map(field => (
+                                                    <div key={field.id} style={{ marginBottom: '10px' }}>
+                                                        <label style={{ fontSize: '0.85rem', color: '#e2e8f0', display: 'block', marginBottom: '4px' }}>
+                                                            {field.field_name}
+                                                            {field.is_required && <span style={{ color: '#EF4444' }}> *</span>}
+                                                        </label>
+                                                        <input
+                                                            type={field.field_type === 'phone' ? 'tel' : field.field_type}
+                                                            placeholder={`Enter ${field.field_name.toLowerCase()}`}
+                                                            value={regFormData[field.id] || ''}
+                                                            onChange={(e) => setRegFormData({ ...regFormData, [field.id]: e.target.value })}
+                                                            required={field.is_required}
+                                                            style={{
+                                                                width: '100%',
+                                                                padding: '10px 12px',
+                                                                borderRadius: '8px',
+                                                                border: '1px solid rgba(255,255,255,0.15)',
+                                                                background: 'rgba(255,255,255,0.05)',
+                                                                color: '#f8fafc',
+                                                                fontSize: '0.9rem',
+                                                                outline: 'none',
+                                                                boxSizing: 'border-box'
+                                                            }}
+                                                        />
+                                                    </div>
+                                                ))}
+                                                <div style={{ display: 'flex', gap: '8px', marginTop: '14px' }}>
+                                                    <button
+                                                        className="btn-register"
+                                                        onClick={handleRegister}
+                                                        disabled={loadingReg}
+                                                        style={{ flex: 1 }}
+                                                    >
+                                                        {loadingReg ? '...' : '✓ Submit & Register'}
+                                                    </button>
+                                                    <button
+                                                        onClick={() => { setShowRegForm(false); setRegFormData({}); }}
+                                                        style={{ background: 'rgba(255,255,255,0.08)', color: '#94a3b8', border: 'none', borderRadius: '8px', padding: '8px 16px', cursor: 'pointer', fontSize: '0.85rem' }}
+                                                    >
+                                                        Cancel
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </>
                                 )}
                             </div>
                         )}

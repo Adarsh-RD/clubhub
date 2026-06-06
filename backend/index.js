@@ -1182,11 +1182,13 @@ app.put('/announcements/:id', async (req, res) => {
     const announcementId = parseInt(req.params.id);
     const { title, content } = req.body;
 
-    if (!title || !content) {
-      return res.status(400).json({ error: 'title and content required' });
+    if (!content) {
+      return res.status(400).json({ error: 'content required' });
     }
 
-    const success = await updateAnnouncement(announcementId, title, content, email);
+    // Auto-generate title from content if not provided
+    const finalTitle = title || content.substring(0, 80).trim();
+    const success = await updateAnnouncement(announcementId, finalTitle, content, email);
 
     if (!success) {
       return res.status(404).json({ error: 'announcement not found or unauthorized' });
@@ -2235,6 +2237,7 @@ app.post('/announcements/:announcementId/register', authMiddleware, async (req, 
   try {
     const announcementId = parseInt(req.params.announcementId);
     const userEmail = req.userEmail;
+    const { custom_fields_data } = req.body || {};
 
     // Get user details
     const user = await findUserByEmail(userEmail);
@@ -2242,7 +2245,6 @@ app.post('/announcements/:announcementId/register', authMiddleware, async (req, 
       return res.status(404).json({ ok: false, error: 'User not found' });
     }
 
-    // Check if announcement exists and has registration enabled
     // Check if announcement exists and has registration enabled
     const { rows: announcements } = await pool.query(
       `SELECT id, title, registration_enabled, registration_deadline, max_registrations 
@@ -2270,41 +2272,55 @@ app.post('/announcements/:announcementId/register', authMiddleware, async (req, 
 
     // Check if max registrations reached
     if (announcement.max_registrations) {
-      if (announcement.max_registrations) {
-        const { rows: countResult } = await pool.query(
-          'SELECT COUNT(*) as count FROM event_registrations WHERE announcement_id = $1 AND status = \'registered\'',
-          [announcementId]
-        );
-
-        if (countResult[0].count >= announcement.max_registrations) {
-          return res.status(400).json({ ok: false, error: 'Event is full. Maximum registrations reached.' });
-        }
-      }
-
-      // Check if already registered
-      // Check if already registered
-      const { rows: existing } = await pool.query(
-        'SELECT id, status FROM event_registrations WHERE announcement_id = $1 AND user_id = $2',
-        [announcementId, user.id]
+      const { rows: countResult } = await pool.query(
+        `SELECT COUNT(*) as count FROM event_registrations WHERE announcement_id = $1 AND status = 'registered'`,
+        [announcementId]
       );
 
-      if (existing.length > 0) {
-        if (existing[0].status === 'registered') {
-          return res.status(400).json({ ok: false, error: 'Already registered for this event' });
-        } else {
-          // Re-register if previously cancelled
-          await pool.query(
-            'UPDATE event_registrations SET status = \'registered\', registered_at = NOW() WHERE id = $1',
-            [existing[0].id]
-          );
+      if (parseInt(countResult[0].count) >= announcement.max_registrations) {
+        return res.status(400).json({ ok: false, error: 'Event is full. Maximum registrations reached.' });
+      }
+    }
+
+    // Validate custom fields if any are required
+    const { rows: customFields } = await pool.query(
+      `SELECT id, field_name, is_required FROM event_registration_fields WHERE announcement_id = $1 ORDER BY sort_order`,
+      [announcementId]
+    );
+
+    if (customFields.length > 0) {
+      const fieldsData = custom_fields_data || {};
+      for (const field of customFields) {
+        if (field.is_required && (!fieldsData[field.id] || !String(fieldsData[field.id]).trim())) {
+          return res.status(400).json({ ok: false, error: `"${field.field_name}" is required` });
         }
+      }
+    }
+
+    // Check if already registered
+    const { rows: existing } = await pool.query(
+      'SELECT id, status FROM event_registrations WHERE announcement_id = $1 AND user_id = $2',
+      [announcementId, user.id]
+    );
+
+    const fieldsJson = custom_fields_data ? JSON.stringify(custom_fields_data) : '{}';
+
+    if (existing.length > 0) {
+      if (existing[0].status === 'registered') {
+        return res.status(400).json({ ok: false, error: 'Already registered for this event' });
       } else {
-        // Create new registration
+        // Re-register if previously cancelled
         await pool.query(
-          `INSERT INTO event_registrations (announcement_id, user_id) VALUES ($1, $2)`,
-          [announcementId, user.id]
+          `UPDATE event_registrations SET status = 'registered', registered_at = NOW(), custom_fields_data = $2 WHERE id = $1`,
+          [existing[0].id, fieldsJson]
         );
       }
+    } else {
+      // Create new registration
+      await pool.query(
+        `INSERT INTO event_registrations (announcement_id, user_id, custom_fields_data) VALUES ($1, $2, $3)`,
+        [announcementId, user.id, fieldsJson]
+      );
     }
 
     console.log(`✓ ${userEmail} registered for event ${announcementId}`);
@@ -2438,7 +2454,7 @@ app.get('/announcements/:announcementId/registration-info', async (req, res) => 
       [announcementId]
     );
 
-    const currentCount = countResult[0].count;
+    const currentCount = parseInt(countResult[0].count);
     const isFull = announcement.max_registrations && currentCount >= announcement.max_registrations;
     const deadlinePassed = announcement.registration_deadline && new Date() > new Date(announcement.registration_deadline);
 
@@ -2454,6 +2470,26 @@ app.get('/announcements/:announcementId/registration-info', async (req, res) => 
   } catch (err) {
     console.error('Error getting registration info:', err);
     res.status(500).json({ ok: false, error: 'Failed to get info' });
+  }
+});
+
+// Get custom registration fields for an event
+app.get('/announcements/:announcementId/registration-fields', async (req, res) => {
+  try {
+    const announcementId = parseInt(req.params.announcementId);
+
+    const { rows: fields } = await pool.query(
+      `SELECT id, field_name, field_type, is_required, sort_order
+       FROM event_registration_fields
+       WHERE announcement_id = $1
+       ORDER BY sort_order ASC`,
+      [announcementId]
+    );
+
+    res.json({ ok: true, fields });
+  } catch (err) {
+    console.error('Error fetching registration fields:', err);
+    res.status(500).json({ ok: false, error: 'Failed to fetch fields' });
   }
 });
 
@@ -2492,7 +2528,8 @@ app.get('/announcements/:announcementId/registrations', authMiddleware, async (r
         u.roll_number,
         u.branch,
         er.registered_at,
-        er.status
+        er.status,
+        er.custom_fields_data
        FROM event_registrations er
        JOIN users u ON er.user_id = u.id
        WHERE er.announcement_id = $1
@@ -2500,9 +2537,16 @@ app.get('/announcements/:announcementId/registrations', authMiddleware, async (r
       [announcementId]
     );
 
+    // Get custom field definitions for this event
+    const { rows: customFields } = await pool.query(
+      `SELECT id, field_name, field_type FROM event_registration_fields WHERE announcement_id = $1 ORDER BY sort_order`,
+      [announcementId]
+    );
+
     res.json({
       ok: true,
       registrations,
+      custom_fields: customFields,
       total_count: registrations.length,
       registered_count: registrations.filter(r => r.status === 'registered').length
     });
@@ -2539,7 +2583,8 @@ app.get('/announcements/:announcementId/registrations/export', authMiddleware, a
         u.roll_number,
         u.branch,
         er.registered_at,
-        er.status
+        er.status,
+        er.custom_fields_data
        FROM event_registrations er
        JOIN users u ON er.user_id = u.id
        WHERE er.announcement_id = $1
@@ -2547,17 +2592,34 @@ app.get('/announcements/:announcementId/registrations/export', authMiddleware, a
       [announcementId]
     );
 
-    // Generate CSV
+    // Get custom field definitions
+    const { rows: customFields } = await pool.query(
+      `SELECT id, field_name FROM event_registration_fields WHERE announcement_id = $1 ORDER BY sort_order`,
+      [announcementId]
+    );
+
+    // Generate CSV with custom field columns
+    const baseHeaders = ['Name', 'Email', 'Roll Number', 'Branch', 'Registered At', 'Status'];
+    const customHeaders = customFields.map(f => f.field_name);
+    const allHeaders = [...baseHeaders, ...customHeaders];
+
     const csv = [
-      ['Name', 'Email', 'Roll Number', 'Branch', 'Registered At', 'Status'].join(','),
-      ...registrations.map(r => [
-        `"${r.user_name || ''}"`,
-        r.user_email,
-        r.roll_number || '',
-        r.branch || '',
-        new Date(r.registered_at).toLocaleString(),
-        r.status
-      ].join(','))
+      allHeaders.join(','),
+      ...registrations.map(r => {
+        const baseRow = [
+          `"${r.user_name || ''}"`,
+          r.user_email,
+          r.roll_number || '',
+          r.branch || '',
+          new Date(r.registered_at).toLocaleString(),
+          r.status
+        ];
+        const customValues = customFields.map(f => {
+          const val = r.custom_fields_data?.[f.id] || '';
+          return `"${String(val).replace(/"/g, '""')}"`;
+        });
+        return [...baseRow, ...customValues].join(',');
+      })
     ].join('\n');
 
     res.setHeader('Content-Type', 'text/csv');
@@ -2598,16 +2660,20 @@ app.post('/announcements', upload.single('image'), async (req, res) => {
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
     const {
-      title,
+      title: inputTitle,
       content,
       registration_enabled,
       registration_deadline,
-      max_registrations
+      max_registrations,
+      custom_fields
     } = req.body;
 
-    if (!title || !content) {
-      return res.status(400).json({ error: 'title and content required' });
+    if (!content) {
+      return res.status(400).json({ error: 'content (description) is required' });
     }
+
+    // Auto-generate title from content if missing
+    const title = inputTitle || content.substring(0, 80).trim();
 
     const user = await findUserByEmail(email);
     if (user.role !== 'club_admin' || !user.club_id) {
@@ -2622,8 +2688,7 @@ app.post('/announcements', upload.single('image'), async (req, res) => {
       imageUrl = `data:${mimeType};base64,${base64}`;
     }
 
-    // ⭐⭐⭐ CRITICAL FIX: Parse registration_enabled correctly ⭐⭐⭐
-    // FormData sends boolean as string 'true' or 'false'
+    // Parse registration_enabled — FormData sends boolean as string 'true' or 'false'
     let regEnabled = 0;
 
     if (registration_enabled === 'true' ||
@@ -2639,13 +2704,11 @@ app.post('/announcements', upload.single('image'), async (req, res) => {
       registration_deadline !== '' &&
       registration_deadline !== 'null' &&
       registration_deadline !== 'undefined') {
-      // Parse flexible date string to ISO for Postgres
       const parsedDate = new Date(registration_deadline);
       if (!isNaN(parsedDate.getTime())) {
-        regDeadline = parsedDate; // passing Date object to pg is safe
+        regDeadline = parsedDate;
       } else {
         console.warn('Invalid deadline format received:', registration_deadline);
-        // Fallback or leave as string (might fail in DB) but preventing crash
       }
     }
 
@@ -2661,13 +2724,12 @@ app.post('/announcements', upload.single('image'), async (req, res) => {
 
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     console.log('✅ PARSED VALUES:');
-    console.log('  registration_enabled (raw):', registration_enabled, typeof registration_enabled);
     console.log('  regEnabled (parsed):', regEnabled);
     console.log('  regDeadline:', regDeadline);
     console.log('  maxReg:', maxReg);
+    console.log('  custom_fields:', custom_fields);
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
-    // Insert announcement
     // Insert announcement (Postgres syntax)
     const { rows: result } = await pool.query(
       `INSERT INTO announcements 
@@ -2689,6 +2751,29 @@ app.post('/announcements', upload.single('image'), async (req, res) => {
     console.log('  Announcement ID:', announcementId);
     console.log('  Verification:', verify[0]);
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+
+    // Insert custom registration fields if provided
+    if (regEnabled && custom_fields) {
+      try {
+        const parsedFields = typeof custom_fields === 'string' ? JSON.parse(custom_fields) : custom_fields;
+        if (Array.isArray(parsedFields)) {
+          for (let i = 0; i < parsedFields.length; i++) {
+            const field = parsedFields[i];
+            if (field.field_name && field.field_name.trim()) {
+              await pool.query(
+                `INSERT INTO event_registration_fields (announcement_id, field_name, field_type, is_required, sort_order)
+                 VALUES ($1, $2, $3, $4, $5)`,
+                [announcementId, field.field_name.trim(), field.field_type || 'text', field.is_required !== false, i]
+              );
+            }
+          }
+          console.log(`✅ Inserted ${parsedFields.length} custom registration fields`);
+        }
+      } catch (fieldErr) {
+        console.error('Error inserting custom fields:', fieldErr);
+        // Don't fail the whole announcement creation
+      }
+    }
 
     // Send EMAIL notification to SUBSCRIBED students only
     if (typeof notifySubscribers === 'function') {
@@ -2888,6 +2973,24 @@ const server = app.listen(PORT, async () => {
           created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
           UNIQUE(announcement_id, user_email)
       );
+    `);
+
+    // Custom registration fields table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS event_registration_fields (
+        id SERIAL PRIMARY KEY,
+        announcement_id INTEGER REFERENCES announcements(id) ON DELETE CASCADE NOT NULL,
+        field_name VARCHAR(255) NOT NULL,
+        field_type VARCHAR(50) DEFAULT 'text',
+        is_required BOOLEAN DEFAULT TRUE,
+        sort_order INTEGER DEFAULT 0,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    // Add custom_fields_data column to event_registrations
+    await pool.query(`
+      ALTER TABLE event_registrations ADD COLUMN IF NOT EXISTS custom_fields_data JSONB DEFAULT '{}';
     `);
 
     await pool.query(`

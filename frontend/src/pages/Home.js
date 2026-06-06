@@ -18,12 +18,12 @@ export default function Home() {
 
   // ✅ CORRECT: Registration fields in state
   const [createForm, setCreateForm] = useState({
-    title: '',
     content: '',
     image: null,
     registration_enabled: false,
     registration_deadline: '',
-    max_registrations: ''
+    max_registrations: '',
+    custom_fields: []
   });
 
   useEffect(() => {
@@ -118,14 +118,13 @@ export default function Home() {
   async function handleCreateAnnouncement(e) {
     e.preventDefault();
 
-    if (!createForm.title.trim() || !createForm.content.trim()) {
-      alert('Please fill in all required fields');
+    if (!createForm.content.trim()) {
+      alert('Please write a description');
       return;
     }
 
     try {
       const formData = new FormData();
-      formData.append('title', createForm.title.trim());
       formData.append('content', createForm.content.trim());
       formData.append('registration_enabled', createForm.registration_enabled);
 
@@ -135,6 +134,9 @@ export default function Home() {
         }
         if (createForm.max_registrations) {
           formData.append('max_registrations', createForm.max_registrations);
+        }
+        if (createForm.custom_fields.length > 0) {
+          formData.append('custom_fields', JSON.stringify(createForm.custom_fields));
         }
       }
 
@@ -153,15 +155,15 @@ export default function Home() {
       const data = await res.json();
 
       if (res.ok && data.ok) {
-        alert('✓ Announcement published successfully!');
+        alert('✓ Published successfully!');
         setShowCreateModal(false);
         setCreateForm({
-          title: '',
           content: '',
           image: null,
           registration_enabled: false,
           registration_deadline: '',
-          max_registrations: ''
+          max_registrations: '',
+          custom_fields: []
         });
         setImagePreview(null);
         loadData();
@@ -169,8 +171,8 @@ export default function Home() {
         throw new Error(data.error || 'Failed to publish');
       }
     } catch (err) {
-      console.error('Error publishing announcement:', err);
-      alert('✗ Failed to publish announcement: ' + err.message);
+      console.error('Error publishing:', err);
+      alert('✗ Failed to publish: ' + err.message);
     }
   }
 
@@ -425,22 +427,9 @@ export default function Home() {
             </div>
 
             <form onSubmit={handleCreateAnnouncement} className="modal-form">
-              {/* Title Field */}
+              {/* Content/Description Field */}
               <div className="form-field">
-                <label>Title</label>
-                <input
-                  type="text"
-                  placeholder="e.g., Tech Workshop - AI & ML"
-                  value={createForm.title}
-                  onChange={(e) => setCreateForm({ ...createForm, title: e.target.value })}
-                  maxLength="255"
-                  required
-                />
-              </div>
-
-              {/* Content Field */}
-              <div className="form-field">
-                <label>Content</label>
+                <label>Description</label>
                 <textarea
                   placeholder="Write your announcement details here..."
                   value={createForm.content}
@@ -534,6 +523,99 @@ export default function Home() {
                       })}
                     />
                     <span className="field-hint">Leave empty for unlimited registrations</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Custom Registration Fields */}
+              {createForm.registration_enabled && (
+                <div className="registration-options" style={{ marginTop: '10px' }}>
+                  <div className="form-field">
+                    <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <span>Custom Registration Fields</span>
+                      <button
+                        type="button"
+                        onClick={() => setCreateForm({
+                          ...createForm,
+                          custom_fields: [...createForm.custom_fields, { field_name: '', field_type: 'text', is_required: true }]
+                        })}
+                        style={{
+                          background: 'rgba(16, 185, 129, 0.15)',
+                          color: '#10B981',
+                          border: '1px solid rgba(16, 185, 129, 0.3)',
+                          borderRadius: '8px',
+                          padding: '6px 14px',
+                          fontSize: '0.85rem',
+                          cursor: 'pointer',
+                          fontWeight: '600',
+                          transition: 'all 0.2s'
+                        }}
+                      >
+                        + Add Field
+                      </button>
+                    </label>
+                    <span className="field-hint">Ask students for extra info like phone number, team name, etc.</span>
+
+                    {createForm.custom_fields.map((field, idx) => (
+                      <div key={idx} style={{
+                        display: 'flex',
+                        gap: '8px',
+                        alignItems: 'center',
+                        marginTop: '10px',
+                        padding: '10px',
+                        background: 'rgba(255,255,255,0.03)',
+                        borderRadius: '8px',
+                        border: '1px solid rgba(255,255,255,0.08)'
+                      }}>
+                        <input
+                          type="text"
+                          placeholder="Field name (e.g. Phone Number)"
+                          value={field.field_name}
+                          onChange={(e) => {
+                            const updated = [...createForm.custom_fields];
+                            updated[idx].field_name = e.target.value;
+                            setCreateForm({ ...createForm, custom_fields: updated });
+                          }}
+                          style={{ flex: 1, padding: '8px 12px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.05)', color: '#f8fafc', fontSize: '0.9rem' }}
+                        />
+                        <select
+                          value={field.field_type}
+                          onChange={(e) => {
+                            const updated = [...createForm.custom_fields];
+                            updated[idx].field_type = e.target.value;
+                            setCreateForm({ ...createForm, custom_fields: updated });
+                          }}
+                          style={{ padding: '8px 10px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.05)', color: '#f8fafc', fontSize: '0.85rem', minWidth: '80px' }}
+                        >
+                          <option value="text">Text</option>
+                          <option value="number">Number</option>
+                          <option value="phone">Phone</option>
+                          <option value="email">Email</option>
+                        </select>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem', color: '#94a3b8', whiteSpace: 'nowrap', cursor: 'pointer' }}>
+                          <input
+                            type="checkbox"
+                            checked={field.is_required}
+                            onChange={(e) => {
+                              const updated = [...createForm.custom_fields];
+                              updated[idx].is_required = e.target.checked;
+                              setCreateForm({ ...createForm, custom_fields: updated });
+                            }}
+                          />
+                          Req
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const updated = createForm.custom_fields.filter((_, i) => i !== idx);
+                            setCreateForm({ ...createForm, custom_fields: updated });
+                          }}
+                          style={{ background: 'rgba(239, 68, 68, 0.15)', color: '#EF4444', border: 'none', borderRadius: '6px', padding: '6px 10px', cursor: 'pointer', fontSize: '1rem', lineHeight: 1 }}
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}
